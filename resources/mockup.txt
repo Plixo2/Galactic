@@ -1,0 +1,105 @@
+use some.Object.*
+use some.Object.Function
+use some.Object.Union
+use some.*
+use folder.*
+
+structure F<T> {
+    a: bool = false
+    ab = true
+    b: T
+    ay = 100
+    c = () -> bool { false }
+    d = fn (self: f, a: int, b: string) {
+
+    }
+    e = fn (self, a: int, b: string) {
+
+    }
+    f = fn (a: int, b: string) {
+
+    }
+
+    implement Indexable<int> {
+        get = fn(index) {
+            index
+        }
+    }
+
+    implement Default<F> {
+        get = fn() {
+            F()
+        }
+    }
+}
+
+typeTest = fn() {
+    some := 0
+    other := some
+    obj = f()
+    boolean := obj.b
+    if allo(boolean) {
+
+    }
+    c = allo("")
+    1 + 2 * 3
+}
+
+allo = fn <T>(t: T) -> T {
+    t
+}
+
+
+main = fn (string.. args) -> void {
+    f("hello")
+    f.a
+    s = Some.Hello | Some.World
+    b = Option.Some<string>("hello")
+    let (a, b) = (0, 100)
+
+    some = {
+        100
+    }
+    some := if true { 100 }  else { 200 }
+    some : bool = { false }
+
+
+    if false {
+        "Hello World"
+    } else {
+        "Bye World"
+    }.println()
+
+    let option = Option::Some()
+    let staticAccess = f::f
+}
+//entweder initialisiert man alle, oder nur die ohne value? vllt
+
+interface List<T> {
+    get = fn() {
+
+    }
+}
+
+interface Default<T> {
+    get = fn () -> T {
+    }
+}
+
+structure struct<T> {
+    obj: T
+    num: number
+}
+
+enum Option<T> {
+    Some(T)
+    None()
+}
+
+union Some {
+    Hello
+    World
+}
+
+
+
