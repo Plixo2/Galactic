@@ -1,7 +1,0 @@
-use nested.Main.*
-constant: float = 0.0
-
-
-println: fn(string) -> void = fn(str) {
-    a := 1
-}

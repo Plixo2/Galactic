@@ -36,4 +36,8 @@ public class UnitBuilder {
     public static void addConstantExpressions(Unit unit) {
         unit.constants().forEach(ref -> ConstantBuilder.addExpressions(unit, ref));
     }
+
+    public static void addFields(Unit unit) {
+        unit.structs().forEach(ref -> StructBuilder.addFields(unit, ref));
+    }
 }

@@ -21,8 +21,7 @@ public final class BinExpr implements Expr {
 
     @Override
     public Type getType() {
-        throw new NullPointerException("TODO");
-//        return null;
+        return operator().checkAndGetType(left.getType(),right.getType());
     }
 
     @Override

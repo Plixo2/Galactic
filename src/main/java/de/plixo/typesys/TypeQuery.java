@@ -25,6 +25,12 @@ public class TypeQuery {
         testAndSolve(left, right, true);
     }
 
+    public void assertEquality() {
+        if (!test()) {
+            throw new NullPointerException("type test failed between " + left + " and " + right);
+        }
+    }
+
     // testAndSolve(a,b,m) should behave like testAndSolve(b,a,m)
     private static boolean testAndSolve(Type typeA, Type typeB, boolean mutate) {
 
@@ -98,7 +104,7 @@ public class TypeQuery {
                         yield false;
                     }
                 }
-                yield testAndSolve(functionType.returnType(), b.returnType(),mutate);
+                yield testAndSolve(functionType.returnType(), b.returnType(), mutate);
             }
             case GenericType ignored -> {
                 System.out.println("cant compare generics");

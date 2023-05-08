@@ -46,7 +46,12 @@ public class Language {
         var units = root.flatUnits();
         units.forEach(UnitBuilder::addConstants);
         units.forEach(ref -> UnitBuilder.addImports(ref, root));
-        units.forEach(ref -> ref.addImport(new Import.UnitImport(ref)));
+        units.forEach(ref -> {
+//            new Import.UnitImport(ref)
+            ref.constants().forEach(c -> ref.addImport(new Import.ConstantImport(c)));
+            ref.structs().forEach(c -> ref.addImport(new Import.StructureImport(c)));
+        });
+        units.forEach(UnitBuilder::addFields);
         units.forEach(UnitBuilder::addConstantExpressions);
         units.forEach(ref -> System.out.println(ref.imports()));
 

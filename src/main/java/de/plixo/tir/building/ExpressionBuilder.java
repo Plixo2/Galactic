@@ -7,13 +7,17 @@ import de.plixo.tir.scoping.Scope;
 import de.plixo.tir.tree.Unit;
 import de.plixo.typesys.types.FunctionType;
 import de.plixo.typesys.types.Primitive;
+import de.plixo.typesys.types.StructImplementation;
 import de.plixo.typesys.types.Type;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ExpressionBuilder {
 
+    //the type hint is just a hint where you could get type infos, doesn't have to match with the
+    // returned type
     public static Expr build(HIRExpr expr, Type hint, Scope scope, Unit unit) {
 
         return switch (expr) {
@@ -23,13 +27,52 @@ public class ExpressionBuilder {
             case HIRBranch hirBranch -> throw new NullPointerException("TODO");
             case HIRConstant hirConstant -> new ConstantExpr(hirConstant.constant);
             case HIRDefinition hirDefinition -> buildDefinition(hirDefinition, hint, scope, unit);
-            case HIRField hirField -> throw new NullPointerException("TODO");
+            case HIRField hirField -> buildField(hirField, hint, scope, unit);
             case HIRFunction hirFunction -> buildFunction(hirFunction, hint, scope, unit);
             case HIRIdentifier hirIdentifier -> buildIdentifier(hirIdentifier, hint, scope, unit);
             case HIRIndexed hirIndexed -> throw new NullPointerException("TODO");
-            case HIRInvoked hirInvoked -> throw new NullPointerException("TODO");
+            case HIRInvoked hirInvoked -> buildCall(hirInvoked, hint, scope, unit);
             case HIRUnary hirUnary -> throw new NullPointerException("TODO");
         };
+    }
+
+    private static FieldExpr buildField(HIRField hirField, @Nullable Type hint, Scope scope,
+                                        Unit unit) {
+        var expr = build(hirField.object(), hint, scope, unit);
+        var type = Objects.requireNonNull(expr.getType());
+        var name = hirField.name();
+        if (type instanceof StructImplementation implementation) {
+            var implType = implementation.get(name);
+            if (implType == null) {
+                throw new NullPointerException(
+                        "Cant find field " + name + " in " + implementation.struct.absolutName());
+            }
+            return new FieldExpr(expr,name,implementation,implType);
+        } else {
+            throw new NullPointerException(
+                    "Cant get field in " + type);
+        }
+    }
+
+    private static Expr buildCall(HIRInvoked hirInvoked, @Nullable Type hint, Scope scope,
+                                  Unit unit) {
+        var calling = ExpressionBuilder.build(hirInvoked.function, hint, scope, unit);
+        if (calling instanceof PathExpr.StructPathExpr structInvoking) {
+            var structure = structInvoking.structure();
+            if (hirInvoked.arguments.size() != structure.fields().size()) {
+                throw new NullPointerException("Incompatible num arguments");
+            }
+            var implementation = new StructImplementation(structure);
+            //todo use implementation inside zip, and resolve
+            var types =
+                    Streams.zip(hirInvoked.arguments.stream(), structure.fields().values().stream(),
+                                    (hirExpr, type) -> ExpressionBuilder.build(hirExpr, type, scope, unit))
+                            .toList();
+            return new ConstructExpr(structure, types, implementation);
+        } else {
+            //get via type
+            throw new NullPointerException("TODO");
+        }
     }
 
 
@@ -42,9 +85,13 @@ public class ExpressionBuilder {
         } else {
             var constant = unit.findConstant(id);
             if (constant != null) {
-                return new ConstRefExpr(constant);
+                return new ConstantRefExpr(constant);
             }
-            throw new NullPointerException("TODO");
+            var path = unit.findPath(id);
+            if (path != null) {
+                return path;
+            }
+            throw new NullPointerException("cant find " + id);
         }
     }
 

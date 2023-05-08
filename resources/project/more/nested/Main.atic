@@ -1,0 +1,10 @@
+use more.Level.*
+cn: float = 0.0
+
+structure ME {
+    v: Other
+}
+
+println: fn(string) -> void = fn(str) {
+    a := ME(0).v.number
+}

@@ -15,7 +15,7 @@ public final class DefinitionExpr implements Expr {
 
     @Override
     public Type getType() {
-        return null;
+        return variable.type();
     }
 
     @Override

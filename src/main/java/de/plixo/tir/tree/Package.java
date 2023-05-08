@@ -64,4 +64,12 @@ public class Package {
     public String toString() {
         return "Package " + absolutName();
     }
+
+    public Package root() {
+        var obj = this;
+        while (obj.parent != null) {
+            obj = obj.parent;
+        }
+        return obj;
+    }
 }

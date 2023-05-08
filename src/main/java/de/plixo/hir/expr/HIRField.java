@@ -2,12 +2,15 @@ package de.plixo.hir.expr;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.Getter;
 
 public final class HIRField extends HIRExpr {
 
-    HIRExpr object;
+    @Getter
+    private final HIRExpr object;
 
-    public String name;
+    @Getter
+    private final String name;
 
     public HIRField(HIRExpr object, String name) {
         this.object = object;

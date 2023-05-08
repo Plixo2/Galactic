@@ -6,6 +6,7 @@ import de.plixo.hir.item.HIRImport;
 import de.plixo.hir.item.HIRItem;
 import de.plixo.hir.item.HIRStruct;
 import de.plixo.tir.expr.Expr;
+import de.plixo.tir.expr.PathExpr;
 import de.plixo.typesys.types.GenericType;
 import de.plixo.typesys.types.Type;
 import lombok.Getter;
@@ -13,15 +14,12 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Unit {
 
     @Getter
-    private final @Nullable Package parent;
+    private final Package parent;
 
     @Getter
     private final String localName;
@@ -34,7 +32,7 @@ public class Unit {
     //constants and imports
     private List<HIRItem> todo = new ArrayList<>();
 
-    public Unit(@Nullable Package parent, String localName) {
+    public Unit(Package parent, String localName) {
         this.parent = parent;
         this.localName = localName;
     }
@@ -140,11 +138,36 @@ public class Unit {
         return new ArrayList<>(imports);
     }
 
+
+    public @Nullable PathExpr findPath(String path) {
+        for (Import aimport : this.imports) {
+            var structure = aimport.findPath(path);
+            if (structure != null) {
+                return structure;
+            }
+        }
+        return null;
+    }
     public @Nullable Unit.Structure findImport(List<String> path) {
         for (Import aimport : this.imports) {
             var structure = aimport.findStructure(path);
             if (structure != null) {
                 return structure;
+            }
+        }
+        var queue = new ArrayDeque<>(path);
+        var root = parent.root();
+        while (!queue.isEmpty()) {
+            var name = queue.poll();
+            var aPackage = root.getPackage(name);
+            if (aPackage == null) {
+                var unit = root.getUnit(name);
+                if (unit == null) {
+                    return null;
+                }
+                return Import.findStructure(unit,queue,false);
+            } else {
+                root = aPackage;
             }
         }
         return null;
@@ -159,6 +182,7 @@ public class Unit {
         return null;
     }
 
+
     public static class Structure {
 
         @Getter
@@ -170,10 +194,17 @@ public class Unit {
 
         Map<String, Type> fields = new LinkedHashMap<>(); //to be filled in
 
+        @Getter
+        private @Nullable HIRStruct todo = null;
+
 
         public Structure(Unit unit, String localName) {
             this.unit = unit;
             this.localName = localName;
+        }
+
+        public void addTodo(HIRStruct struct) {
+            this.todo = struct;
         }
 
         public void addGenerics(String name) {
@@ -194,6 +225,10 @@ public class Unit {
 
         public Map<String, Type> fields() {
             return new LinkedHashMap<>(fields);
+        }
+
+        public void addField(String name, Type type) {
+            this.fields.put(name,type);
         }
     }
 

@@ -1,0 +1,5 @@
+use more.nested.Main
+
+structure Other {
+    number: bool
+}

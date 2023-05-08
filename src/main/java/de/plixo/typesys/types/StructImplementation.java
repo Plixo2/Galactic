@@ -2,6 +2,7 @@ package de.plixo.typesys.types;
 
 
 import de.plixo.tir.tree.Unit;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +21,7 @@ public final class StructImplementation extends Type {
         return struct.fields().keySet().stream().map(this::get).toList();
     }
 
-    public Type get(String memberName) {
+    public @Nullable Type get(String memberName) {
         var type = struct.getField(memberName);
         if (type == null) {
             return null;
