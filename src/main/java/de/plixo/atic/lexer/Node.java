@@ -1,10 +1,8 @@
 package de.plixo.atic.lexer;
 
 import de.plixo.atic.exceptions.LanguageError;
-import de.plixo.lexer.AutoLexer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
@@ -47,11 +45,9 @@ public class Node {
             if (child.name != null && child.name.equalsIgnoreCase(name)) return child;
         }
         throw new LanguageError(region,"cant find node " + name + " in " + this.name);
-        //throw new NullPointerException("cant find node " + name + " in " + this);
     }
 
     public Node child() {
-//        if (children.size() != 1) throw new NullPointerException("Cant resolve children of " + this);
         return children.get(0);
     }
 
@@ -108,15 +104,6 @@ public class Node {
         }
     }
 
-    public int size() {
-        int size = 1;
-
-        for (Node child : children) {
-            size += child.size();
-        }
-
-        return size;
-    }
 
     @Override
     public String toString() {

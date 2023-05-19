@@ -1,0 +1,32 @@
+use more.Level.*
+cn: float = 0.0
+
+#hello
+structure ME {
+    number: float
+    v: fn() -> float
+    index: fn(int) -> bool
+    add: fn(int) -> ME
+}
+
+createME := fn() -> ME {
+    let me := ME(0.0, fn() -> self.number, )
+    me = me + 1
+
+
+    let me := ME(0.0, fn() self.number, fn(f) false, fn(i) {
+        self.number += 1
+        self
+    })
+    let next := me + 1 + 1
+}
+
+println := fn(str: float) -> ME {
+    let outside := 10.0
+    let func := fn[ME]() -> float {
+        println(outside)
+        self[0]
+        self.number
+    }
+    let a := ME(0.0,func , fn(f) true, fn(i) self)
+}

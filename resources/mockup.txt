@@ -33,7 +33,7 @@ structure F<T> {
     }
 }
 
-typeTest = fn() {
+typeTest := fn() {
     some := 0
     other := some
     obj = f()
@@ -43,6 +43,10 @@ typeTest = fn() {
     }
     c = allo("")
     1 + 2 * 3
+
+    for list fn() {
+
+    }
 }
 
 allo = fn <T>(t: T) -> T {
@@ -76,14 +80,11 @@ main = fn (string.. args) -> void {
 //entweder initialisiert man alle, oder nur die ohne value? vllt
 
 interface List<T> {
-    get = fn() {
-
-    }
+    get: fn() -> void
 }
 
 interface Default<T> {
-    get = fn () -> T {
-    }
+    get: fn () -> T
 }
 
 structure struct<T> {

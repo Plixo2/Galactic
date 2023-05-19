@@ -1,6 +1,5 @@
 package de.plixo.atic.exceptions;
 
-import de.plixo.atic.lexer.Position;
 import de.plixo.atic.lexer.Region;
 
 public class FailedTokenCaptureError extends LanguageError {

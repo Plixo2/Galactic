@@ -1,10 +1,15 @@
 use more.Level.*
-cn: float = 0.0
 
 structure ME {
-    v: Other
+    f: float = 0.0
+    setF = fn(f: float) {
+        self.f = f
+    }
 }
 
-println: fn(string) -> void = fn(str) {
-    a := ME(0).v.number
+make := fn() -> float {
+
 }
+
+
+

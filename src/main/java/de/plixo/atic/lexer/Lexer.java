@@ -1,10 +1,8 @@
 package de.plixo.atic.lexer;
 
-import de.plixo.atic.exceptions.FailedTokenCaptureError;
+import de.plixo.atic.Language;
+import de.plixo.atic.Token;
 import de.plixo.atic.exceptions.UnexpectedTokenError;
-import de.plixo.lexer.AutoLexer;
-import de.plixo.lexer.GrammarReader;
-import de.plixo.lexer.tokenizer.Tokenizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,17 +18,15 @@ public class Lexer {
     public Lexer(String grammar) {
         ruleSet = GrammarReader.loadFromString(grammar.lines().toArray(String[]::new));
         engine = new AutoLexer<>((str, token) -> token.token().alias.equals(str), record -> {
-            throw new UnexpectedTokenError(Region.fromPosition(record.position()), record);
+            //throw new UnexpectedTokenError(Region.fromPosition(record.position()), record);
         });
     }
 
-    List<Token> tokenDefinitions = Arrays.asList(Token.values());
+    private final static Tokenizer TOKENIZER = new Tokenizer(Arrays.asList(Token.values()));
 
     public Node buildTree(String src) {
-        var records = generateTokens(tokenDefinitions, src);
-        records.removeIf(
-                record -> record.token() == Token.WHITESPACE || record.token() == Token.COMMENT);
-        var eof = records.get(records.size() - 1);
+        var records = generateTokens(src);
+        records.removeIf(record -> record.token() == Token.WHITESPACE || record.token() == Token.COMMENT);
         var node = engine.reverseRule(ruleSet, "unit", records);
         if (node == null) {
             var first = records.get(0);
@@ -46,11 +42,10 @@ public class Lexer {
         return converted;
     }
 
-    private List<Record> generateTokens(List<Token> definitions, String src) {
+    private List<Record> generateTokens(String src) {
         var startTime = System.currentTimeMillis();
         var lines = src.lines().iterator();
         var tokens = new ArrayList<Record>();
-
 
         var line_counter = 1;
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -58,18 +53,14 @@ public class Lexer {
             while (lines.hasNext()) {
                 var line = lines.next();
                 var line_count = line_counter;
-                futures.add(executor.submit(() -> {
-                    var localTokens = new ArrayList<Record>();
-                    Tokenizer.apply(line, definitions, (token, data, from, to) -> {
-                                localTokens.add(new Record(token, data,
-                                        new Position(line_count, from + 1, to + 1)));
-                            }, (character, string) -> {
-                                var position = new Position(line_count, character, character + 1);
-                                throw new FailedTokenCaptureError(Region.fromPosition(position), string);
-                            }, (token, string) -> token.peek.test(string),
-                            (token, string) -> token.capture.test(string));
-                    return localTokens;
-                }));
+                Language.TASK_CREATED += 1;
+                futures.add(executor.submit(
+                        () -> new ArrayList<>(switch (Lexer.TOKENIZER.apply(line_count, line)) {
+                            case Tokenizer.TokenFailure(var text, var ignored) ->
+                                    throw new NullPointerException(
+                                            "failed to capture token " + text);
+                            case Tokenizer.TokenSuccess(var records) -> records;
+                        })));
 
                 line_counter += 1;
             }
@@ -78,7 +69,6 @@ public class Lexer {
                 try {
                     tokens.addAll(ref.get());
                 } catch (InterruptedException | ExecutionException e) {
-                    System.out.println("e.getCause() = " + e.getCause());
                     throw new RuntimeException(e);
                 }
             });
