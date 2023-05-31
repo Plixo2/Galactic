@@ -22,12 +22,6 @@ public class TypeBuilder {
                         if (generic != null) {
                             yield generic;
                         }
-//                        if (name.equals("self")) {
-//                            if (currentSelf == null) {
-//                                throw new NullPointerException("Cant resolve current self");
-//                            }
-//                            yield currentSelf;
-//                        }
                         var primitive = Primitive.get(name);
                         if (primitive != null) {
                             yield primitive;

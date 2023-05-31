@@ -3,6 +3,7 @@ package de.plixo.atic.hir.expr;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.plixo.atic.lexer.Region;
 import lombok.Getter;
 
 public final class HIRIdentifier extends HIRExpr {
@@ -10,7 +11,8 @@ public final class HIRIdentifier extends HIRExpr {
     @Getter
     private final String name;
 
-    public HIRIdentifier(String name) {
+    public HIRIdentifier(Region region, String name) {
+        super(region);
         this.name = name;
     }
 
@@ -23,6 +25,7 @@ public final class HIRIdentifier extends HIRExpr {
     public JsonElement toJson() {
         var jsonObject = new JsonObject();
         jsonObject.addProperty("type", "id");
+        jsonObject.add("position", region().toJson());
         jsonObject.addProperty("value", name);
         return jsonObject;
     }

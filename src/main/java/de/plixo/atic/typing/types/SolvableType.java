@@ -1,7 +1,11 @@
 package de.plixo.atic.typing.types;
 
+import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
+
 public final class SolvableType extends Type {
-    public Type type;
+    @Getter
+    private @Nullable Type type = null;
 
     @Override
     public String string() {
@@ -17,10 +21,13 @@ public final class SolvableType extends Type {
         if (type == null) {
             return "?";
         }
-        return type.shortString();
+        return "!" + type.shortString();
     }
 
     public void solve(Type type) {
+        if (this == type) {
+            throw new NullPointerException("\"should not happen\"");
+        }
         if (this.type instanceof SolvableType solvableType) {
             solvableType.solve(type);
         }

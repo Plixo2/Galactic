@@ -76,6 +76,16 @@ main = fn (string.. args) -> void {
 
     let option = Option::Some()
     let staticAccess = f::f
+
+    let list = list.new();
+
+    list.forEach(fn(ref) {
+
+    })
+
+    list.forEach: fn() {
+
+    }
 }
 //entweder initialisiert man alle, oder nur die ohne value? vllt
 

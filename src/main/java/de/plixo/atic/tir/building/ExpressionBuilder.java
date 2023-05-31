@@ -2,6 +2,7 @@ package de.plixo.atic.tir.building;
 
 import com.google.common.collect.Streams;
 import de.plixo.atic.common.Constant;
+import de.plixo.atic.exceptions.reasons.GeneralFailure;
 import de.plixo.atic.hir.expr.*;
 import de.plixo.atic.tir.expr.*;
 import de.plixo.atic.tir.scoping.Scope;
@@ -33,30 +34,40 @@ public class ExpressionBuilder {
             case HIRIndexed hirIndexed -> throw new NullPointerException("not impl");
             case HIRInvoked hirInvoked -> buildCall(hirInvoked, hint, scope, unit);
             case HIRUnary hirUnary -> buildUnary(hirUnary, hint, scope, unit);
-            case HIRReturn hirReturn -> buildReturn(hirReturn, hint,scope,unit);
+            case HIRReturn hirReturn -> buildReturn(hirReturn, hint, scope, unit);
         };
     }
+
     private static ReturnExpr buildReturn(HIRReturn hirReturn, @Nullable Type hint, Scope scope,
-                                  Unit unit) {
+                                          Unit unit) {
         Expr value = null;
         if (hirReturn.object() != null) {
-            value = ExpressionBuilder.build(hirReturn.object(),hint,scope,unit);
+            value = ExpressionBuilder.build(hirReturn.object(), hint, scope, unit);
         }
         var returnExpr = new ReturnExpr(value);
-        new TypeQuery(returnExpr.getType(), scope.returnType()).assertEquality();
+        new TypeQuery(returnExpr.getType(), scope.returnType()).assertEquality(hirReturn.region());
         return returnExpr;
     }
+
     private static Expr buildAssign(HIRAssign assign, @Nullable Type hint, Scope scope, Unit unit) {
         var object = ExpressionBuilder.build(assign.object(), hint, scope, unit);
         if (object instanceof VariableExpr variableExpr) {
+            if (variableExpr.variable().defineType() == Scope.DefineType.FINAL) {
+                throw new GeneralFailure(assign.region(),
+                        "can only reassign non final variables").create();
+            }
+            // else if (variableExpr.variable().allocationType() == Scope.AllocationType.LOCAL) {
+            //  throw new GeneralFailure(assign.region(), "can only reassign local variables")
+            //  .create();
+            //}
             var value =
                     ExpressionBuilder.build(assign.value(), variableExpr.getType(), scope, unit);
-            new TypeQuery(value.getType(), variableExpr.getType()).assertEquality();
+            new TypeQuery(value.getType(), variableExpr.getType()).assertEquality(assign.region());
             return new VarAssignExpr(value, variableExpr.variable());
         } else if (object instanceof FieldExpr expr) {
             var structExpr = ExpressionBuilder.build(assign.value(), expr.getType(), scope, unit);
             var fieldType = expr.fieldType();
-            new TypeQuery(fieldType, structExpr.getType()).assertEquality();
+            new TypeQuery(fieldType, structExpr.getType()).assertEquality(assign.region());
             var typeQuery = new TypeQuery(expr.structImplementation(), scope.owner());
             if (!typeQuery.test()) {
                 throw new NullPointerException(
@@ -79,15 +90,14 @@ public class ExpressionBuilder {
             default -> hint;
         };
         var expr = ExpressionBuilder.build(hirUnary.left(), type, scope, unit);
-        //validate
-        expr.getType();
-        return new UnaryExpr(expr, hirUnary.operator());
+        var opType = hirUnary.operator().checkAndGetTypeUnary(hirUnary.region(), expr.getType());
+        return new UnaryExpr(expr, hirUnary.operator(), opType);
     }
 
     private static BranchExpr buildBranch(HIRBranch hirBranch, @Nullable Type hint, Scope scope,
                                           Unit unit) {
         var expr = ExpressionBuilder.build(hirBranch.condition, Primitive.BOOL, scope, unit);
-        new TypeQuery(expr.getType(), Primitive.BOOL).assertEquality();
+        new TypeQuery(expr.getType(), Primitive.BOOL).assertEquality(hirBranch.region());
         var bodyScope = new Scope(scope, scope.returnType(), scope.owner(), scope.scopeLevel());
         var body = ExpressionBuilder.build(hirBranch.body, hint, bodyScope, unit);
         Expr elseBody = null;
@@ -103,13 +113,15 @@ public class ExpressionBuilder {
     private static Expr buildBinOp(HIRBinOp hirBin, @Nullable Type hint, Scope scope, Unit unit) {
         var left = ExpressionBuilder.build(hirBin.left(), hint, scope, unit);
         var right = ExpressionBuilder.build(hirBin.right(), hint, scope, unit);
-        var binExpr = new BinExpr(left, right, hirBin.operator());
+        var typeBinary = hirBin.operator()
+                .checkAndGetTypeBinary(hirBin.region(), left.getType(), right.getType());
+        var binExpr = new BinExpr(left, right, hirBin.operator(), typeBinary);
 
         var type = left.getType();
         var rightType = right.getType();
         if (new TypeQuery(type, Primitive.FLOAT).test() ||
                 new TypeQuery(type, Primitive.INT).test()) {
-            new TypeQuery(rightType, type).assertEquality();
+            new TypeQuery(rightType, type).assertEquality(hirBin.region());
             var allowed = switch (binExpr.operator()) {
                 case ADD, NOT_EQUALS, MULTIPLY, DIVIDE, EQUALS, SMALLER_EQUALS, SMALLER, GREATER, GREATER_EQUALS, SUBTRACT ->
                         true;
@@ -120,7 +132,7 @@ public class ExpressionBuilder {
                         binExpr.operator() + " is here not allowed float -" + " float");
             }
         } else if (new TypeQuery(type, Primitive.BOOL).test()) {
-            new TypeQuery(rightType, Primitive.BOOL).assertEquality();
+            new TypeQuery(rightType, Primitive.BOOL).assertEquality(hirBin.region());
             var allowed = switch (binExpr.operator()) {
                 case AND, EQUALS, NOT_EQUALS, LOGIC_NEGATE, OR -> true;
                 case ADD, MULTIPLY, DIVIDE, SMALLER_EQUALS, SMALLER, GREATER, GREATER_EQUALS, SUBTRACT ->
@@ -142,9 +154,10 @@ public class ExpressionBuilder {
                 if (functionType.arguments().size() != 1) {
                     throw new NullPointerException("Incompatible num arguments");
                 }
-                new TypeQuery(functionType.arguments().get(0), rightType).assertEquality();
+                new TypeQuery(functionType.arguments().get(0), rightType).assertEquality(
+                        hirBin.region());
                 return new CallExpr(fieldExpr, functionType, List.of(right),
-                        functionType.getReturnType());
+                        functionType.returnType());
             } else {
                 throw new NullPointerException(
                         "Cant only call the overloaded operator " + funcName + " in " +
@@ -160,7 +173,7 @@ public class ExpressionBuilder {
 
     private static Expr buildField(HIRField hirField, @Nullable Type hint, Scope scope, Unit unit) {
         var expr = build(hirField.object(), hint, scope, unit);
-        var type = Objects.requireNonNull(expr.getType());
+        var type = Objects.requireNonNull(expr.getType()).unwrap();
         var name = hirField.name();
         if (type instanceof StructImplementation implementation) {
             var implType = implementation.get(name);
@@ -170,12 +183,17 @@ public class ExpressionBuilder {
             }
             return new FieldExpr(expr, name, implementation, implType, implementation);
         } else {
-           // var constant = unit.findConstant(name);
-//            if (constant.type() instanceof FunctionType functionType) {
-             //    return new ConstantRefExpr(constant);
-//            } else {
-//            }
-            throw new NullPointerException("Cant get field in " + type);
+            var constant = unit.findConstant(name);
+            if (constant == null) {
+                throw new GeneralFailure(hirField.region(),
+                        "Cant get field or chisel " + name).create();
+            }
+
+            if (constant.type().unwrap() instanceof FunctionType functionType) {
+                return new ChiselMethodRef(functionType, constant, expr);
+            } else {
+                throw new GeneralFailure(hirField.region(), "cant chisel non methods").create();
+            }
         }
     }
 
@@ -186,38 +204,66 @@ public class ExpressionBuilder {
             var structure = structInvoking.structure();
             var uninitialized = structure.uninitialized();
             if (hirInvoked.arguments().size() != uninitialized.size()) {
-                throw new NullPointerException("Incompatible num arguments");
+                throw new GeneralFailure(hirInvoked.region(),
+                        "Incompatible num arguments").create();
             }
             var implementation = new StructImplementation(structure);
             for (GenericType generic : structure.generics()) {
                 implementation.implement(generic, new SolvableType());
             }
             //todo use implementation inside zip, and resolve
-            var types = Streams.zip(hirInvoked.arguments().stream(),
-                    uninitialized.stream(), (hirExpr, type) -> {
+            var types = Streams.zip(hirInvoked.arguments().stream(), uninitialized.stream(),
+                    (hirExpr, type) -> {
                         var implType = implementation.get(type.name());
                         var expr = ExpressionBuilder.build(hirExpr, implType, scope, unit);
-                        var typeQuery = new TypeQuery(expr.getType(), implType);
-                        typeQuery.assertEquality();
+                        var typeQuery = new TypeQuery(expr.getType().unwrap(), implType);
+                        typeQuery.assertEquality(hirExpr.region());
                         return expr;
                     }).toList();
 
             return new ConstructExpr(structure, types, implementation);
+        } else if (calling instanceof ChiselMethodRef methodRef) {
+            var constantRefExpr = new ConstantRefExpr(methodRef.constant());
+            if (methodRef.functionType().arguments().size() !=
+                    (hirInvoked.arguments().size() + 1)) {
+                throw new GeneralFailure(hirInvoked.region(),
+                        "Incompatible num arguments").create();
+            }
+            var methodArgsStream = methodRef.functionType().arguments().stream().iterator();
+            var callingObj = methodArgsStream.next();
+            new TypeQuery(callingObj, methodRef.expr().getType()).assertEquality(
+                    hirInvoked.region());
+
+            var types = new ArrayList<>(
+                    Streams.zip(hirInvoked.arguments().stream(), Streams.stream(methodArgsStream),
+                            (hirExpr, type) -> {
+                                var expr = ExpressionBuilder.build(hirExpr, type, scope, unit);
+                                new TypeQuery(expr.getType(), type).assertEquality(
+                                        hirExpr.region());
+                                return expr;
+                            }).toList());
+            types.add(0, methodRef.expr());
+            return new CallExpr(constantRefExpr, methodRef.functionType(), types,
+                    methodRef.functionType().returnType());
         } else {
-            var exprType = calling.getType();
+            var exprType = calling.getType().unwrap();
+            if (calling instanceof ConstantRefExpr expr) {
+                System.out.println("expr.constant() = " + expr.constant().absolutName());
+            }
             if (exprType instanceof FunctionType functionType) {
                 if (functionType.arguments().size() != hirInvoked.arguments().size()) {
-                    throw new NullPointerException("Incompatible num arguments");
+                    throw new GeneralFailure(hirInvoked.region(),
+                            "Incompatible num arguments").create();
                 }
                 var types = Streams.zip(hirInvoked.arguments().stream(),
                         functionType.arguments().stream(), (hirExpr, type) -> {
                             var expr = ExpressionBuilder.build(hirExpr, type, scope, unit);
-                            new TypeQuery(expr.getType(), type).assertEquality();
+                            new TypeQuery(expr.getType(), type).assertEquality(hirExpr.region());
                             return expr;
                         }).toList();
-                return new CallExpr(calling, functionType, types, functionType.getReturnType());
+                return new CallExpr(calling, functionType, types, functionType.returnType());
             } else {
-                throw new NullPointerException("Cant call a " + exprType);
+                throw new GeneralFailure(hirInvoked.region(), "Cant call a " + exprType).create();
             }
 
         }
@@ -263,17 +309,17 @@ public class ExpressionBuilder {
 //        if (!new TypeQuery(typedHint, Primitive.VOID).test()) {
         if (type != null) {
             var typeQuery = new TypeQuery(expr.getType(), type);
-            typeQuery.assertEquality();
+            typeQuery.assertEquality(definition.region());
         }
         type = expr.getType();
 //        }
         //TODO typ check or code flow analysis
 
 
-        var variable = new Scope.Variable(varDefinition.name(), type, Scope.AllocationType.STACK,
+        var variable = new Scope.Variable(varDefinition.name(), type, Scope.AllocationType.LOCAL,
                 Scope.DefineType.DYNAMIC);
 
-        scope.addVariable(variable);
+        scope.addVariable(definition.region(), variable);
         System.out.println("Defined " + varDefinition.name() + " with type " + type);
         return new DefinitionExpr(variable, expr);
     }
@@ -283,7 +329,6 @@ public class ExpressionBuilder {
      */
     public static FunctionExpr buildFunction(HIRFunction hirFunction, @Nullable Type hint,
                                              Scope scope, Unit unit, boolean constructShellOnly) {
-
         var names = new ArrayList<String>();
         var types = new ArrayList<Type>();
 
@@ -315,7 +360,7 @@ public class ExpressionBuilder {
         }
         if (hint instanceof FunctionType functionType) {
             if (returnType == null) {
-                returnType = functionType.getReturnType();
+                returnType = functionType.returnType();
             }
             if (functionType.arguments().size() == types.size()) {
                 for (int i = 0; i < functionType.arguments().size(); i++) {
@@ -335,7 +380,8 @@ public class ExpressionBuilder {
         }
         var args = Streams.zip(names.stream(), types.stream(), (n, t) -> {
             if (t == null) {
-                throw new NullPointerException("missing type information for " + n);
+                throw new GeneralFailure(hirFunction.region(),
+                        hint + " missing type information for " + n).create();
             }
             return new FunctionExpr.Variable(n, t);
         }).toList();
@@ -348,7 +394,7 @@ public class ExpressionBuilder {
         if (!constructShellOnly) {
             subScope.overwriteVariable(new Scope.Variable("self", owner, Scope.AllocationType.SELF,
                     Scope.DefineType.FINAL));
-            functionExpr.arguments().forEach(ref -> subScope.addVariable(
+            functionExpr.arguments().forEach(ref -> subScope.addVariable(hirFunction.region(),
                     new Scope.Variable(ref.name(), ref.type(), Scope.AllocationType.INPUT,
                             Scope.DefineType.FINAL)));
 
@@ -398,7 +444,7 @@ public class ExpressionBuilder {
                     boolean isLast = !iterator.hasNext();
                     if (testReturnStatements(subExpr)) {
                         if (isLast) {
-                           yield true;
+                            yield true;
                         } else {
                             throw new NullPointerException("statements does return early");
                         }
@@ -408,25 +454,13 @@ public class ExpressionBuilder {
             }
             case BranchExpr branchExpr -> {
                 if (branchExpr.elseBody() != null) {
-                    yield testReturnStatements(branchExpr.elseBody()) && testReturnStatements(branchExpr.body());
+                    yield testReturnStatements(branchExpr.elseBody()) &&
+                            testReturnStatements(branchExpr.body());
                 }
                 yield false;
             }
-            case CallExpr callExpr -> false;
-            case ConstantExpr constantExpr -> false;
-            case ConstantRefExpr constantRefExpr -> false;
-            case ConstructExpr constructExpr -> false;
-            case DefinitionExpr definitionExpr -> false;
-            case FieldAssignExpr fieldAssignExpr -> false;
-            case FieldExpr fieldExpr -> false;
-            case FunctionExpr functionExpr -> false;
             case ReturnExpr returnExpr -> true;
-            case UnaryExpr unaryExpr -> false;
-            case VarAssignExpr varAssignExpr -> false;
-            case VariableExpr variableExpr -> false;
-            case PathExpr.PackagePathExpr packagePathExpr -> false;
-            case PathExpr.StructPathExpr structPathExpr -> false;
-            case PathExpr.UnitPathExpr unitPathExpr -> false;
+            default -> false;
         };
     }
 }

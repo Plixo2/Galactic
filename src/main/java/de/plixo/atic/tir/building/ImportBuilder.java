@@ -3,6 +3,8 @@ package de.plixo.atic.tir.building;
 import de.plixo.atic.hir.item.HIRImport;
 import de.plixo.atic.tir.tree.Import;
 import de.plixo.atic.tir.tree.Package;
+import de.plixo.atic.tir.tree.Unit;
+import de.plixo.atic.exceptions.reasons.ImportFailure;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -13,11 +15,10 @@ public class ImportBuilder {
     /**
      * bad impl
      */
-    public static List<Import> build(HIRImport aImport, Package root) {
+    public static List<Import> build(HIRImport aImport, Unit parentUnit, Package root) {
         var queue = new ArrayDeque<>(aImport.path());
 
-//        String combined = String.join(".", aImport.path());
-        Package currentPackage = root;
+        var currentPackage = root;
         while (!queue.isEmpty()) {
             var element = queue.peek();
             var subPackage = currentPackage.getPackage(element);
@@ -33,18 +34,19 @@ public class ImportBuilder {
                 return root.units().stream().map(ref -> (Import) new Import.UnitImport(ref))
                         .toList();
             } else {
-                throw new NullPointerException("Import only a units, or all units inside a " +
-                        "package (non recursive) with \"*\"");
+                throw new ImportFailure(aImport.region(),
+                        ImportFailure.ImportFailType.IMPORT_PACKAGE,
+                        currentPackage.absolutName()).create();
             }
         } else {
             var unitName = queue.poll();
             var unit = currentPackage.getUnit(unitName);
             if (unit == null) {
-                throw new NullPointerException("Cant find unit " + unitName);
+                throw new ImportFailure(aImport.region(),
+                        ImportFailure.ImportFailType.UNKNOWN_UNIT, unitName).create();
             }
             if (queue.isEmpty()) {
                 if (aImport.importAll()) {
-
                     var structures = unit.structs().stream()
                             .map(ref -> (Import) new Import.StructureImport(ref)).toList();
                     var constants = unit.constants().stream()
@@ -62,16 +64,19 @@ public class ImportBuilder {
                 if (queue.isEmpty() && !aImport.importAll()) {
                     return List.of(new Import.StructureImport(structure));
                 }
-                throw new NullPointerException("Cant import fields in " + termName);
+                throw new ImportFailure(aImport.region(),
+                        ImportFailure.ImportFailType.IMPORT_FIELD, termName).create();
             } else {
                 var constant = unit.getConstant(termName);
                 if (constant != null) {
                     if (queue.isEmpty() && !aImport.importAll()) {
                         return List.of(new Import.ConstantImport(constant));
                     }
-                    throw new NullPointerException("Cant import fields in a constant");
+                    throw new ImportFailure(aImport.region(),
+                            ImportFailure.ImportFailType.IMPORT_FIELD, termName).create();
                 } else {
-                    throw new NullPointerException("Cant import struct or constant in " + termName);
+                    throw new ImportFailure(aImport.region(),
+                            ImportFailure.ImportFailType.UNKNOWN_OBJECT, termName).create();
                 }
             }
 

@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.plixo.atic.tir.tree.Package;
 import de.plixo.atic.tir.tree.Unit;
+import de.plixo.atic.typing.types.Primitive;
 import de.plixo.atic.typing.types.Type;
 import lombok.Getter;
 
@@ -11,7 +12,7 @@ public abstract sealed class PathExpr implements Expr {
 
     @Override
     public Type getType() {
-        return null;
+        return Primitive.VOID;
     }
 
     public static final class UnitPathExpr extends PathExpr {

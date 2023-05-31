@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 public final class FunctionType extends Type {
 
+    @Getter
     private final Type returnType;
-
 
     @Getter
     private final List<Type> arguments;
@@ -24,16 +24,6 @@ public final class FunctionType extends Type {
         this.owner = Objects.requireNonNull(owner);
     }
 
-    public FunctionType newType(Map<? extends Type, Type> implementation) {
-
-        return new FunctionType(implementation.getOrDefault(this.returnType, this.returnType),
-                this.arguments.stream().map(ref -> implementation.getOrDefault(ref, ref)).toList(),
-                this.owner);
-    }
-
-    public Type getReturnType() {
-        return returnType;
-    }
 
     @Override
     public String string() {

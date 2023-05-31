@@ -18,11 +18,24 @@ public sealed abstract class PathEntity permits PathEntity.PathDir, PathEntity.P
     @Getter
     private final String localName;
 
+
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder(50);
         this.prettyPrint(buffer, "", "");
         return buffer.toString();
+    }
+
+    public List<PathEntity.PathUnit> listUnits() {
+        return switch (this) {
+            case PathEntity.PathDir pathDir -> {
+                var pathUnits = new ArrayList<PathEntity.PathUnit>();
+                pathDir.subDirs().forEach(ref -> pathUnits.addAll(ref.listUnits()));
+                pathUnits.addAll(pathDir.units());
+                yield pathUnits;
+            }
+            case PathEntity.PathUnit pathUnit -> List.of(pathUnit);
+        };
     }
 
     abstract void prettyPrint(StringBuilder buffer, String prefix, String childrenPrefix);

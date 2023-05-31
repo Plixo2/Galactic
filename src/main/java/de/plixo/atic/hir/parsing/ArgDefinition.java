@@ -2,10 +2,15 @@ package de.plixo.atic.hir.parsing;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.plixo.atic.hir.item.HIRAnnotation;
 import de.plixo.atic.hir.typedef.HIRType;
 import de.plixo.atic.hir.expr.HIRExpr;
+import de.plixo.atic.lexer.Region;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArgDefinition {
     @Getter
@@ -19,10 +24,19 @@ public class ArgDefinition {
     @Getter
     private final ArgDefineType defineType;
 
-    public ArgDefinition(String name, @Nullable HIRType typeHint, @Nullable HIRExpr defaultValue) {
+    @Getter
+    private final Region region;
+
+    @Getter
+    private final List<HIRAnnotation> annotations;
+
+    public ArgDefinition(Region region, String name, @Nullable HIRType typeHint,
+                         @Nullable HIRExpr defaultValue, List<HIRAnnotation> annotations) {
         this.name = name;
+        this.region = region;
         this.typeHint = typeHint;
         this.defaultValue = defaultValue;
+        this.annotations = annotations;
 
         if (typeHint == null && defaultValue == null) {
             this.defineType = ArgDefineType.NOTHING;
@@ -57,15 +71,16 @@ public class ArgDefinition {
     }
 
     public JsonElement toJson() {
-        var jsonElement = new JsonObject();
-        jsonElement.addProperty("name", name);
+        var jsonObject = new JsonObject();
+        jsonObject.addProperty("name", name);
+        jsonObject.add("position", region().toJson());
         if (typeHint != null) {
-            jsonElement.add("typeHint", typeHint.toJson());
+            jsonObject.add("typeHint", typeHint.toJson());
         }
         if (defaultValue != null) {
-            jsonElement.add("default", defaultValue.toJson());
+            jsonObject.add("default", defaultValue.toJson());
         }
-        return jsonElement;
+        return jsonObject;
     }
 
     public enum ArgDefineType {

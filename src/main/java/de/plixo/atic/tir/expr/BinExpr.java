@@ -1,6 +1,5 @@
 package de.plixo.atic.tir.expr;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.plixo.atic.typing.types.Type;
@@ -16,16 +15,19 @@ public final class BinExpr implements Expr {
     @Getter
     private final Operator operator;
 
-    public BinExpr(Expr left, Expr right, Operator operator) {
+    @Getter
+    private final Type type;
+
+    public BinExpr(Expr left, Expr right, Operator operator,Type type) {
         this.left = left;
         this.right = right;
         this.operator = operator;
+        this.type = type;
     }
 
     @Override
     public Type getType() {
-//        return left.getType();
-        return operator().checkAndGetType(left.getType(),right.getType());
+        return type;
     }
 
     @Override

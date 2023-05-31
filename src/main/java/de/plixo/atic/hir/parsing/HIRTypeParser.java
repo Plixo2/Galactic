@@ -1,11 +1,11 @@
 package de.plixo.atic.hir.parsing;
 
-import de.plixo.atic.exceptions.LanguageError;
 import de.plixo.atic.hir.parsing.records.WordChain;
 import de.plixo.atic.hir.typedef.HIRClassType;
 import de.plixo.atic.hir.typedef.HIRFunctionType;
 import de.plixo.atic.hir.typedef.HIRType;
 import de.plixo.atic.lexer.Node;
+import de.plixo.atic.exceptions.reasons.GrammarNodeFailure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class HIRTypeParser {
         } else if (node.has("functionType")) {
             return parseFunction(node.get("functionType"));
         } else {
-            throw new LanguageError(node.region(), "cant parse Node " + node);
+            throw new GrammarNodeFailure("cant parse Node", node).create();
         }
     }
 
@@ -41,13 +41,13 @@ public class HIRTypeParser {
         if (ownerDef.has("type")) {
             owner = HIRTypeParser.parse(ownerDef.get("type"));
         }
-        return new HIRFunctionType(typeList, returnType, owner);
+        return new HIRFunctionType(node.region(), typeList, returnType, owner);
     }
 
     private static HIRClassType parseClass(Node node) {
         var wordChain = WordChain.create(node.get("wordChain"));
         var generics = parseTypeList(node.get("genericHintOpt"));
-        return new HIRClassType(wordChain.words(), generics);
+        return new HIRClassType(node.region(), wordChain.words(), generics);
     }
 
     private static List<HIRType> parseTypeList(Node node) {

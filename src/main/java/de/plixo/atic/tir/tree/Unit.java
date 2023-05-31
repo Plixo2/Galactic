@@ -1,19 +1,24 @@
 package de.plixo.atic.tir.tree;
 
+import de.plixo.atic.exceptions.reasons.GeneralFailure;
 import de.plixo.atic.hir.expr.HIRExpr;
 import de.plixo.atic.hir.item.HIRConst;
 import de.plixo.atic.hir.item.HIRImport;
 import de.plixo.atic.hir.item.HIRItem;
 import de.plixo.atic.hir.item.HIRStruct;
+import de.plixo.atic.lexer.Region;
+import de.plixo.atic.tir.expr.ConstantExpr;
 import de.plixo.atic.tir.expr.Expr;
 import de.plixo.atic.tir.expr.PathExpr;
 import de.plixo.atic.typing.types.GenericType;
 import de.plixo.atic.typing.types.Type;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.*;
 
 public class Unit {
@@ -24,6 +29,9 @@ public class Unit {
     @Getter
     private final String localName;
 
+    @Getter
+    private final File file;
+
     private final Map<String, Structure> structures = new LinkedHashMap<>();
     private final Map<String, Constant> constants = new LinkedHashMap<>();
 
@@ -32,7 +40,8 @@ public class Unit {
     //constants and imports
     private List<HIRItem> todo = new ArrayList<>();
 
-    public Unit(Package parent, String localName) {
+    public Unit(File file, Package parent, String localName) {
+        this.file = file;
         this.parent = parent;
         this.localName = localName;
     }
@@ -81,23 +90,39 @@ public class Unit {
     }
 
     public void addStructure(Structure structure) {
-        if (doesContain(structure)) {
-            throw new NullPointerException("structure does already exist");
+        if (doesContainName(structure.localName())) {
+            throw new NullPointerException("structure does already exist " + structure.localName());
         }
         structures.put(structure.localName, structure);
     }
 
     public void addConstant(Constant constant) {
-        if (doesContain(constant)) {
-            //constant.localName = String.valueOf(Math.random());
-            throw new NullPointerException("constant already exists");
+        if (doesContainName(constant.localName())) {
+            throw new NullPointerException("constant already exists " + constant.localName());
         }
         constants.put(constant.localName, constant);
     }
 
+
     public void addImport(Import aImport) {
+        var topNames =
+                imports.stream().filter(ref -> ref.localName().equals(aImport.localName())).count();
+        if (topNames != 0) {
+            throw new NullPointerException(
+                    "import name does already exist " + aImport.localName() + " in " +
+                            this.absolutName());
+        }
+//        if (doesContainName(aImport.localName())) {
+//            System.out.println(constants);
+//            System.out.println(structures);
+//            throw new NullPointerException("import name does already exist for structs or " +
+//                    "constants " + aImport.localName() + " in " + this.absolutName());
+//        }
         if (doesContain(aImport)) {
-            throw new NullPointerException("import does already exist");
+
+            throw new NullPointerException(
+                    "import does already exist " + aImport.localName() + " in " +
+                            this.absolutName());
         }
         imports.add(aImport);
     }
@@ -106,12 +131,8 @@ public class Unit {
         return imports.contains(aImport);
     }
 
-    public boolean doesContain(Structure structure) {
-        return structures.containsKey(structure.localName);
-    }
-
-    public boolean doesContain(Constant constant) {
-        return constants.containsKey(constant.localName);
+    public boolean doesContainName(String name) {
+        return constants.containsKey(name) || structures.containsKey(name);
     }
 
     public List<Structure> structs() {
@@ -142,9 +163,9 @@ public class Unit {
 
     public @Nullable PathExpr findPath(String path) {
         for (Import aimport : this.imports) {
-            var structure = aimport.findPath(path);
-            if (structure != null) {
-                return structure;
+            var expr = aimport.findPath(path);
+            if (expr != null) {
+                return expr;
             }
         }
         return null;
@@ -193,10 +214,13 @@ public class Unit {
 
         @Getter
         private final String localName;
+
+
         private final List<GenericType> generics = new ArrayList<>(); //to be filled in
 
         private final Map<String, Field> fields = new LinkedHashMap<>(); //to be filled in
 
+        private final Map<String, Annotation> annotations = new LinkedHashMap<>(); //to be filled in
         @Getter
         private @Nullable HIRStruct todo = null;
 
@@ -204,6 +228,18 @@ public class Unit {
         public Structure(Unit unit, String localName) {
             this.unit = unit;
             this.localName = localName;
+        }
+
+        public void addAnnotation(Annotation annotation) {
+            if (annotations.containsKey(annotation.name())) {
+                throw new GeneralFailure(annotation.region(),
+                        "annotation does already exist").create();
+            }
+            annotations.put(annotation.name(), annotation);
+        }
+
+        public @Nullable Annotation getAnnotation(String name) {
+            return annotations.get(name);
         }
 
         public void addTodo(HIRStruct struct) {
@@ -235,9 +271,15 @@ public class Unit {
         }
 
         public List<Field> uninitialized() {
-            return this.fields.values().stream().filter(ref -> ref.expr == null).toList();
+            return this.fields.values().stream().filter(ref -> {
+                var isNative = ref.annotations().stream().anyMatch(
+                        anno -> CompileAnnotations.isAnnotation(
+                                CompileAnnotations.CompileAnnotation.NATIVE_METHOD, anno));
+                return ref.expr == null && !isNative;
+            }).toList();
         }
 
+        @AllArgsConstructor
         public static class Field {
             @Getter
             private final String name;
@@ -253,15 +295,19 @@ public class Unit {
             @Getter
             private @Nullable HIRExpr todo;
 
-            public Field(String name, Type type, Expr expr, @Nullable HIRExpr todo) {
-                this.name = name;
-                this.type = type;
-                this.expr = expr;
-                this.todo = todo;
-            }
+
+            @Getter
+            private List<Annotation> annotations;
+
 
             public void clearTodo() {
                 this.todo = null;
+            }
+
+            @Override
+            public String toString() {
+                return "Field{" + "name='" + name + '\'' + ", type=" + type + ", expr=" + expr +
+                        ", todo=" + todo + '}';
             }
         }
     }
@@ -271,7 +317,7 @@ public class Unit {
         private final Unit unit;
 
         @Getter
-        private String localName;
+        private final String localName;
         @Getter
         private final Type type;
 
@@ -294,5 +340,16 @@ public class Unit {
         public String absolutName() {
             return unit.absolutName() + "." + localName;
         }
+    }
+
+    @AllArgsConstructor
+    public static class Annotation {
+        @Getter
+        private final Region region;
+
+        @Getter
+        private final String name;
+        @Getter
+        private final List<ConstantExpr> values;
     }
 }

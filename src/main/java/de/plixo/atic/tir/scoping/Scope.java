@@ -1,14 +1,13 @@
 package de.plixo.atic.tir.scoping;
 
-import de.plixo.atic.typing.types.StructImplementation;
+import de.plixo.atic.lexer.Region;
 import de.plixo.atic.typing.types.Type;
-import lombok.AllArgsConstructor;
+import de.plixo.atic.exceptions.reasons.DuplicateFailure;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Struct;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -18,7 +17,6 @@ public class Scope {
     private final Scope parent;
 
     private final Map<String, Variable> definitions = new LinkedHashMap<>();
-    private final Map<String, Variable> input = new LinkedHashMap<>();
 
     @Getter
     private final Type returnType;
@@ -36,9 +34,10 @@ public class Scope {
         this.owner = owner;
     }
 
-    public void addVariable(Variable variable) {
+    public void addVariable(Region region, Variable variable) {
         if (get(variable.name) != null) {
-            throw new NullPointerException("variable " + variable.name + " does already exist");
+            throw new DuplicateFailure(region, DuplicateFailure.DuplicateType.LOCAL_VARIABLE,
+                    variable.name).create();
         }
         definitions.put(variable.name, variable);
     }
@@ -92,7 +91,7 @@ public class Scope {
     }
 
     public enum AllocationType {
-        STACK,
+        LOCAL,
         SELF,
         INPUT
     }

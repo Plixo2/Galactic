@@ -1,12 +1,9 @@
 package de.plixo.atic.hir.parsing;
 
-import de.plixo.atic.exceptions.LanguageError;
 import de.plixo.atic.hir.item.*;
-import de.plixo.atic.hir.parsing.records.Definition;
-import de.plixo.atic.hir.parsing.records.VarDefinition;
-import de.plixo.atic.hir.parsing.records.WordList;
+import de.plixo.atic.hir.parsing.records.*;
 import de.plixo.atic.lexer.Node;
-import de.plixo.atic.hir.parsing.records.WordChain;
+import de.plixo.atic.exceptions.reasons.GrammarNodeFailure;
 
 import java.util.List;
 
@@ -21,7 +18,7 @@ public class HIRItemParser {
         } else if (topEntry.has("constant")) {
             return parseConstant(topEntry.get("constant"), hirAnnotations);
         } else {
-            throw new LanguageError(topEntry.child().region(), "cant process node " + topEntry.child());
+            throw new GrammarNodeFailure("cant parse Node", node).create();
         }
     }
 
@@ -31,18 +28,19 @@ public class HIRItemParser {
             var paramOpt = ref.get("annotationParamOpt");
             var args = paramOpt.list("expressionList", "expressionListOpt", "expression").stream()
                     .map(HIRExprParser::parse).toList();
-            return new HIRAnnotation(ref.getID(),args);
+            return new HIRAnnotation(ref.region(),ref.getID(),args);
         }).toList();
     }
 
     private static HIRImport parseImport(Node node, List<HIRAnnotation> annotations) {
-        return new HIRImport(WordChain.create(node).words(), node.get("importAll").hasChildren()
+        return new HIRImport(node.region(), WordChain.create(node).words(),
+                node.get("importAll").hasChildren()
                 , annotations);
     }
 
     private static HIRConst parseConstant(Node node, List<HIRAnnotation> annotations) {
-        var varDefinition = VarDefinition.create(node.get("varDefinition"));
-        return new HIRConst(varDefinition.name(), varDefinition.expression(),
+        var varDefinition = ConstDefinition.create(node.get("constDefine"));
+        return new HIRConst(node.region(), varDefinition.name(), varDefinition.expression(),
                 varDefinition.typehint() , annotations);
     }
 
@@ -50,10 +48,16 @@ public class HIRItemParser {
         var name = node.getID();
         var generics = WordList.create(node.get("genericDefinition"));
 
-        var definitionNodes = node.get("definitionBlock").list("definitionList", "definition");
-        var definitions = definitionNodes.stream().map(Definition::create)
-                .map(ref -> new ArgDefinition(ref.name(), ref.typehint(), ref.expression()));
+        var definitionNodes = node.get("definitionBlock").list("definitionList", "annotatedDefinition");
+        var definitions = definitionNodes.stream()
+                .map(ref -> {
+                    var hirAnnotations = HIRItemParser.parseAnnotationList(ref);
+                    var def = Definition.create(ref.get("definition"));
+                    return new ArgDefinition(def.region(),def.name(), def.typehint(),
+                            def.expression(),hirAnnotations);
+                });
 
-        return new HIRStruct(name, definitions.toList(), generics.words(), annotations);
+        return new HIRStruct(node.region(), name, definitions.toList(), generics.words(),
+                annotations);
     }
 }

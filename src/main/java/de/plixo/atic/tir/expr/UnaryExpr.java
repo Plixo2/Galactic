@@ -10,17 +10,23 @@ public final class UnaryExpr implements Expr {
 
     @Getter
     private final Expr right;
+
     @Getter
     private final Operator operator;
 
-    public UnaryExpr(Expr right, Operator operator) {
+    @Getter
+    private final Type type;
+
+
+    public UnaryExpr(Expr right, Operator operator, Type type) {
         this.right = right;
         this.operator = operator;
+        this.type = type;
     }
 
     @Override
     public Type getType() {
-        return operator().checkAndGetType(right.getType());
+        return type;
     }
 
 

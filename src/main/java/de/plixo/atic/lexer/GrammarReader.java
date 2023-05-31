@@ -1,8 +1,9 @@
 package de.plixo.atic.lexer;
 
 import de.plixo.atic.common.TokenStream;
-import de.plixo.atic.exceptions.UnknownRuleException;
+import de.plixo.atic.exceptions.reasons.GrammarRuleFailure;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,10 +40,10 @@ public class GrammarReader {
                 final ArrayList<Rule> nameRuleSet = new ArrayList<>(rules);
                 nameRuleSet.removeIf(ruleRef -> !ruleRef.name.equalsIgnoreCase(name));
                 if (nameRuleSet.size() > 1) {
-                    throw new UnknownRuleException(
-                            "Found more than one definition of rule \"" + name + "\"");
+                    throw new GrammarRuleFailure(
+                            "Found more than one definition of rule \"" + name + "\"").create();
                 } else if (nameRuleSet.size() == 0) {
-                    throw new UnknownRuleException("Unknown rule \"" + name + "\"");
+                    throw new GrammarRuleFailure("Unknown rule \"" + name + "\"").create();
                 }
                 ref.rule = nameRuleSet.get(0);
             }));
@@ -88,8 +89,9 @@ public class GrammarReader {
                         e.isConcrete = true;
                     }
                 } else {
-                    throw new UnknownRuleException(
-                            "Expected keyword or literal, but got " + stream.current());
+
+                    throw new GrammarRuleFailure(
+                            "Expected keyword or literal, but got " + stream.current()).create();
                 }
             }
             stream.consume();
@@ -103,7 +105,7 @@ public class GrammarReader {
     private static boolean testToken(TokenStream<TokenRecord<GrammarToken>> stream,
                                      GrammarToken token) {
         if (!stream.hasEntriesLeft()) {
-            throw new UnknownRuleException("Expected " + token.name() + ", but ran out of tokens");
+            throw new GrammarRuleFailure("Expected " + token.name() + ", but ran out of tokens").create();
         }
         return stream.current().token == token;
     }
@@ -111,11 +113,11 @@ public class GrammarReader {
     private static String assertToken(TokenStream<TokenRecord<GrammarToken>> stream,
                                       GrammarToken token) {
         if (!stream.hasEntriesLeft()) {
-            throw new UnknownRuleException("Expected " + token.name() + ", but ran out of tokens");
+            throw new GrammarRuleFailure("Expected " + token.name() + ", but ran out of tokens").create();
         }
         if (stream.current().token != token) {
-            throw new UnknownRuleException(
-                    "Expected " + token.name() + ", but got " + stream.current());
+            throw new GrammarRuleFailure(
+                    "Expected " + token.name() + ", but got " + stream.current()).create();
         }
         return stream.current().data;
     }
@@ -140,8 +142,9 @@ public class GrammarReader {
 
 
     @RequiredArgsConstructor
-    static class Rule {
-        final String name;
+    public static class Rule {
+        @Getter
+        private final String name;
         final List<Sentence> sentences;
     }
 

@@ -1,128 +1,149 @@
 package de.plixo.atic.lexer;
 
 import de.plixo.atic.common.TokenStream;
-import de.plixo.atic.exceptions.UnknownRuleException;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 
-@RequiredArgsConstructor
-public class AutoLexer<T> {
+public class AutoLexer {
 
-    final BiPredicate<String, T> tokenTest;
-    final Consumer<T> onError;
 
-    public SyntaxNode<T> reverseRule(GrammarReader.RuleSet ruleSet, String entry, List<T> tokens) {
-        final GrammarReader.Rule rule = ruleSet.findRule(entry);
-        if (rule == null) {
-            throw new UnknownRuleException("Unknown entry rule \"" + entry + "\"");
-        }
+    public @Nullable SyntaxResult reverseRule(GrammarReader.Rule entry, List<Record> tokens) {
         val stream = new TokenStream<>(tokens);
-        val node = testRule(rule, stream);
+        val node = testRule(entry, stream);
         if (stream.hasEntriesLeft()) {
             return null;
         }
         return node;
     }
 
-    @AllArgsConstructor
-    private static class DelayNode<T> {
-        SyntaxNode<T> node;
-        int index;
-    }
-
-
-    private SyntaxNode<T> testRule(GrammarReader.Rule rule, TokenStream<T> stream) {
+    private @Nullable SyntaxResult testRule(GrammarReader.Rule rule, TokenStream<Record> stream) {
         for (GrammarReader.Sentence sentence : rule.sentences) {
             final int index = stream.index();
             val node = testSentence(rule, sentence, stream);
             if (node == null) {
                 stream.setIndex(index);
             } else {
-                node.name = rule.name;
-                if (stream.hasEntriesLeft())
-                    node.data = stream.current();
                 return node;
             }
         }
         return null;
     }
 
-    private SyntaxNode<T> testSentence(GrammarReader.Rule rule, GrammarReader.Sentence sentence,
-                                       TokenStream<T> stream) {
-        final List<SyntaxNode<T>> nodes = new ArrayList<>();
-        for (int i = 0; i < sentence.entries.size(); i++) {
-            final GrammarReader.Entry entry = sentence.entries.get(i);
+    private @Nullable SyntaxResult testSentence(GrammarReader.Rule rule,
+                                                GrammarReader.Sentence sentence,
+                                                TokenStream<Record> stream) {
+        final List<SyntaxNode> nodes = new ArrayList<>();
+        for (var entry : sentence.entries) {
             if (!stream.hasEntriesLeft()) {
                 return null;
             }
             if (entry.isLiteral()) {
-                final T token = stream.current();
-                if (!tokenTest.test(entry.literal, token)) {
+                var token = stream.current();
+                var test = token.token().alias.equals(entry.literal);
+                if (!test) {
                     if (entry.isConcrete) {
-                        onError.accept(token);
+                        var left = new ArrayList<Record>();
                         while (stream.hasEntriesLeft()) {
-                            System.out.println("left " + stream.current());
+                            left.add(stream.current());
                             stream.consume();
                         }
-                        throw new UnknownRuleException(
-                                "Failed to capture keyword " + entry.literal + " in " + rule.name + " #" + i);
+                        return new FailedLiteral(left, rule, entry.literal , token);
+                    } else {
+                        return null;
                     }
-                    return null;
                 }
                 if (!entry.isHidden) {
-                    nodes.add(genLeaf(token));
+                    nodes.add(new LeafNode(rule.name(), token));
                 }
                 stream.consume();
             } else {
-                if (entry.rule == null) {
-                    throw new NullPointerException();
-                }
-                final SyntaxNode<T> child = testRule(entry.rule, stream);
-                if (child == null) {
-                    if (entry.isConcrete) {
-                        final T token = stream.current();
-                        onError.accept(token);
-                        while (stream.hasEntriesLeft()) {
-                            System.out.println("left " + stream.current());
-                            stream.consume();
-                        }
-                        throw new UnknownRuleException(
-                                "Failed to capture rule " + entry.rule.name + " in " + rule.name);
+                var child = testRule(Objects.requireNonNull(entry.rule), stream);
+                switch (child) {
+                    case FailedLiteral syntaxError -> {
+                        return syntaxError;
                     }
-                    return null;
+                    case FailedRule syntaxError -> {
+                        return syntaxError;
+                    }
+                    case SyntaxMatch syntaxMatch -> nodes.add(syntaxMatch.node());
+                    case null -> {
+                        if (entry.isConcrete) {
+                            var left = new ArrayList<Record>();
+                            while (stream.hasEntriesLeft()) {
+                                left.add(stream.current());
+                                stream.consume();
+                            }
+                            return new FailedRule(left, entry.rule, rule);
+                        }
+                        return null;
+                    }
                 }
-                nodes.add(child);
             }
         }
-
-        return genNode(nodes);
+        return new SyntaxMatch(new BranchNode(rule.name(), nodes));
     }
 
-    private SyntaxNode<T> genLeaf(T data) {
-        return new LeafNode(data);
+    public static abstract sealed class SyntaxResult {
+
     }
 
-    private SyntaxNode<T> genNode(List<SyntaxNode<T>> list) {
-        final SyntaxNode<T> syntaxNode = new SyntaxNode<>();
-        syntaxNode.list = list;
-        return syntaxNode;
+    @AllArgsConstructor
+    public static final class FailedRule extends SyntaxResult {
+        List<Record> records;
+        GrammarReader.Rule failedRule;
+        GrammarReader.Rule parentRule;
     }
 
-    public static class SyntaxNode<T> {
-        public String name;
-        public List<SyntaxNode<T>> list = new ArrayList<>();
-        public T data;
+    @AllArgsConstructor
+    public static final class FailedLiteral extends SyntaxResult {
+        List<Record> records;
+        GrammarReader.Rule parentRule;
+        String expectedLiteral;
+        Record consumedLiteral;
     }
 
-    @RequiredArgsConstructor
-    public class LeafNode extends SyntaxNode<T> {
-        public final T data;
+    @AllArgsConstructor
+    public static final class SyntaxMatch extends SyntaxResult {
+        @Getter
+        private final SyntaxNode node;
     }
 
+    @AllArgsConstructor
+    public static abstract sealed class SyntaxNode permits BranchNode, LeafNode {
+        @Getter
+        private final String name;
+    }
+
+    public static final class LeafNode extends SyntaxNode {
+        @Getter
+        private final Record data;
+
+        public LeafNode(String name, Record data) {
+            super(name);
+            this.data = data;
+        }
+    }
+
+    public static final class BranchNode extends SyntaxNode {
+        @Getter
+        private final List<SyntaxNode> list;
+
+        public BranchNode(String name, List<SyntaxNode> list) {
+            super(name);
+            this.list = list;
+        }
+    }
+
+    public interface ErrorFunction<T> {
+        RuntimeException get(T token, List<T> left, GrammarReader.Rule rule, String literal,
+                             boolean isLiteral);
+    }
 }

@@ -5,9 +5,11 @@ import de.plixo.atic.lexer.Node;
 import de.plixo.atic.hir.expr.HIRExpr;
 import de.plixo.atic.hir.parsing.HIRExprParser;
 import de.plixo.atic.hir.parsing.HIRTypeParser;
+import de.plixo.atic.lexer.Region;
 import org.jetbrains.annotations.Nullable;
 
-public record Definition(String name, @Nullable HIRType typehint, @Nullable HIRExpr expression) {
+public record Definition(Region region, String name, @Nullable HIRType typehint,
+                         @Nullable HIRExpr expression) {
 
 
     public static Definition create(Node node) {
@@ -22,6 +24,6 @@ public record Definition(String name, @Nullable HIRType typehint, @Nullable HIRE
         if (defaultParamOptNode.has("expression")) {
             expr = HIRExprParser.parse(defaultParamOptNode.get("expression"));
         }
-        return new Definition(name, type, expr);
+        return new Definition(node.region(), name, type, expr);
     }
 }

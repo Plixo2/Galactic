@@ -1,10 +1,11 @@
 package de.plixo.atic.lexer;
 
-import de.plixo.atic.exceptions.LanguageError;
+import de.plixo.atic.exceptions.reasons.GrammarNodeFailure;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ public class Node {
         for (Node child : children) {
             if (child.name != null && child.name.equalsIgnoreCase(name)) return child;
         }
-        throw new LanguageError(region,"cant find node " + name + " in " + this.name);
+        throw new GrammarNodeFailure("cant find child \"" + name + "\"", this).create();
     }
 
     public Node child() {
@@ -67,39 +68,54 @@ public class Node {
         return Objects.requireNonNull(id.child().record).data();
     }
 
-    public static Node fromSyntaxNode(AutoLexer.SyntaxNode<Record> node) {
-        if (node instanceof AutoLexer<Record>.LeafNode leafNode) {
-            var data = leafNode.data;
-            var left = new Position(data.position().line(), data.position().from(), data.position().to());
-            var right = new Position(data.position().line(), data.position().from(), data.position().to());
-            return new Node(data, node.name, true, new ArrayList<>(), new Region(left, right));
-        } else {
-            var children = node.list.stream().map(Node::fromSyntaxNode).toList();
-            Region first = null;
-            Region last = null;
-            for (Node child : children) {
-                if (child.region != null) {
-                    if (first == null) {
-                        first = child.region;
-                    }
-                    last = child.region;
-                }
-            }
-            Region region = null;
-            if (last != null) {
-                region = new Region(first.left(), last.right());
-            }
-            return new Node(null, node.name, false, children, region);
+    public String getString() {
+        if (Objects.equals("string", name)) {
+            return Objects.requireNonNull(this.child().record).data();
         }
+        final Node id = get("string");
+        return Objects.requireNonNull(id.child().record).data();
     }
 
-    public void fillPosition() {
+    public static Node fromSyntaxNode(File file, AutoLexer.SyntaxNode node) {
+        return switch (node) {
+            case AutoLexer.BranchNode branchNode -> {
+                var children = branchNode.list().stream().map(ref -> Node.fromSyntaxNode(file, ref))
+                        .toList();
+                Region first = null;
+                Region last = null;
+                for (Node child : children) {
+                    if (child.region != null) {
+                        if (first == null) {
+                            first = child.region;
+                        }
+                        last = child.region;
+                    }
+                }
+                Region region = null;
+                if (last != null) {
+                    region = new Region(file, first.left(), last.right());
+                }
+                yield new Node(null, node.name(), false, children, region);
+            }
+            case AutoLexer.LeafNode leafNode -> {
+                var data = leafNode.data();
+                var left = new Position(data.position().line(), data.position().from(),
+                        data.position().to());
+                var right = new Position(data.position().line(), data.position().from(),
+                        data.position().to());
+                yield new Node(data, node.name(), true, new ArrayList<>(),
+                        new Region(file, left, right));
+            }
+        };
+    }
+
+    public void fillPosition(File file) {
         var left = this.region.left();
         for (Node child : this.children()) {
             if (child.region == null) {
-                child.region = new Region(left, left);
+                child.region = new Region(file, left, left);
             }
-            child.fillPosition();
+            child.fillPosition(file);
             left = child.region.right();
         }
     }
@@ -113,7 +129,7 @@ public class Node {
     public String toString(boolean minify) {
         StringBuilder buffer = new StringBuilder(50);
         print(buffer, "", "", minify);
-        return "\n"+ buffer;
+        return "\n" + buffer;
     }
 
     private void print(StringBuilder buffer, String prefix, String childrenPrefix, boolean minify) {
@@ -131,17 +147,15 @@ public class Node {
         if (isLeafNode) {
             assert record != null;
             bob.append("\"").append(record.data()).append("\"");
-        } else bob.append(name);
+        } else {
+            bob.append(name);
+        }
         buffer.append(bob);
         int l = 80;
         //wtf
         var bobLength = new String(bob.toString().getBytes(), StandardCharsets.UTF_8).length();
         var diff = Math.max(l - bobLength, 10);
-        try {
-            buffer.append(" ".repeat(diff)).append(this.region);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        buffer.append(" ".repeat(diff)).append(this.region);
         buffer.append('\n');
         for (Iterator<Node> it = children.iterator(); it.hasNext(); ) {
             Node next = it.next();
@@ -176,7 +190,8 @@ public class Node {
         }
     }
 
-    private static void walk(String leaf, String list, String list2, Node node, List<Node> collection) {
+    private static void walk(String leaf, String list, String list2, Node node,
+                             List<Node> collection) {
         if (node.has(leaf)) {
             final Node element = node.get(leaf);
             collection.add(element);

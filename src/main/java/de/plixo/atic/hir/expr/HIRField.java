@@ -2,6 +2,7 @@ package de.plixo.atic.hir.expr;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.plixo.atic.lexer.Region;
 import lombok.Getter;
 
 public final class HIRField extends HIRExpr {
@@ -12,7 +13,8 @@ public final class HIRField extends HIRExpr {
     @Getter
     private final String name;
 
-    public HIRField(HIRExpr object, String name) {
+    public HIRField(Region region, HIRExpr object, String name) {
+        super(region);
         this.object = object;
         this.name = name;
     }
@@ -26,6 +28,7 @@ public final class HIRField extends HIRExpr {
     public JsonElement toJson() {
         var jsonObject = new JsonObject();
         jsonObject.addProperty("type", "field");
+        jsonObject.add("position", region().toJson());
         jsonObject.addProperty("field", name);
         jsonObject.add("prevExpr", object.toJson());
         return jsonObject;

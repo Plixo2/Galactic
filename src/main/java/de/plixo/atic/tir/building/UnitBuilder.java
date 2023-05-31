@@ -10,7 +10,7 @@ import java.util.List;
 
 public class UnitBuilder {
     public static Unit build(Package parent, PathEntity.PathUnit pathUnit, List<HIRItem> items) {
-        var unit = new Unit(parent, pathUnit.localName());
+        var unit = new Unit(pathUnit.file(),parent, pathUnit.localName());
 
         for (var item : items) {
             if (item instanceof HIRStruct hirStruct) {
@@ -25,7 +25,7 @@ public class UnitBuilder {
 
     public static void addImports(Unit unit, Package root) {
         var imports = unit.getAndRemoveImports();
-        imports.forEach(ref -> ImportBuilder.build(ref, root).forEach(unit::addImport));
+        imports.forEach(ref -> ImportBuilder.build(ref, unit, root).forEach(unit::addImport));
     }
 
     public static void addConstants(Unit unit) {
@@ -35,6 +35,10 @@ public class UnitBuilder {
 
     public static void addConstantExpressions(Unit unit) {
         unit.constants().forEach(ref -> ConstantBuilder.addExpressions(unit, ref));
+    }
+
+    public static void addAnnotations(Unit unit) {
+        unit.structs().forEach(ref -> StructBuilder.addAnnotations(unit, ref));
     }
 
     public static void addFields(Unit unit) {

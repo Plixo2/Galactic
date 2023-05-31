@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.plixo.atic.hir.parsing.ArgDefinition;
+import de.plixo.atic.lexer.Region;
 import lombok.Getter;
 
 import java.util.List;
@@ -15,8 +16,9 @@ public final class HIRStruct extends HIRItem {
     @Getter
     private final List<String> generics;
 
-    public HIRStruct(String name,List<ArgDefinition> fields, List<String> generics, List<HIRAnnotation> annotations) {
-        super(annotations);
+    public HIRStruct(Region region, String name, List<ArgDefinition> fields, List<String> generics,
+                     List<HIRAnnotation> annotations) {
+        super(region, annotations);
         this.name = name;
         this.fields = fields;
         this.generics = generics;
@@ -26,6 +28,7 @@ public final class HIRStruct extends HIRItem {
     public JsonElement toJson() {
         var jsonObject = new JsonObject();
         jsonObject.addProperty("type", "struct");
+        jsonObject.add("position", region().toJson());
         jsonObject.addProperty("name", name);
         var array = new JsonArray();
         fields.forEach(ref -> array.add(ref.toJson()));

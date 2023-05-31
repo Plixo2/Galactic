@@ -24,22 +24,12 @@ public final class StructImplementation extends Type {
     }
 
     public @Nullable Type get(String memberName) {
-        var type = struct.getField(memberName).type();
-        if (type == null) {
+        var field = struct.getField(memberName);
+        if (field == null) {
             return null;
         }
-
-        if (type instanceof SolvableType solvableType) {
-            return solvableType;
-        }
-
-        return switch (type) {
-            case Primitive ignored -> type;
-            case StructImplementation subImpl -> subImpl.newType(implementation);
-            case GenericType genericType -> implementation.get(genericType);
-            case FunctionType functionType -> functionType.newType(implementation);
-            case null, default -> throw new NullPointerException("Unknown " + type);
-        };
+        var type = field.type();
+        return convertType(type, implementation);
     }
 
     public StructImplementation newType(Map<? extends Type, Type> implementation) {
@@ -91,5 +81,7 @@ public final class StructImplementation extends Type {
         //overwrites the implementation;
         this.implementation.put(genericType, type);
     }
+
+
 
 }

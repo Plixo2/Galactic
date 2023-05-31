@@ -1,0 +1,10 @@
+
+
+//#Native("java.util.ArrayList")
+//struct JVMList<T> {
+
+  //  #Override
+   // #Method
+   // const add: fn(T) -> bool
+//}
+

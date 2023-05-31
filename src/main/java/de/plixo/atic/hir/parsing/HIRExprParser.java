@@ -2,13 +2,14 @@ package de.plixo.atic.hir.parsing;
 
 import de.plixo.atic.common.Constant;
 import de.plixo.atic.common.Operator;
-import de.plixo.atic.exceptions.LanguageError;
+import de.plixo.atic.exceptions.reasons.GrammarNodeFailure;
 import de.plixo.atic.hir.expr.*;
 import de.plixo.atic.hir.parsing.records.Definition;
 import de.plixo.atic.hir.parsing.records.VarDefinition;
 import de.plixo.atic.hir.typedef.HIRType;
 import de.plixo.atic.lexer.Node;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HIRExprParser {
@@ -20,7 +21,7 @@ public class HIRExprParser {
         } else if (node.has("returnStatement")) {
             return parseReturn(node.get("returnStatement"));
         } else {
-            throw new NullPointerException("cant parse Expression node");
+            throw new GrammarNodeFailure("cant parse Expression node", node).create();
         }
     }
 
@@ -30,11 +31,11 @@ public class HIRExprParser {
         if (expressionOpt.has("expression")) {
             expr = HIRExprParser.parse(expressionOpt.get("expression"));
         }
-        return new HIRReturn(expr);
+        return new HIRReturn(node.region(), expr);
     }
 
     private static HIRDefinition parseDefinition(Node node) {
-        return new HIRDefinition(VarDefinition.create(node));
+        return new HIRDefinition(node.region(), VarDefinition.create(node));
     }
 
     private static HIRExpr parseBoolArithmetic(Node node) {
@@ -67,7 +68,7 @@ public class HIRExprParser {
         if (assignOpt.has("expression")) {
             var expression = assignOpt.get("expression");
             var parse = HIRExprParser.parse(expression);
-            return new HIRAssign(currentObject, parse);
+            return new HIRAssign(node.region(), currentObject, parse);
         } else {
             return currentObject;
         }
@@ -76,18 +77,24 @@ public class HIRExprParser {
     private static HIRExpr parseMember(HIRExpr left, Node node) {
         if (node.has("id")) {
             var id = node.getID();
-            return new HIRField(left, id);
-        } else if (node.has("expressionList")) {
-            var list = node.list("expressionList", "expressionListOpt", "expression").stream()
-                    .map(HIRExprParser::parse).toList();
-            return new HIRInvoked(left, list);
+            return new HIRField(node.region(), left, id);
+        } else if (node.has("callAccess")) {
+            var callAccess = node.get("callAccess");
+            List<HIRExpr> list;
+            if (callAccess.has("expressionList")) {
+                list = callAccess.list("expressionList", "expressionListOpt", "expression")
+                        .stream().map(HIRExprParser::parse).toList();
+            } else {
+                list = List.of(HIRExprParser.parse(callAccess.get("expression")));
+            }
+            return new HIRInvoked(node.region(), left, list);
         } else if (node.has("expression")) {
             //move the syntactic sugar outside
             var index = HIRExprParser.parse(node.get("expression"));
-            var indexedFunction = new HIRField(left, "index");
-            return new HIRInvoked(indexedFunction, List.of(index));
+            var indexedFunction = new HIRField(node.region(), left, "index");
+            return new HIRInvoked(node.region(), indexedFunction, List.of(index));
         } else {
-            throw new LanguageError(node.region(), "cant parse Node " + node);
+            throw new GrammarNodeFailure("cant parse Node", node).create();
         }
     }
 
@@ -100,9 +107,13 @@ public class HIRExprParser {
             } else {
                 number = Integer.parseInt(nodeNumber);
             }
-            return new HIRConstant(new Constant.NumberConstant(number));
+            return new HIRConstant(node.region(), new Constant.NumberConstant(number));
+        } else if (node.has("string")) {
+            var nodeNumber = node.getString();
+            var literal = nodeNumber.substring(1, nodeNumber.length() - 1);
+            return new HIRConstant(node.region(), new Constant.StringConstant(literal));
         } else if (node.has("id")) {
-            return new HIRIdentifier(node.getID());
+            return new HIRIdentifier(node.region(), node.getID());
         } else if (node.has("expression")) {
             return HIRExprParser.parse(node.get("expression"));
         } else if (node.has("blockExpr")) {
@@ -114,45 +125,56 @@ public class HIRExprParser {
         } else if (node.has("unary")) {
             return parseUnary(node.get("unary"));
         } else {
-            throw new LanguageError(node.region(), "cant parse Node " + node);
+            throw new GrammarNodeFailure("cant parse Node", node).create();
         }
     }
 
     private static HIRUnary parseUnary(Node node) {
         var factor = node.get("factor");
         if (node.children().size() == 2) {
-            return new HIRUnary(parseFactor(factor), Operator.SUBTRACT);
+            return new HIRUnary(node.region(), parseFactor(factor), Operator.SUBTRACT);
         } else {
-            return new HIRUnary(parseFactor(factor), Operator.LOGIC_NEGATE);
+            return new HIRUnary(node.region(), parseFactor(factor), Operator.LOGIC_NEGATE);
         }
     }
 
     private static HIRBlock parseBlock(Node node) {
         var list = node.list("blockExprList", "expression").stream().map(HIRExprParser::parse)
                 .toList();
-        return new HIRBlock(list);
+        return new HIRBlock(node.region(), list);
     }
 
     private static HIRBranch parseBranch(Node node) {
         var condition = HIRExprParser.parse(node.get("expression"));
-        var body = HIRExprParser.parse(node.get("body").get("expression"));
+        var bdy = node.get("body");
+        HIRExpr body;
+        if (bdy.has("expression")) {
+            body = HIRExprParser.parse(bdy.get("expression"));
+        } else {
+            body = HIRExprParser.parseBlock(bdy.get("blockExpr"));
+        }
         HIRExpr elseExpr = null;
         var branchOpt = node.get("branchOpt");
         if (branchOpt.has("elseOpt")) {
-            var elseExprNode = branchOpt.get("elseOpt").get("body").get("expression");
-            elseExpr = HIRExprParser.parse(elseExprNode);
+            var elseBody = branchOpt.get("elseOpt").get("body");
+            HIRExpr elseExprNode;
+            if (elseBody.has("expression")) {
+                elseExpr = HIRExprParser.parse(elseBody.get("expression"));
+            } else {
+                elseExpr = HIRExprParser.parseBlock(elseBody.get("blockExpr"));
+            }
         } else if (branchOpt.has("elseifOpt")) {
             var elseifOpt = branchOpt.get("elseifOpt");
             elseExpr = HIRExprParser.parseBranch(elseifOpt);
         }
-        return new HIRBranch(condition, body, elseExpr);
+        return new HIRBranch(node.region(), condition, body, elseExpr);
     }
 
     private static HIRFunction parseFunction(Node node) {
         var args = node.list("argumentList", "argumentListOpt", "definition").stream()
                 .map(Definition::create)
-                .map(ref -> new ArgDefinition(ref.name(), ref.typehint(), ref.expression()))
-                .toList();
+                .map(ref -> new ArgDefinition(ref.region(), ref.name(), ref.typehint(),
+                        ref.expression(), new ArrayList<>())).toList();
         var returnTypeOpt = node.get("returnTypeOpt");
         var ownerDef = node.get("ownerDef");
         HIRType returnType = null;
@@ -165,7 +187,7 @@ public class HIRExprParser {
             owner = HIRTypeParser.parse(ownerDef.get("type"));
         }
 
-        return new HIRFunction(args, returnType, owner, body);
+        return new HIRFunction(node.region(), args, returnType, owner, body);
     }
 
     private static HIRExpr binaryExpr(Node node, String next, String right, String function,
@@ -177,7 +199,7 @@ public class HIRExprParser {
             var operator = Operator.create(operators);
             var rightNode = binaryExpr(rightSide.get(current), next, right, function, current,
                     nextFunction);
-            return new HIRBinOp(leftNode, rightNode, operator);
+            return new HIRBinOp(node.region(), leftNode, rightNode, operator);
         } else {
             return leftNode;
         }

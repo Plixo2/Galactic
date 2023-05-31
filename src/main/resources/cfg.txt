@@ -7,7 +7,7 @@ import := "use"? wordChain! importAll!
 importAll := "."? "*" ||
 
 struct := "structure"? id! genericDefinition! definitionBlock!
-constant := varDefinition
+constant := constDefine
 
 
 annotationList := annotation annotationList! ||
@@ -17,9 +17,9 @@ annotationParamOpt := "("? expressionList! ")"?! ||
 genericDefinition := "<"? wordList! ">"?! ||
 
 definitionBlock := "{"? definitionList! "}"?!
-definitionList := definition definitionList ||
+definitionList := annotatedDefinition definitionList ||
 
-
+annotatedDefinition := annotationList definition
 definition := id typeHintOpt defaultParamOpt
 defaultParamOpt := "="? expression! ||
 typeHintOpt := ":"? type! ||
@@ -36,7 +36,7 @@ classType := wordChain genericHintOpt!
 genericHintOpt := "<"? typeList! ">"?! ||
 
 number := "number"
-text := "string"
+string := "string"
 
 id := "keyword"
 
@@ -46,11 +46,11 @@ wordChainOpt := "."? wordChain ||
 wordList := id wordListOpt
 wordListOpt := ","? wordList ||
 
-branchExpr := "if"? expression body! branchOpt!
+branchExpr := "if"? expression! body! branchOpt!
 branchOpt := elseifOpt | elseOpt ||
-elseifOpt := "elif"? expression! body! branchOpt!
+elseifOpt := "elif"? expression! body! branchOpt! | "else"? "if"? expression! body! branchOpt!
 elseOpt := "else"? body!
-body := expression!
+body := "=>" expression! | blockExpr!
 
 blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
@@ -58,11 +58,16 @@ blockExprList := "}"? | expression blockExprList!
 
 returnStatement := "return"? expressionOpt!
 expressionOpt := expression ||
+
+constDefine := id constTypeDef
+constTypeDef := ":"? "="? expression! | ":"? type "="? expression!
+
+
 varDefinition := id varTypeDef
-varTypeDef := ":"? "="? expression! | ":"? type "="? expression!
+varTypeDef := "="? expression! | ":"? "="? expression! | ":"? type "="? expression!
 
 //expression
-expression := "let"? varDefinition | returnStatement | boolArithmetic
+expression := "let"? varDefinition endOfStatement! | returnStatement endOfStatement! | boolArithmetic endOfStatement!
 boolArithmetic := comparisonArithmetic boolRight!
 comparisonArithmetic := arithmetic comparisonRight!
 arithmetic := term arithmeticRight!
@@ -73,12 +78,13 @@ comparisonRight := comparisonArithmeticFunc comparisonArithmetic ||
 arithmeticRight := arithmeticFunc arithmetic ||
 termRight := termFunc term ||
 
-factor := object memberList! assignOpt! endOfStatement!
+factor := object memberList! assignOpt!
 endOfStatement := ";"? ||
 assignOpt := "="? expression! ||
-object := blockExpr | branchExpr | unary | "("? expression ")"? | number | id | function | text
+object := blockExpr | branchExpr | unary | "("? expression ")"? | number | id | function | string
 memberList := memberAccess memberList! ||
-memberAccess := "." id! | "("? expressionList! ")"?! | "["? expression! "]"?!
+memberAccess := "." id! | callAccess | "["? expression! "]"?!
+callAccess := "("? expressionList! ")"?! | ":"? expression!
 
 unary :=  "!"? factor! | "-" factor
 
