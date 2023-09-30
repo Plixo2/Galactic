@@ -1,0 +1,25 @@
+
+class Laptop: test.PC
+class Apple: java.lang.Object
+
+//{
+  //  let house: test.House = test.House.INSTANCE
+  //  let car: test.Car = house.getCar()
+   // house.accept(house)
+//}
+
+fn create(a: test.House) -> boolean {
+    //let array: java.lang.String = new java.lang.String {"hello"}
+    //let num: java.lang.Integer = "a".length()
+    //let house: int = num.intValue()
+    //let isHouseNameEmpty: boolean = a.getName().isEmpty()
+//
+    //if isHouseNameEmpty {
+    //    if a.isReady() {
+//
+    //    }
+    //}
+
+    let test: [int] = test.Utils.intArray(new java.lang.Double {1}.intValue())
+
+}

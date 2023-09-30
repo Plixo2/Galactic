@@ -2,6 +2,7 @@ package de.plixo.atic.lexer;
 
 import de.plixo.atic.Language;
 import de.plixo.atic.Token;
+import de.plixo.atic.exceptions.reasons.GeneralFailure;
 import de.plixo.atic.exceptions.reasons.TokenFailure;
 
 import java.io.File;
@@ -22,7 +23,7 @@ public class Lexer {
     public Lexer(String grammar, String entry) {
         ruleSet = GrammarReader.loadFromString(grammar.lines().toArray(String[]::new));
         engine = new AutoLexer();
-        this.entry = Objects.requireNonNull(ruleSet.findRule(entry));
+        this.entry = Objects.requireNonNull(ruleSet.findRule(entry),"cant find entry");
     }
 
     private final static Tokenizer TOKENIZER = new Tokenizer(Arrays.asList(Token.values()));
@@ -31,6 +32,7 @@ public class Lexer {
         var records = generateTokens(src);
         records.removeIf(
                 record -> record.token() == Token.WHITESPACE || record.token() == Token.COMMENT);
+
 
         var node = engine.reverseRule(entry, records);
 
@@ -41,6 +43,9 @@ public class Lexer {
                 yield converted;
             }
             case AutoLexer.FailedLiteral failedLiteral -> {
+                failedLiteral.records.forEach(ref -> {
+                    System.out.println(ref);
+                });
                 var s = "Failed to match literal " + failedLiteral.expectedLiteral + " in rule " +
                         failedLiteral.parentRule.name();
 
@@ -51,13 +56,16 @@ public class Lexer {
             case AutoLexer.FailedRule failedRule -> {
                 var s = "Failed to match rule " + failedRule.failedRule.name() + " in rule " +
                         failedRule.parentRule.name();
+                Region region = null;
                 if (!failedRule.records.isEmpty()) {
-                s += " at " + failedRule.records.get(0).position().toString();
+                    var position = failedRule.records.get(0).position();
+                    s += " at " + position.toString() + "\n";
+                    region = new Region(file,position,position);
                 }
                 for (Record record : failedRule.records) {
                     s += record + "\n";
                 }
-                throw new NullPointerException(s);
+                throw new GeneralFailure(region, s).create();
             }
             case null -> {
                 var s = "Failed to match rule " + entry.name();

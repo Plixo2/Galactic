@@ -4,6 +4,8 @@ use some.Object.Union
 use some.*
 use folder.*
 
+use interface java.util.ArrayList
+
 structure F<T> {
     a: bool = false
     ab = true

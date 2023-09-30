@@ -91,20 +91,21 @@ public class TypeQuery {
                 }
                 var typesA = structImplementation.getTypes();
                 var typesB = b.getTypes();
-                if (typesA.size() != typesB.size()) {
-                    dbg(typesA);
-                    dbg(typesB);
-                    dbg("wrong size ");
-                    yield false;
-                }
-                //todo only with implemented types necessary
-                for (int i = 0; i < typesA.size(); i++) {
-                    if (!testAndSolve(typesA.get(i), typesB.get(i), action)) {
-                        dbg("wrong implementation");
-                        yield false;
-                    }
-                }
-                yield true;
+                yield structImplementation.struct().equals(b.struct());
+//                if (typesA.size() != typesB.size()) {
+//                    dbg(typesA);
+//                    dbg(typesB);
+//                    dbg("wrong size ");
+//                    yield false;
+//                }
+//                //todo only with implemented types necessary
+//                for (int i = 0; i < typesA.size(); i++) {
+//                    if (!testAndSolve(typesA.get(i), typesB.get(i), action)) {
+//                        dbg("wrong implementation");
+//                        yield false;
+//                    }
+//                }
+//                yield true;
             }
             case Primitive primitive -> {
                 if (!(typeB instanceof Primitive b)) {

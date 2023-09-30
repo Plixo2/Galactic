@@ -1,8 +1,8 @@
 package de.plixo.atic.exceptions.reasons;
 
+import de.plixo.atic.exceptions.LangError;
 import de.plixo.atic.lexer.Node;
 import de.plixo.atic.lexer.Region;
-import de.plixo.atic.exceptions.LangError;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +31,7 @@ public abstract sealed class Failure
         this.file = file;
     }
 
-    public void setRegion(Region region) {
+    public void setRegion(@Nullable Region region) {
         this.region = region;
     }
 

@@ -112,14 +112,7 @@ public class Unit {
                     "import name does already exist " + aImport.localName() + " in " +
                             this.absolutName());
         }
-//        if (doesContainName(aImport.localName())) {
-//            System.out.println(constants);
-//            System.out.println(structures);
-//            throw new NullPointerException("import name does already exist for structs or " +
-//                    "constants " + aImport.localName() + " in " + this.absolutName());
-//        }
         if (doesContain(aImport)) {
-
             throw new NullPointerException(
                     "import does already exist " + aImport.localName() + " in " +
                             this.absolutName());
@@ -170,6 +163,8 @@ public class Unit {
         }
         return null;
     }
+
+
 
     public @Nullable Unit.Structure findImport(List<String> path) {
         for (Import aimport : this.imports) {
@@ -270,13 +265,8 @@ public class Unit {
             this.fields.put(field.name(), field);
         }
 
-        public List<Field> uninitialized() {
-            return this.fields.values().stream().filter(ref -> {
-                var isNative = ref.annotations().stream().anyMatch(
-                        anno -> CompileAnnotations.isAnnotation(
-                                CompileAnnotations.CompileAnnotation.NATIVE_METHOD, anno));
-                return ref.expr == null && !isNative;
-            }).toList();
+        public List<Field> getUninitialized() {
+            return this.fields.values().stream().filter(ref -> ref.expr == null).toList();
         }
 
         @AllArgsConstructor

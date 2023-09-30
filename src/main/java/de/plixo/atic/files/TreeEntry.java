@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public sealed abstract class TreeEntry permits TreeEntry.TreePath, TreeEntry.TreeUnit {
+
     @Getter
     @Accessors(fluent = true)
     private final String localName;

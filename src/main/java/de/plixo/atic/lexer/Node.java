@@ -206,4 +206,7 @@ public class Node {
         }
     }
 
+    public void assertType(String item) {
+        assert Objects.equals(this.name, item);
+    }
 }

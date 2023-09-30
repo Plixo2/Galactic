@@ -4,7 +4,6 @@ import de.plixo.atic.exceptions.reasons.GeneralFailure;
 import de.plixo.atic.hir.item.HIRAnnotation;
 import de.plixo.atic.tir.expr.ConstantExpr;
 import de.plixo.atic.tir.scoping.Scope;
-import de.plixo.atic.tir.tree.CompileAnnotations;
 import de.plixo.atic.tir.tree.Unit;
 import de.plixo.atic.typing.types.Primitive;
 
@@ -21,9 +20,9 @@ public class AnnotationBuilder {
             return constantExpr;
         }).toList();
         var buildAnnotation = new Unit.Annotation(annotation.region(), annotation.name(), list);
-        if (!CompileAnnotations.isBuildIn(buildAnnotation)) {
-            throw new GeneralFailure(annotation.region(),"custom annotations not yet supported").create();
-        }
-        return buildAnnotation;
+       // if (!CompileAnnotations.isBuildIn(buildAnnotation)) {
+            throw new GeneralFailure(annotation.region(),"Annotations not yet supported").create();
+       // }
+        //return buildAnnotation;
     }
 }

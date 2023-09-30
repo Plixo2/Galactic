@@ -12,12 +12,15 @@ public final class HIRImport extends HIRItem {
     private final List<String> path;
     @Getter
     private final boolean importAll;
+    @Getter
+    private final boolean useJVMInterface;
 
-    public HIRImport(Region region, List<String> path, boolean importAll,
+    public HIRImport(Region region, List<String> path, boolean importAll, boolean useJVMInterface,
                      List<HIRAnnotation> annotations) {
         super(region,annotations);
         this.path = path;
         this.importAll = importAll;
+        this.useJVMInterface = useJVMInterface;
     }
 
     @Override

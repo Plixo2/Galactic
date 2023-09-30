@@ -9,12 +9,20 @@ public enum Token {
     COMMENT(".comment", "\\/\\/", "\\/\\/.*"),
     WHITESPACE("", "\\s", "\\s*"),
     USE("use", "use\\b", "use"),
-    STRUCTURE("structure", "struct\\b", "struct"),
+    CLASS("class", "class\\b", "class"),
     INTERFACE("interface", "interface\\b", "interface"),
+    INT("int","int\\b","int"),
+    BYTE("byte","byte\\b","byte"),
+    SHORT("short","short\\b","short"),
+    LONG("long","long\\b","long"),
+    FLOAT("float","float\\b","float"),
+    DOUBLE("double","double\\b","double"),
+    BOOLEAN("boolean","boolean\\b","boolean"),
+    CHAR("char","char\\b","char"),
     FUNCTION("fn", "fn\\b", "fn"),
     IF("if", "if\\b", "if"),
+    NEW("new", "new\\b", "new"),
     ELSE("else", "else\\b", "else"),
-    ELIF("elif", "elif\\b", "elif"),
     RETURN("return", "return\\b", "return"),
     LET("let", "let\\b", "let"),
 //    NATIVE("native", "native\\b", "native"),
@@ -32,6 +40,7 @@ public enum Token {
     SEMICOLON(";", ";", "(;)"),
     NON_EQUALS("!=", "!=", "(!=|!)"),
     EQUALS("==", "==", "(==|=)"),
+    AT("@", "@", "(@)"),
     SMALLER_EQUALS("<=", "<=", "(<=|<)"),
     GREATER_EQUALS(">=", ">=", "(>=|>)"),
     OR("||", "\\|\\|", "(\\||\\|\\|)"),
@@ -44,7 +53,7 @@ public enum Token {
     GREATER("<", "<", "(<)"),
     SMALLER(">", ">", "(>)"),
     HASH("#", "#", "(#)"),
-    NUMBER("number", "[0-9]", "[0-9\\.]+[0-9]"),
+    NUMBER("number", "[0-9]", "[0-9\\.]+"),
     STRING("string", "\"", "text"),
     KEYWORD("keyword", "\\w", "\\w+"),
     ASSIGN("=", "=", "="),
@@ -59,11 +68,9 @@ public enum Token {
         this.alias = alias;
 
 
-
         if (Objects.equals(alias, "string")) {
             this.peek = Pattern.compile("^" + peek, Pattern.MULTILINE).asPredicate();
             this.capture = (string) -> {
-
                 boolean waitForChar = true;
                 var chars = string.toCharArray();
                 for (int i = 0; i < chars.length; i++) {

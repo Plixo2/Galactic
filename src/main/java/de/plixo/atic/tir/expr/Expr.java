@@ -5,7 +5,7 @@ import de.plixo.atic.typing.types.Type;
 
 public sealed interface Expr
         permits BinExpr, BlockExpr, BranchExpr, CallExpr, ConstantExpr, ChiselMethodRef,
-        ConstantRefExpr, ConstructExpr, DefinitionExpr, FieldAssignExpr, FieldExpr, FunctionExpr,
+        ConstantRefExpr, StructConstructExpr, DefinitionExpr, FieldAssignExpr, FieldExpr, FunctionExpr,
         PathExpr, ReturnExpr, UnaryExpr, VarAssignExpr, VariableExpr {
     Type getType();
 

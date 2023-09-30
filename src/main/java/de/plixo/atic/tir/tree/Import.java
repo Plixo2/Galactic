@@ -11,7 +11,8 @@ import java.util.Objects;
 import java.util.Queue;
 
 public abstract sealed class Import
-        permits Import.StructureImport, Import.UnitImport, Import.ConstantImport {
+        permits Import.ConstantImport, Import.JVMInterface, Import.StructureImport,
+        Import.UnitImport {
 
     abstract String localName();
 
@@ -31,6 +32,7 @@ public abstract sealed class Import
                         new PathExpr.StructPathExpr(structureImport.structure);
                 case UnitImport unitImport -> new PathExpr.UnitPathExpr(unitImport.unit);
                 case ConstantImport ignored -> null;
+                case JVMInterface ignored -> null;
             };
         }
         return null;
@@ -45,6 +47,7 @@ public abstract sealed class Import
             case StructureImport structureImport -> findStructure(structureImport.structure, queue);
             case UnitImport unitImport -> findStructure(unitImport.unit, queue, true);
             case ConstantImport ignored -> null;
+            case JVMInterface ignored -> null;
         };
     }
 
@@ -84,6 +87,36 @@ public abstract sealed class Import
             return null;
         }
         return structure;
+    }
+
+    @AllArgsConstructor
+    public static final class JVMInterface extends Import {
+
+        @Getter
+        private Class<?> interfaceClass;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            JVMInterface that = (JVMInterface) o;
+            return Objects.equals(interfaceClass, that.interfaceClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(interfaceClass);
+        }
+
+        @Override
+        public String toString() {
+            return "Import JVM Interface " + interfaceClass.getName();
+        }
+
+        @Override
+        String localName() {
+            return interfaceClass.getSimpleName();
+        }
     }
 
 

@@ -1,5 +1,0 @@
-use more.nested.Main
-
-struct Obj {
-    number: bool
-}

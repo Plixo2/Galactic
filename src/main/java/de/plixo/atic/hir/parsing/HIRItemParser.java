@@ -34,7 +34,8 @@ public class HIRItemParser {
 
     private static HIRImport parseImport(Node node, List<HIRAnnotation> annotations) {
         return new HIRImport(node.region(), WordChain.create(node).words(),
-                node.get("importAll").hasChildren()
+                node.get("importAll").hasChildren(),
+                node.get("language").hasChildren()
                 , annotations);
     }
 

@@ -202,7 +202,7 @@ public class ExpressionBuilder {
         var calling = ExpressionBuilder.build(hirInvoked.function(), hint, scope, unit);
         if (calling instanceof PathExpr.StructPathExpr structInvoking) {
             var structure = structInvoking.structure();
-            var uninitialized = structure.uninitialized();
+            var uninitialized = structure.getUninitialized();
             if (hirInvoked.arguments().size() != uninitialized.size()) {
                 throw new GeneralFailure(hirInvoked.region(),
                         "Incompatible num arguments").create();
@@ -221,18 +221,32 @@ public class ExpressionBuilder {
                         return expr;
                     }).toList();
 
-            return new ConstructExpr(structure, types, implementation);
+            return new StructConstructExpr(structure, types, implementation);
         } else if (calling instanceof ChiselMethodRef methodRef) {
             var constantRefExpr = new ConstantRefExpr(methodRef.constant());
+            int offset = 1;
+            var ownerOfCalledFunction = methodRef.functionType().owner();
+            var hasOwner = !new TypeQuery(ownerOfCalledFunction, Primitive.VOID).test();
+
+            if (hasOwner) {
+                offset -= 1;
+            }
+
             if (methodRef.functionType().arguments().size() !=
-                    (hirInvoked.arguments().size() + 1)) {
+                    (hirInvoked.arguments().size() + offset)) {
                 throw new GeneralFailure(hirInvoked.region(),
                         "Incompatible num arguments").create();
             }
             var methodArgsStream = methodRef.functionType().arguments().stream().iterator();
-            var callingObj = methodArgsStream.next();
-            new TypeQuery(callingObj, methodRef.expr().getType()).assertEquality(
-                    hirInvoked.region());
+            var methodCalledOnType = methodRef.expr().getType();
+            if (hasOwner) {
+                new TypeQuery(ownerOfCalledFunction, methodCalledOnType).assertEquality(
+                        hirInvoked.region());
+            } else {
+                var callingObj = methodArgsStream.next();
+                new TypeQuery(callingObj, methodCalledOnType).assertEquality(
+                        hirInvoked.region());
+            }
 
             var types = new ArrayList<>(
                     Streams.zip(hirInvoked.arguments().stream(), Streams.stream(methodArgsStream),

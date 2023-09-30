@@ -29,7 +29,6 @@ public class TypeBuilder {
                     }
                 }
 
-
                 var classObj = unit.findImport(hirClassType.path());
                 if (classObj == null) {
                     throw new NullPointerException("Cant find " + hirClassType.path());

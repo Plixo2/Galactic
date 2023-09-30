@@ -10,7 +10,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-public final class ConstructExpr implements Expr {
+public final class StructConstructExpr implements Expr {
 
     @Getter
     private final Unit.Structure structure;
@@ -21,8 +21,8 @@ public final class ConstructExpr implements Expr {
     @Getter
     private final StructImplementation implementation;
 
-    public ConstructExpr(Unit.Structure structure, List<Expr> arguments,
-                         StructImplementation implementation) {
+    public StructConstructExpr(Unit.Structure structure, List<Expr> arguments,
+                               StructImplementation implementation) {
         this.structure = structure;
         this.arguments = arguments;
         this.implementation = implementation;
