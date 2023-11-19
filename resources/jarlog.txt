@@ -1,0 +1,20 @@
+// class version 63.0 (63)
+// access flags 0x601
+public abstract interface test/TestInterface {
+
+  // compiled from: TestInterface.java
+
+  // access flags 0x401
+  public abstract asString()Ljava/lang/String;
+
+  // access flags 0x1
+  public default asString2()Ljava/lang/String;
+   L0
+    LINENUMBER 7 L0
+    LDC ""
+    ARETURN
+   L1
+    LOCALVARIABLE this Ltest/TestInterface; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+}

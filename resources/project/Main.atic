@@ -1,25 +1,22 @@
 
-class Laptop: test.PC
-class Apple: java.lang.Object
-
-//{
-  //  let house: test.House = test.House.INSTANCE
-  //  let car: test.Car = house.getCar()
-   // house.accept(house)
-//}
-
-fn create(a: test.House) -> boolean {
-    //let array: java.lang.String = new java.lang.String {"hello"}
-    //let num: java.lang.Integer = "a".length()
-    //let house: int = num.intValue()
-    //let isHouseNameEmpty: boolean = a.getName().isEmpty()
-//
-    //if isHouseNameEmpty {
-    //    if a.isReady() {
-//
-    //    }
-    //}
-
-    let test: [int] = test.Utils.intArray(new java.lang.Double {1}.intValue())
-
+class Func extends java.util.ArrayList implements java.util.function.Consumer {
+    field: double
+    name: java.lang.String
+    fn accept(obj: java.lang.Object) -> void {
+        var i: Main.Func = new Main.Func {0, "Hello"}
+        var obj: java.lang.Object = i.get(new java.lang.Double{0}.intValue())
+        if new java.lang.Boolean {false} {
+            java.lang.System.out.println("String")
+        }
+        var d: double = i.get()
+    }
+    fn get() -> double 0
 }
+
+fn main() -> void {
+
+      var s: int = 0
+      java.lang.System.out.println(s)
+}
+
+

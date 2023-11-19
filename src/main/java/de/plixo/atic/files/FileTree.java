@@ -71,7 +71,7 @@ public class FileTree {
                     } catch (IOException e) {
                         throw new FileIOFailure(file, FileIOFailure.FileType.UNIT).create();
                     }
-                    treeUnit.setRoot(config.lexer().buildTree(file, src));
+                    treeUnit.setRoot(config.lexer().buildTree(file, src, "unit2"));
                 };
                 if (config.threaded()) {
                     Thread thread = Thread.startVirtualThread(runnable);

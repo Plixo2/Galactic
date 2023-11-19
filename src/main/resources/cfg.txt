@@ -1,38 +1,49 @@
 unit2 := itemList! "EOF"?
 
 itemList := item itemList ||
-item := import | class | block | staticFunction
+item := import | class | block | method
 
 import := "use"? importType! dotWordChain! ";"?!
 importType := "@"? id! ||
 
-class := "class"? id! extends!
-extends := ":"? type ||
+class := "class"? id! extends! implements! classBlock!
+extends := "extends"? type ||
+implements := "implements"? typeList ||
+
+classBlock := "{"? classItemList "}"?!
+
+classItemList := classItem classItemList! ||
+classItem := method | field
+
+field := id ":" type!
 
 block := blockExpr
 
-staticFunction := "fn"? id! "("?! parameterList! ")"?! "->"?! type! expression!
+method := "fn"? id! "("?! parameterList! ")"?! "->"?! type! expression!
 parameterList := parameter parameterList! ||
 parameter := id ":"?! type!
 
 blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
 
-expression := branch | variableDefinition | factor
-variableDefinition := "let" id! ":"?! type! "=" expression! |
-branch := "if"? expression! elsePart!
-elsePart := expression!
+expression := variableDefinition | factor
+variableDefinition := "var" id! ":"?! type! "=" expression! |
+branch := "if"? expression! body! branchOpt!
+branchOpt := "else"? expression! ||
+body := expression!
 
 factor := object memberList!
-object := initialisation | blockExpr | string | number | id | "("? expression! ")"!
+object := initialisation | branch | blockExpr | string | number | id | "("? expression! ")"?! | unary
+unary :=  "!" factor! | "-" factor | "+" factor
 
 initialisation := "new"? type! "{"? initialisationFieldList "}"?!
 initialisationFieldList := initialisationField initialisationFieldListOpt! ||
 initialisationFieldListOpt := ","? initialisationFieldList! ||
-initialisationField := expression!
+initialisationField := expression
 
 memberList := memberAccess memberList! ||
-memberAccess := "."? id! | callAccess | arrayAccess
+memberAccess := "."? id! | callAccess | arrayAccess | castAccess
+castAccess := "<"? type! ">"?!
 arrayAccess := "["? expression! "]"?!
 callAccess := "("? expressionList! ")"?!
 //dotNotationValues := id | number | string
@@ -41,9 +52,12 @@ expressionList := expression expressionListOpt! ||
 expressionListOpt := ","? expressionList! ||
 
 type := arrayType | classType | primitive
-primitive := "double" | "float" | "int" | "byte" | "short" | "long" | "boolean" | "char"
+primitive := "void" | "double" | "float" | "int" | "byte" | "short" | "long" | "boolean" | "char"
 arrayType := "["? type! "]"?!
 classType := dotWordChain
+
+typeList := type typeListOpt! ||
+typeListOpt := ","? typeList! ||
 
 dotWordChain := id dotWordChainOpt!
 dotWordChainOpt := "."? dotWordChain ||
@@ -127,7 +141,7 @@ string := "string"
 //varTypeDef := "="? expression! | ":"? "="? expression! | ":"? type "="? expression!
 //
 ////expression
-//expression := "let"? varDefinition endOfStatement! | returnStatement endOfStatement! | boolArithmetic endOfStatement!
+//expression := "var"? varDefinition endOfStatement! | returnStatement endOfStatement! | boolArithmetic endOfStatement!
 //boolArithmetic := comparisonArithmetic boolRight!
 //comparisonArithmetic := arithmetic comparisonRight!
 //arithmetic := term arithmeticRight!

@@ -4,7 +4,8 @@ use some.Object.Union
 use some.*
 use folder.*
 
-use interface java.util.ArrayList
+use java.util.ArrayList
+
 
 structure F<T> {
     a: bool = false
@@ -36,7 +37,7 @@ structure F<T> {
 }
 
 typeTest := fn() {
-    some := 0
+    some := Object.<test.main>.
     other := some
     obj = f()
     boolean := obj.b

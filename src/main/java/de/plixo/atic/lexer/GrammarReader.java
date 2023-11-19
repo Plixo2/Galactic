@@ -1,6 +1,5 @@
 package de.plixo.atic.lexer;
 
-import de.plixo.atic.common.TokenStream;
 import de.plixo.atic.exceptions.reasons.GrammarRuleFailure;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,7 +41,7 @@ public class GrammarReader {
                 if (nameRuleSet.size() > 1) {
                     throw new GrammarRuleFailure(
                             "Found more than one definition of rule \"" + name + "\"").create();
-                } else if (nameRuleSet.size() == 0) {
+                } else if (nameRuleSet.isEmpty()) {
                     throw new GrammarRuleFailure("Unknown rule \"" + name + "\"").create();
                 }
                 ref.rule = nameRuleSet.get(0);

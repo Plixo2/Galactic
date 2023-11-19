@@ -18,22 +18,20 @@ public class Lexer {
     private final GrammarReader.RuleSet ruleSet;
     private final AutoLexer engine;
 
-    private final GrammarReader.Rule entry;
 
-    public Lexer(String grammar, String entry) {
+    public Lexer(String grammar) {
         ruleSet = GrammarReader.loadFromString(grammar.lines().toArray(String[]::new));
         engine = new AutoLexer();
-        this.entry = Objects.requireNonNull(ruleSet.findRule(entry),"cant find entry");
     }
 
     private final static Tokenizer TOKENIZER = new Tokenizer(Arrays.asList(Token.values()));
 
-    public Node buildTree(File file, String src) {
+    public Node buildTree(File file, String src, String entryName) {
         var records = generateTokens(src);
         records.removeIf(
                 record -> record.token() == Token.WHITESPACE || record.token() == Token.COMMENT);
 
-
+        var entry = Objects.requireNonNull(ruleSet.findRule(entryName),"cant find entry");
         var node = engine.reverseRule(entry, records);
 
         return switch (node) {
@@ -43,9 +41,7 @@ public class Lexer {
                 yield converted;
             }
             case AutoLexer.FailedLiteral failedLiteral -> {
-                failedLiteral.records.forEach(ref -> {
-                    System.out.println(ref);
-                });
+                failedLiteral.records.forEach(System.out::println);
                 var s = "Failed to match literal " + failedLiteral.expectedLiteral + " in rule " +
                         failedLiteral.parentRule.name();
 

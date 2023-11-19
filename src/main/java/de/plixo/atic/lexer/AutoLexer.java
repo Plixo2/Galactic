@@ -1,16 +1,13 @@
 package de.plixo.atic.lexer;
 
-import de.plixo.atic.common.TokenStream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiPredicate;
 
 public class AutoLexer {
 
