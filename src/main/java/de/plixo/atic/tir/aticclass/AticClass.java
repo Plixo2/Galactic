@@ -37,23 +37,23 @@ public class AticClass extends AClass implements PathElement {
     public List<AField> fields = new ArrayList<>();
 
     @Getter
-    private List<MethodImplementation> methods = new ArrayList<>();
+    private final List<MethodImplementation> methods = new ArrayList<>();
 
-    public void addMethod(AticMethod method) {
+    public void addMethod(AticMethod method, Context context) {
         if (method.isAbstract()) {
             methods.add(new AbstractMethod(method));
             return;
         }
         var aMethod = method.asAMethod();
         for (var abstractMethod : superClass.getMethods()) {
-            if (signatureMatch(abstractMethod, aMethod)) {
+            if (signatureMatch(abstractMethod, aMethod, context)) {
                 methods.add(new ImplementedMethod(abstractMethod, method));
                 return;
             }
         }
         for (AClass anInterface : interfaces) {
             for (var abstractMethod : anInterface.getMethods()) {
-                if (signatureMatch(abstractMethod, aMethod)) {
+                if (signatureMatch(abstractMethod, aMethod, context)) {
                     methods.add(new ImplementedMethod(abstractMethod, method));
                     return;
                 }
@@ -62,7 +62,7 @@ public class AticClass extends AClass implements PathElement {
         methods.add(new NewMethod(method));
     }
 
-    private boolean signatureMatch(AMethod method, AMethod aticMethod) {
+    private boolean signatureMatch(AMethod method, AMethod aticMethod, Context context) {
         if (!method.name.equals(aticMethod.name)) {
             return false;
         }
@@ -141,12 +141,12 @@ public class AticClass extends AClass implements PathElement {
     }
 
 
-    public void addAllFieldsConstructor() {
+    public void addAllFieldsConstructor(Context context) {
         var params = new ArrayList<Parameter>();
         for (var field : this.fields) {
             params.add(new Parameter(field.name, field.type));
         }
-        addMethod(new AticMethod(this, ACC_PUBLIC, "<init>", params, new AVoid(), null));
+        addMethod(new AticMethod(this, ACC_PUBLIC, "<init>", params, new AVoid(), null), context);
     }
 
     public Set<AMethod> implementationLeft() {

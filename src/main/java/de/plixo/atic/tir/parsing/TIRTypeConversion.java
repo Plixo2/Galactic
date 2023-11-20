@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-public class TypeConversion {
+public class TIRTypeConversion {
 
     public static @Nullable Expression convert(Expression object, AType expected, Context context) {
         if (AType.isSame(expected, APrimitive.BOOLEAN)) {

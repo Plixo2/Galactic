@@ -19,14 +19,14 @@ field := id ":" type!
 
 block := blockExpr
 
-method := "fn"? id! "("?! parameterList! ")"?! "->"?! type! expression!
+method := "fn"? id! "("?! parameterList! ")"?! "->"?! type! "=" expression!
 parameterList := parameter parameterList! ||
 parameter := id ":"?! type!
 
 blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
 
-expression := variableDefinition | factor
+expression := variableDefinition | factor | "@"? @macro
 variableDefinition := "var" id! ":"?! type! "=" expression! |
 branch := "if"? expression! body! branchOpt!
 branchOpt := "else"? expression! ||
@@ -42,8 +42,7 @@ initialisationFieldListOpt := ","? initialisationFieldList! ||
 initialisationField := expression
 
 memberList := memberAccess memberList! ||
-memberAccess := "."? id! | callAccess | arrayAccess | castAccess
-castAccess := "<"? type! ">"?!
+memberAccess := "."? id! | callAccess | arrayAccess
 arrayAccess := "["? expression! "]"?!
 callAccess := "("? expressionList! ")"?!
 //dotNotationValues := id | number | string

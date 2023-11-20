@@ -42,9 +42,9 @@ public class AutoLexer {
             if (!stream.hasEntriesLeft()) {
                 return null;
             }
-            if (entry.isLiteral()) {
+            if (entry instanceof GrammarReader.LiteralEntry literal) {
                 var token = stream.current();
-                var test = token.token().alias.equals(entry.literal);
+                var test = token.token().alias.equals(literal.literal);
                 if (!test) {
                     if (entry.isConcrete) {
                         var left = new ArrayList<Record>();
@@ -52,7 +52,7 @@ public class AutoLexer {
                             left.add(stream.current());
                             stream.consume();
                         }
-                        return new FailedLiteral(left, rule, entry.literal , token);
+                        return new FailedLiteral(left, rule, literal.literal, token);
                     } else {
                         return null;
                     }
@@ -61,8 +61,8 @@ public class AutoLexer {
                     nodes.add(new LeafNode(rule.name(), token));
                 }
                 stream.consume();
-            } else {
-                var child = testRule(Objects.requireNonNull(entry.rule), stream);
+            } else if (entry instanceof GrammarReader.RuleEntry ruleEntry) {
+                var child = testRule(Objects.requireNonNull(ruleEntry.rule), stream);
                 switch (child) {
                     case FailedLiteral syntaxError -> {
                         return syntaxError;
@@ -78,10 +78,28 @@ public class AutoLexer {
                                 left.add(stream.current());
                                 stream.consume();
                             }
-                            return new FailedRule(left, entry.rule, rule);
+                            return new FailedRule(left, ruleEntry.rule, rule);
                         }
                         return null;
                     }
+                }
+            } else if (entry instanceof GrammarReader.MacroEntry macroEntry) {
+                try {
+                    var invoke = (SyntaxResult) macroEntry.method.invoke(null,stream);
+                    switch (invoke) {
+                        case FailedLiteral syntaxError -> {
+                            return syntaxError;
+                        }
+                        case FailedRule syntaxError -> {
+                            return syntaxError;
+                        }
+                        case SyntaxMatch syntaxMatch -> nodes.add(syntaxMatch.node());
+                        case null -> {
+                            return null;
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

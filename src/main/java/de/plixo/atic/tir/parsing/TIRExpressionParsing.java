@@ -28,7 +28,6 @@ public class TIRExpressionParsing {
             case HIRString hirString -> parseStringExpression(hirString, context);
             case HIRUnaryExpression hirUnaryExpression -> null;
             case HIRVarDefinition hirVarDefinition -> parseVarDefinition(hirVarDefinition, context);
-            case HIRCast hirCast -> throw new NullPointerException("todo");
         }, expression.getClass().getName());
     }
 
@@ -76,7 +75,7 @@ public class TIRExpressionParsing {
 
     private static Expression parseBranchExpression(HIRBranch hirBranch, Context context) {
         var condition =
-                TypeConversion.convert(parse(hirBranch.condition(), context), APrimitive.BOOLEAN,
+                TIRTypeConversion.convert(parse(hirBranch.condition(), context), APrimitive.BOOLEAN,
                         context);
         if (condition == null ||
                 !AType.isAssignableFrom(APrimitive.BOOLEAN, condition.getType(), context)) {

@@ -7,7 +7,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class AArray extends AType {
     public AType elementType;
-
     @Override
     public String toString() {
         return "AArray{" + "elementType=" + elementType + '}';

@@ -21,6 +21,7 @@ public class TIRClassParsing {
                 var parsed = TIRClassParsing.parseClass(unit, hirClass);
                 unit.addClass(parsed);
             } else  if (hirItem instanceof HIRStaticMethod hirStaticMethod) {
+                throw new NullPointerException("not supported");
                 //  var parsed = TIRUnitParsing.parse(unit, hirStaticMethod, );
                 //  unit.addClass(parsed);
             }  else {
@@ -70,7 +71,7 @@ public class TIRClassParsing {
             var aticMethod =
                     new AticMethod(aticClass, ACC_PUBLIC, method.methodName(), parameters, returnType,
                             method);
-            aticClass.addMethod(aticMethod);
+            aticClass.addMethod(aticMethod, context);
         }
     }
 

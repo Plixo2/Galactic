@@ -1,11 +1,12 @@
 package de.plixo.atic.lexer;
 
 import de.plixo.atic.exceptions.reasons.GrammarRuleFailure;
+import de.plixo.atic.macro.Processor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +45,7 @@ public class GrammarReader {
                 } else if (nameRuleSet.isEmpty()) {
                     throw new GrammarRuleFailure("Unknown rule \"" + name + "\"").create();
                 }
-                ref.rule = nameRuleSet.get(0);
+                ((RuleEntry) ref).rule = nameRuleSet.get(0);
             }));
             rules.add(rule);
         }
@@ -87,8 +88,12 @@ public class GrammarReader {
                         stream.consume();
                         e.isConcrete = true;
                     }
+                } else if (testToken(stream, JAVA_LINK)) {
+                    stream.consume();
+                    final String linkName = stream.current().data;
+                    entries.add(new MacroEntry(getLinkMethod(linkName)));
+                    stream.consume();
                 } else {
-
                     throw new GrammarRuleFailure(
                             "Expected keyword or literal, but got " + stream.current()).create();
                 }
@@ -104,7 +109,8 @@ public class GrammarReader {
     private static boolean testToken(TokenStream<TokenRecord<GrammarToken>> stream,
                                      GrammarToken token) {
         if (!stream.hasEntriesLeft()) {
-            throw new GrammarRuleFailure("Expected " + token.name() + ", but ran out of tokens").create();
+            throw new GrammarRuleFailure(
+                    "Expected " + token.name() + ", but ran out of tokens").create();
         }
         return stream.current().token == token;
     }
@@ -112,13 +118,28 @@ public class GrammarReader {
     private static String assertToken(TokenStream<TokenRecord<GrammarToken>> stream,
                                       GrammarToken token) {
         if (!stream.hasEntriesLeft()) {
-            throw new GrammarRuleFailure("Expected " + token.name() + ", but ran out of tokens").create();
+            throw new GrammarRuleFailure(
+                    "Expected " + token.name() + ", but ran out of tokens").create();
         }
         if (stream.current().token != token) {
             throw new GrammarRuleFailure(
                     "Expected " + token.name() + ", but got " + stream.current()).create();
         }
         return stream.current().data;
+    }
+
+    private static Method getLinkMethod(String name) {
+        if (name.equals("macro")) {
+            try {
+                var process = Processor.class.getMethod("process", TokenStream.class);
+                process.setAccessible(true);
+                return process;
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new NullPointerException("Unknown link method \"" + name + "\"");
+        }
     }
 
     private static void consume(TokenStream<?> stream) {
@@ -153,25 +174,31 @@ public class GrammarReader {
     }
 
     static class Entry {
-        @Nullable String literal = null;
-        @Nullable Rule rule = null;
         boolean isHidden = false;
         boolean isConcrete = false;
+    }
 
-        boolean isLiteral() {
-            return literal != null;
-        }
+    @AllArgsConstructor
+    public static class LiteralEntry extends Entry {
+        String literal = null;
+    }
 
+    @AllArgsConstructor
+    public static class RuleEntry extends Entry {
+        Rule rule = null;
+    }
+
+    @AllArgsConstructor
+    public static class MacroEntry extends Entry {
+        Method method;
     }
 
     private static Entry genEntry(String literal) {
-        final Entry entry = new Entry();
-        entry.literal = literal;
-        return entry;
+        return new LiteralEntry(literal);
     }
 
-    private static Entry genPlaceholderEntry() {
-        return new Entry();
+    private static RuleEntry genPlaceholderEntry() {
+        return new RuleEntry(null);
     }
 
     public enum GrammarToken {
@@ -182,6 +209,7 @@ public class GrammarReader {
         OR("\\|", "\\|"),
         HIDDEN("\\?", "\\?"),
         CONCRETE("\\!", "\\!"),
+        JAVA_LINK("@", "\\@"),
         COMMENT("//", "//.*"),
 
 

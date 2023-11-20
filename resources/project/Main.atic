@@ -2,7 +2,7 @@
 class Func extends java.util.ArrayList implements java.util.function.Consumer {
     field: double
     name: java.lang.String
-    fn accept(obj: java.lang.Object) -> void {
+    fn accept(obj: java.lang.Object) -> void = {
         var i: Main.Func = new Main.Func {0, "Hello"}
         var obj: java.lang.Object = i.get(new java.lang.Double{0}.intValue())
         if new java.lang.Boolean {false} {
@@ -10,13 +10,19 @@ class Func extends java.util.ArrayList implements java.util.function.Consumer {
         }
         var d: double = i.get()
     }
-    fn get() -> double 0
+    fn get() -> double = 0
+
+    fn make() -> void = {
+
+    }
 }
 
-fn main() -> void {
+//fn macroTest() -> bool {
+ //  test! {
+//
+   // }
+//}
 
-      var s: int = 0
-      java.lang.System.out.println(s)
-}
+//macro test "Expression" -> "MacroTest"
 
-
+//macro := @macro

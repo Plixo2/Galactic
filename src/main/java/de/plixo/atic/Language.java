@@ -50,17 +50,7 @@ public class Language extends Object {
         var currentTime = System.currentTimeMillis();
         System.out.println("Took " + (currentTime - time) + " ms");
 
-        try {
-            File file2 = new File("resources\\");
-            URL url = file2.toURI().toURL();
-            URL[] urls = new URL[]{url};
-            ClassLoader cl = new URLClassLoader(urls);
-            var cls = cl.loadClass("test.OutClass");
-            cls.getConstructors()[0].newInstance();
-            cls.getMethod("method").invoke(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
         System.out.println("end");
 
     }
@@ -95,7 +85,8 @@ public class Language extends Object {
             TIRClassParsing.fillMethodShells(aClass, context);
         }
         for (var aClass : classes) {
-            aClass.addAllFieldsConstructor();
+            var context = new Context(null, aClass.unit(), root);
+            aClass.addAllFieldsConstructor(context);
         }
         for (var aClass : classes) {
             var context = new Context(null, aClass.unit(), root);

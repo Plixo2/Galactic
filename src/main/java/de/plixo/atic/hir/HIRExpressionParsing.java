@@ -57,10 +57,6 @@ public class HIRExpressionParsing {
             var arrayAccess = node.get("arrayAccess");
             var index = HIRExpressionParsing.parse(arrayAccess.get("expression"));
             return new HIRArrayAccessNotation(previous, index);
-        } else if (node.has("castAccess")) {
-            var castAccess = node.get("castAccess");
-            var type = HIRTypeParsing.parse(castAccess.get("type"));
-            return new HIRCast(previous, type);
         }
         throw new NullPointerException("Unknown member");
     }
