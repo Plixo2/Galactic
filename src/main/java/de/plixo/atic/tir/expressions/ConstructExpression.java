@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.MethodCollection;
 import de.plixo.atic.types.AClass;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.sub.AMethod;
@@ -10,22 +11,16 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ConstructExpression extends Expression {
+public final class ConstructExpression extends Expression {
 
     @Getter
-    private final AClass contructedClassType;
-    @Getter
-    private final AMethod constructor;
-    @Getter
-    private final List<Expression> expressions;
+    private final AType constructType;
 
-    @Override
-    public Expression dotNotation(String id, Context context) {
-        return standartDotExpression(contructedClassType, id, context);
-    }
+    @Getter
+    private final List<Expression> arguments;
 
     @Override
     public AType getType() {
-        return contructedClassType;
+        throw new NullPointerException("to compute");
     }
 }

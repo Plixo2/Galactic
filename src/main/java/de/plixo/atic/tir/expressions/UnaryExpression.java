@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class UnaryExpression extends Expression {
+public final class UnaryExpression extends Expression {
 
     @Getter
     private final Expression object;

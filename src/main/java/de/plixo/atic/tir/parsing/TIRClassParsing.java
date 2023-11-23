@@ -1,7 +1,6 @@
 package de.plixo.atic.tir.parsing;
 
 import de.plixo.atic.hir.items.HIRClass;
-import de.plixo.atic.hir.items.HIRStaticMethod;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
@@ -16,15 +15,11 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 public class TIRClassParsing {
 
     public static void parse(Unit unit) {
-        for (var hirItem : unit.hirItems()) {
+        for (var hirItem : unit.getHirItems()) {
             if (hirItem instanceof HIRClass hirClass) {
                 var parsed = TIRClassParsing.parseClass(unit, hirClass);
                 unit.addClass(parsed);
-            } else  if (hirItem instanceof HIRStaticMethod hirStaticMethod) {
-                throw new NullPointerException("not supported");
-                //  var parsed = TIRUnitParsing.parse(unit, hirStaticMethod, );
-                //  unit.addClass(parsed);
-            }  else {
+            } else {
                 throw new NullPointerException("not supported");
             }
         }
@@ -68,9 +63,8 @@ public class TIRClassParsing {
             var parameters = method.parameters().stream().map(ref -> new Parameter(ref.name(),
                     TIRTypeParsing.parse(ref.type(), context))).toList();
             var returnType = TIRTypeParsing.parse(method.returnType(), context);
-            var aticMethod =
-                    new AticMethod(aticClass, ACC_PUBLIC, method.methodName(), parameters, returnType,
-                            method);
+            var aticMethod = new AticMethod(aticClass, ACC_PUBLIC, method.methodName(), parameters,
+                    returnType, method);
             aticClass.addMethod(aticMethod, context);
         }
     }

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ArrayConstructExpression extends Expression {
+public final class ArrayConstructExpression extends Expression {
 
     @Getter
     private final AType elementType;

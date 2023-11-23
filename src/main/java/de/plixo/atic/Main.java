@@ -19,7 +19,7 @@ public class Main {
             throw new RuntimeException("cant load grammar resource", e);
         }
         var lexer = new Lexer(grammar);
-        var language = new Language(new ParseConfig("atic", lexer, true));
+        var language = new Language(new ParseConfig("atic", lexer));
         language.parse(new File("resources/project"));
     }
 

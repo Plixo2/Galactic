@@ -6,13 +6,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
+@Getter
 @RequiredArgsConstructor
-public class BranchExpression extends Expression {
-    @Getter
+public final class BranchExpression extends Expression {
     private final Expression condition;
-    @Getter
-    private final Expression body;
-    @Getter
+    private final Expression then;
     private final @Nullable Expression elseExpression;
 
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class ObjectFieldExpression extends Expression {
+public final class ObjectFieldExpression extends Expression {
 
     @Getter
     private final Expression object;

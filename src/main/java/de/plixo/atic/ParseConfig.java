@@ -9,5 +9,4 @@ import lombok.Getter;
 public class ParseConfig {
     private String filePattern;
     private Lexer lexer;
-    private boolean threaded;
 }

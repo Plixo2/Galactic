@@ -1,21 +1,19 @@
 package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
-import de.plixo.atic.tir.Context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-public final class BlockExpression extends Expression {
-
-    @Getter
-    private final List<Expression> expressions;
+@Getter
+public final class CallNotation extends Expression {
+    private final Expression object;
+    private final List<Expression> arguments;
 
     @Override
     public AType getType() {
-        return new AVoid();
+        throw new NullPointerException("not computed yet");
     }
 }

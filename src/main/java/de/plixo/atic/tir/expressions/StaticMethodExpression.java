@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class StaticMethodExpression extends Expression {
+public final class StaticMethodExpression extends Expression {
     private final AClass aClass;
     private final MethodCollection method;
 

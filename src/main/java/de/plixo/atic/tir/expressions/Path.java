@@ -4,10 +4,12 @@ import de.plixo.atic.types.AType;
 import de.plixo.atic.types.AVoid;
 import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.Context;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class Path extends Expression {
+@Getter
+public final class Path extends Expression {
     private final ObjectPath path;
 
     @Override

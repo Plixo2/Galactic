@@ -36,9 +36,9 @@ public final class Package implements CompileRoot, PathElement {
     }
 
     @Override
-    public List<Unit> listUnits() {
+    public List<Unit> flatUnits() {
         var list = new ArrayList<>(units);
-        packages.forEach(ref -> list.addAll(ref.listUnits()));
+        packages.forEach(ref -> list.addAll(ref.flatUnits()));
         return list;
     }
 

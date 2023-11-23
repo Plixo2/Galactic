@@ -73,14 +73,9 @@ public class FileTree {
                     }
                     treeUnit.setRoot(config.lexer().buildTree(file, src, "unit2"));
                 };
-                if (config.threaded()) {
-                    Thread thread = Thread.startVirtualThread(runnable);
-                    Language.TASK_CREATED += 1;
-                    thread.setName("Lexer Thread #" + threads.size());
-                    threads.add(thread);
-                } else {
-                    runnable.run();
-                }
+                Thread thread = Thread.startVirtualThread(runnable);
+                thread.setName("Lexer Thread #" + threads.size());
+                threads.add(thread);
 
                 return treeUnit;
             }

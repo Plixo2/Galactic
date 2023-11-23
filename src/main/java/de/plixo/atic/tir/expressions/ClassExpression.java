@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import java.lang.reflect.Modifier;
 
 @RequiredArgsConstructor
-public class ClassExpression extends Expression {
+public final class ClassExpression extends Expression {
     private final AClass aClass;
 
     @Override

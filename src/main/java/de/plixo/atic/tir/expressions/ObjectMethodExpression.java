@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ObjectMethodExpression extends Expression {
+public final class ObjectMethodExpression extends Expression {
 
     private final @Nullable Expression object;
     private final MethodCollection method;

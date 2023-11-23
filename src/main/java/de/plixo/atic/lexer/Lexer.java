@@ -80,7 +80,6 @@ public class Lexer {
             while (lines.hasNext()) {
                 var line = lines.next();
                 var line_count = line_counter;
-                Language.TASK_CREATED += 1;
                 futures.add(executor.submit(
                         () -> new ArrayList<>(switch (Lexer.TOKENIZER.apply(line_count, line)) {
                             case Tokenizer.TokenFailure(var text, var ignored) ->

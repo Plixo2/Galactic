@@ -8,7 +8,7 @@ import de.plixo.atic.types.classes.JVMClass;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class StringExpression extends Expression {
+public final class StringExpression extends Expression {
 
     private final String value;
 

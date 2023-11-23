@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class StaticFieldExpression extends Expression {
+public final class StaticFieldExpression extends Expression {
     @Getter
     private final AClass aClass;
     @Getter

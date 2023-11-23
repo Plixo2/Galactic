@@ -47,36 +47,18 @@ public class HIRExpressionParsing {
     private static HIRExpression parseMember(HIRExpression previous, Node node) {
         node.assertType("memberAccess");
         if (node.has("id")) {
-            var id = new HIRIdentifier(node.getID());
             return new HIRDotNotation(previous, node.getID());
         } else if (node.has("callAccess")) {
             var callAccess = node.get("callAccess");
             var list = ExpressionCommaList.toList(callAccess);
             return new HIRCallNotation(previous, list);
-        } else if (node.has("arrayAccess")) {
-            var arrayAccess = node.get("arrayAccess");
-            var index = HIRExpressionParsing.parse(arrayAccess.get("expression"));
-            return new HIRArrayAccessNotation(previous, index);
         }
         throw new NullPointerException("Unknown member");
     }
 
     private static HIRExpression parseObject(Node node) {
         node.assertType("object");
-        if (node.has("unary")) {
-            var unary = node.get("unary");
-            var record = unary.children().get(0).record();
-            assert record != null;
-            var operator = record.data();
-            var factor = parseFactor(unary.get("factor"));
-            return switch (operator) {
-                case "+" -> new HIRUnary(factor, UnaryFunctions.ADD);
-                case "-" -> new HIRUnary(factor, UnaryFunctions.MINUS);
-                case "!" -> new HIRUnary(factor, UnaryFunctions.NEGATE_LOGIC);
-                default -> throw new IllegalStateException("Unexpected value: " + operator);
-            };
-
-        } else if (node.has("blockExpr")) {
+        if (node.has("blockExpr")) {
             var list = node.get("blockExpr").list("blockExprList", "expression").stream()
                     .map(HIRExpressionParsing::parse).toList();
             return new HIRBlock(list);

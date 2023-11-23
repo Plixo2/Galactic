@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
-public class NumberExpression extends Expression{
+public final class NumberExpression extends Expression{
 
     @Getter
     private final BigDecimal value;

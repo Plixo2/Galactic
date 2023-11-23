@@ -33,8 +33,7 @@ branchOpt := "else"? expression! ||
 body := expression!
 
 factor := object memberList!
-object := initialisation | branch | blockExpr | string | number | id | "("? expression! ")"?! | unary
-unary :=  "!" factor! | "-" factor | "+" factor
+object := initialisation | branch | blockExpr | string | number | id | "("? expression! ")"?!
 
 initialisation := "new"? type! "{"? initialisationFieldList "}"?!
 initialisationFieldList := initialisationField initialisationFieldListOpt! ||
@@ -42,8 +41,7 @@ initialisationFieldListOpt := ","? initialisationFieldList! ||
 initialisationField := expression
 
 memberList := memberAccess memberList! ||
-memberAccess := "."? id! | callAccess | arrayAccess
-arrayAccess := "["? expression! "]"?!
+memberAccess := "."? id! | callAccess
 callAccess := "("? expressionList! ")"?!
 //dotNotationValues := id | number | string
 

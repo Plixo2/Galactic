@@ -10,6 +10,7 @@ import de.plixo.atic.types.MethodOwner;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
 
     @Setter
     @Getter
+    @Accessors(fluent = false)
     private List<HIRItem> hirItems = new ArrayList<>();
 
     public void addClass(AticClass aticClass) {
@@ -54,7 +56,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     }
 
     @Override
-    public List<Unit> listUnits() {
+    public List<Unit> flatUnits() {
         return List.of(this);
     }
 

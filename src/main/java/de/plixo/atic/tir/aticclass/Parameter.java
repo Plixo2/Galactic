@@ -13,8 +13,4 @@ public class Parameter {
     @Getter
     private final AType type;
 
-
-    public Context.Variable addTo(Context context) {
-        return context.addVariable(name, type, Context.VariableType.INPUT);
-    }
 }

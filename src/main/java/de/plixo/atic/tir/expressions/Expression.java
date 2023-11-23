@@ -1,12 +1,18 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.types.AType;
 import de.plixo.atic.hir.expressions.HIRExpression;
 import de.plixo.atic.tir.Context;
+import de.plixo.atic.types.AType;
 
 import java.util.List;
 
-public abstract class Expression {
+public sealed abstract class Expression
+        permits ArrayConstructExpression, BlockExpression, BooleanExpression, BranchExpression,
+        CallNotation, ClassExpression, ConstructExpression, DotNotation, MethodInvokeExpression,
+        NumberExpression, ObjectFieldExpression, ObjectMethodExpression, Path,
+        StaticFieldExpression, StaticMethodExpression, StringExpression, SymbolExpression,
+        UnaryExpression, VarDefExpression, VarExpression {
+
     public Expression dotNotation(String id, Context context) {
         throw new NullPointerException("dot not implemented for type " + this.getClass().getName());
     }

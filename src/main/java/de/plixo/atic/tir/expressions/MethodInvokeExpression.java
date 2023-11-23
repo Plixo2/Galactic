@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-public class MethodInvokeExpression extends Expression {
+public final class MethodInvokeExpression extends Expression {
     @Getter
     private final @Nullable Expression object;
     @Getter
