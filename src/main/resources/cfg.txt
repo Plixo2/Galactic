@@ -42,7 +42,7 @@ initialisationField := expression
 
 memberList := memberAccess memberList! ||
 memberAccess := "."? id! | callAccess
-callAccess := "("? expressionList! ")"?!
+callAccess := "("? expressionList! ")"?! | ":"? expression!
 //dotNotationValues := id | number | string
 
 expressionList := expression expressionListOpt! ||

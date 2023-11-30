@@ -1,28 +1,29 @@
 
-class Func extends java.util.ArrayList implements java.util.function.Consumer {
-    field: double
-    name: java.lang.String
-    fn accept(obj: java.lang.Object) -> void = {
-        var i: Main.Func = new Main.Func {0, "Hello"}
-        var obj: java.lang.Object = i.get(new java.lang.Double{0}.intValue())
-        if new java.lang.Boolean {false} {
-            java.lang.System.out.println("String")
-        }
-        var d: double = i.get()
-    }
-    fn get() -> double = 0
-
-    fn make() -> void = {
-
+class Test {
+    field: java.lang.String
+    fn make(w: int) -> java.lang.String = {
+        this.field
     }
 }
 
-//fn macroTest() -> bool {
- //  test! {
-//
-   // }
-//}
 
-//macro test "Expression" -> "MacroTest"
-
-//macro := @macro
+{
+    var hello: java.lang.String = "Hello"
+    var b: boolean = false
+    hello.equalsIgnoreCase("false")
+    if true {
+        //var other: java.lang.Boolean = java.lang.Boolean.valueOf("true")
+        //b.compareTo(other)
+        //var other2: java.lang.Boolean = java.lang.Boolean.valueOf(false)
+        //b.compareTo(other2)
+    } else {
+        var test: Main.Test = new Main.Test { "hello" }
+        if test.field.isEmpty() {
+            if test.make(0i).isEmpty() {
+                "hi"
+            } else {
+                2
+            }
+        }
+    }
+}

@@ -5,17 +5,14 @@ import de.plixo.atic.types.AType;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.types.Converter;
 import de.plixo.atic.types.classes.JVMClass;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Getter
 public final class StringExpression extends Expression {
 
     private final String value;
-
-    @Override
-    public Expression dotNotation(String id, Context context) {
-        return standartDotExpression(getType(), id, context);
-    }
 
     @Override
     public AType getType() {

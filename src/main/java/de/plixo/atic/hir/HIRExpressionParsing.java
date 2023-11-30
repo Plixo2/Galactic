@@ -5,6 +5,8 @@ import de.plixo.atic.hir.utils.ExpressionCommaList;
 import de.plixo.atic.lexer.Node;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HIRExpressionParsing {
     public static HIRExpression parse(Node node) {
@@ -50,7 +52,15 @@ public class HIRExpressionParsing {
             return new HIRDotNotation(previous, node.getID());
         } else if (node.has("callAccess")) {
             var callAccess = node.get("callAccess");
-            var list = ExpressionCommaList.toList(callAccess);
+            List<HIRExpression> list;
+            if (callAccess.has("expression")) {
+                var expressionNode = callAccess.get("expression");
+                var hirExpression = HIRExpressionParsing.parse(expressionNode);
+                list = new ArrayList<>();
+                list.add(hirExpression);
+            } else {
+                list = ExpressionCommaList.toList(callAccess);
+            }
             return new HIRCallNotation(previous, list);
         }
         throw new NullPointerException("Unknown member");
@@ -64,7 +74,7 @@ public class HIRExpressionParsing {
             return new HIRBlock(list);
         } else if (node.has("number")) {
             var nodeNumber = node.getNumber();
-            return new HIRNumber(new BigDecimal(nodeNumber));
+            return new HIRNumber(nodeNumber);
         } else if (node.has("string")) {
             var nodeNumber = node.getString();
             var literal = nodeNumber.substring(1, nodeNumber.length() - 1);

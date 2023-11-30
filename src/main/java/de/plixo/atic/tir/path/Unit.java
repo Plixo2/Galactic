@@ -4,8 +4,10 @@ import de.plixo.atic.files.PathEntity;
 import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.ObjectPath;
+import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
+import de.plixo.atic.tir.expressions.BlockExpression;
 import de.plixo.atic.types.MethodOwner;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,10 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
 
     @Getter
     private final List<AticClass> classes = new ArrayList<>();
+
+    @Getter
+    private final List<AticBlock> blocks = new ArrayList<>();
+
     private final List<AticMethod> staticMethods = new ArrayList<>();
 
     @Setter
@@ -37,6 +43,9 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
 
     public void addClass(AticClass aticClass) {
         this.classes.add(aticClass);
+    }
+    public void addBlock(AticBlock block) {
+        this.blocks.add(block);
     }
 
     @Override
@@ -63,7 +72,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     @Override
     public @Nullable PathElement locate(String name) {
         for (var aClass : classes) {
-            if (aClass.className().equals(name)) {
+            if (aClass.localName().equals(name)) {
                 return aClass;
             }
         }

@@ -5,11 +5,11 @@ import de.plixo.atic.tir.expressions.*;
 
 import java.util.Objects;
 
-public interface Tree {
+public interface Tree<C extends Context> {
 
     Expression defaultBehavior(Expression expression);
 
-    default Expression parse(Expression expression, Context context) {
+    default Expression parse(Expression expression, C context) {
         return Objects.requireNonNull(switch (expression) {
             case ArrayConstructExpression arrayConstructExpression ->
                     parseArrayConstructExpression(arrayConstructExpression, context);
@@ -23,14 +23,14 @@ public interface Tree {
             case ConstructExpression constructExpression ->
                     parseConstructExpression(constructExpression, context);
             case DotNotation dotNotation -> parseDotNotation(dotNotation, context);
-            case MethodInvokeExpression methodInvokeExpression ->
-                    parseMethodInvokeExpression(methodInvokeExpression, context);
+            case MethodCallExpression methodCallExpression ->
+                    parseMethodCallExpression(methodCallExpression, context);
             case NumberExpression numberExpression ->
                     parseNumberExpression(numberExpression, context);
-            case ObjectFieldExpression objectFieldExpression ->
-                    parseObjectFieldExpression(objectFieldExpression, context);
-            case ObjectMethodExpression objectMethodExpression ->
-                    parseObjectMethodExpression(objectMethodExpression, context);
+            case GetFieldExpression fieldExpression ->
+                    parseObjectFieldExpression(fieldExpression, context);
+            case GetMethodExpression methodExpression ->
+                    parseObjectMethodExpression(methodExpression, context);
             case Path path -> parsePath(path, context);
             case StaticFieldExpression staticFieldExpression ->
                     parseStaticFieldExpression(staticFieldExpression, context);
@@ -44,94 +44,121 @@ public interface Tree {
             case VarDefExpression varDefExpression ->
                     parseVarDefExpression(varDefExpression, context);
             case VarExpression varExpression -> parseVarExpression(varExpression, context);
+            case AticClassConstructExpression aticClassConstructExpression ->
+                    parseAticClassConstructExpression(aticClassConstructExpression, context);
+            case AticClassExpression aticClassExpression ->
+                    parseAticClassExpression(aticClassExpression, context);
+            case AticPackageExpression aticPackageExpression ->
+                    parseAticPackageExpression(aticPackageExpression, context);
+            case UnitExpression unitExpression -> parseUnitExpression(unitExpression, context);
+            case InstanceCreationExpression instanceCreationExpression ->
+                    parseInstanceCreationExpression(instanceCreationExpression, context);
         }, expression.getClass().getSimpleName());
     }
-    default Expression parseVarExpression(
-            VarExpression expression, Context context) {
-        return defaultBehavior(expression);
-    }
-    default Expression parseArrayConstructExpression(
-            ArrayConstructExpression expression, Context context) {
+
+    default Expression parseInstanceCreationExpression(InstanceCreationExpression expression,
+                                                       C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseBlockExpression(BlockExpression expression, Context context) {
+    default Expression parseUnitExpression(UnitExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseBooleanExpression(BooleanExpression expression,
-                                              Context context) {
+    default Expression parseAticPackageExpression(AticPackageExpression expression,
+                                                  C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseBranchExpression(BranchExpression expression, Context context) {
+    default Expression parseAticClassExpression(AticClassExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseCallNotation(CallNotation expression, Context context) {
+    default Expression parseAticClassConstructExpression(AticClassConstructExpression expression,
+                                                         C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseClassExpression(ClassExpression expression, Context context) {
+    default Expression parseVarExpression(VarExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseConstructExpression(ConstructExpression expression,
-                                                Context context) {
+    default Expression parseArrayConstructExpression(ArrayConstructExpression expression,
+                                                     C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseDotNotation(DotNotation expression, Context context) {
+    default Expression parseBlockExpression(BlockExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseMethodInvokeExpression(MethodInvokeExpression expression,
-                                                   Context context) {
+    default Expression parseBooleanExpression(BooleanExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseNumberExpression(NumberExpression expression, Context context) {
+    default Expression parseBranchExpression(BranchExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseObjectFieldExpression(ObjectFieldExpression expression,
-                                                  Context context) {
+    default Expression parseCallNotation(CallNotation expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseObjectMethodExpression(ObjectMethodExpression expression,
-                                                   Context context) {
+    default Expression parseClassExpression(ClassExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parsePath(Path expression, Context context) {
+    default Expression parseConstructExpression(ConstructExpression expression, C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseDotNotation(DotNotation expression, C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseMethodCallExpression(MethodCallExpression expression, C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseNumberExpression(NumberExpression expression, C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseObjectFieldExpression(GetFieldExpression expression, C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseObjectMethodExpression(GetMethodExpression expression, C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parsePath(Path expression, C context) {
         return defaultBehavior(expression);
     }
 
     default Expression parseStaticFieldExpression(StaticFieldExpression expression,
-                                                  Context context) {
+                                                  C context) {
         return defaultBehavior(expression);
     }
 
     default Expression parseStaticMethodExpression(StaticMethodExpression expression,
-                                                   Context context) {
+                                                   C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStringExpression(StringExpression expression, Context context) {
+    default Expression parseStringExpression(StringExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseSymbolExpression(SymbolExpression expression, Context context) {
+    default Expression parseSymbolExpression(SymbolExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseUnaryExpression(UnaryExpression expression, Context context) {
+    default Expression parseUnaryExpression(UnaryExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseVarDefExpression(
-            VarDefExpression expression, Context context) {
+    default Expression parseVarDefExpression(VarDefExpression expression, C context) {
         return defaultBehavior(expression);
     }
 

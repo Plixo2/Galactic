@@ -1,28 +1,48 @@
 package de.plixo.atic.tir.parsing;
 
+import de.plixo.atic.Language;
+import de.plixo.atic.hir.expressions.HIRBlock;
 import de.plixo.atic.hir.items.HIRClass;
+import de.plixo.atic.hir.items.HIRTopBlock;
 import de.plixo.atic.tir.Context;
+import de.plixo.atic.tir.Scope;
+import de.plixo.atic.tir.TypeContext;
+import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.tir.aticclass.Parameter;
-import de.plixo.atic.tir.aticclass.method.MethodImplementation;
+import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.Unit;
 import de.plixo.atic.types.AClass;
 import de.plixo.atic.types.sub.AField;
 
+import static de.plixo.atic.tir.Scope.INPUT;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 public class TIRClassParsing {
 
-    public static void parse(Unit unit) {
+
+    public static void parse(Unit unit, CompileRoot root, Language language) {
         for (var hirItem : unit.getHirItems()) {
             if (hirItem instanceof HIRClass hirClass) {
                 var parsed = TIRClassParsing.parseClass(unit, hirClass);
                 unit.addClass(parsed);
-            } else {
-                throw new NullPointerException("not supported");
+            } else if (hirItem instanceof HIRTopBlock block) {
+                var hirBlock = new HIRBlock(block.expressions());
+                var aticBlock = new AticBlock(unit, hirBlock);
+                unit.addBlock(aticBlock);
             }
         }
+    }
+
+
+    public static void parseBlock(Unit unit, CompileRoot root, AticBlock block, Language language) {
+        var context = new TypeContext(unit, root);
+        var base = TIRExpressionParsing.parse(block.hirBlock(), context);
+        base = language.symbolsStage().parse(base, context);
+        base = language.inferStage().parse(base, context);
+        language.checkStage().parse(base, context);
+
     }
 
     public static AticClass parseClass(Unit unit, HIRClass hirClass) {
@@ -69,12 +89,23 @@ public class TIRClassParsing {
         }
     }
 
-    public static void fillMethodExpressions(AticClass aticClass, Context context) {
-        for (MethodImplementation method : aticClass.methods()) {
+    public static void fillMethodExpressions(AticClass aticClass, TypeContext context,
+                                             Language language) {
+        for (var method : aticClass.methods()) {
             var aticMethod = method.aticMethod();
+            aticMethod.parameters().forEach(ref -> {
+                context.scope()
+                        .addVariable(new Scope.Variable(ref.name(), INPUT, ref.type(), null));
+            });
+            context.scope().addVariable(new Scope.Variable("this", INPUT, aticClass, null));
+
+
             var hirMethod = aticMethod.hirMethod();
             if (hirMethod != null) {
                 aticMethod.body = TIRExpressionParsing.parse(hirMethod.expression(), context);
+                aticMethod.body = language.symbolsStage().parse(aticMethod.body, context);
+                aticMethod.body = language.inferStage().parse(aticMethod.body, context);
+                language.checkStage().parse(aticMethod.body, context);
             }
         }
     }

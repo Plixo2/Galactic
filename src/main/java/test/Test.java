@@ -17,7 +17,6 @@ public class Test {
             ClassNode cn = new ClassNode();
             ClassReader cr = new ClassReader(getInputStream(TestInterface.class));
             cr.accept(cn, 0);
-            System.out.println(cn.signature);
             var isInterface = (cn.access & Opcodes.ACC_INTERFACE) != 0;
             System.out.println(isInterface);
 //            System.out.println("cn.signature = " + cn.signature);

@@ -9,10 +9,17 @@ import de.plixo.atic.hir.HIRItemParsing;
 import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.TreeBuilding;
+import de.plixo.atic.tir.TypeContext;
+import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.parsing.TIRClassParsing;
 import de.plixo.atic.tir.path.CompileRoot;
-import lombok.AllArgsConstructor;
+import de.plixo.atic.tir.stages.CheckFlow;
+import de.plixo.atic.tir.stages.Check;
+import de.plixo.atic.tir.stages.Infer;
+import de.plixo.atic.tir.stages.Symbols;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -23,11 +30,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-@AllArgsConstructor
-
+@RequiredArgsConstructor
+@Getter
 public class Language {
 
     private final ParseConfig config;
+
+
+    private Symbols symbolsStage = new Symbols();
+    private Infer inferStage = new Infer();
+    private Check checkStage = new Check();
+    private CheckFlow checkFlowStage = new CheckFlow();
 
 
     public void parse(File file) {
@@ -57,11 +70,15 @@ public class Language {
             var hirItems = Objects.requireNonNull(hir2.mapping.get(pathUnit),
                     "missing hir items " + "from pathUnit " + pathUnit);
             unit.setHirItems(hirItems);
-            TIRClassParsing.parse(unit);
+            TIRClassParsing.parse(unit, root, this);
         }
         var classes = new ArrayList<AticClass>();
         for (var unit : units) {
             classes.addAll(unit.classes());
+        }
+        var blocks = new ArrayList<AticBlock>();
+        for (var unit : units) {
+            blocks.addAll(unit.blocks());
         }
 
         for (var aClass : classes) {
@@ -71,22 +88,26 @@ public class Language {
 
 
         //types are known here
-        for (var aClass : classes) {
+        classes.parallelStream().forEach(aClass -> {
             var context = new Context(aClass.unit(), root);
             TIRClassParsing.fillFields(aClass, context);
-        }
-        for (var aClass : classes) {
+        });
+        classes.parallelStream().forEach(aClass -> {
             var context = new Context(aClass.unit(), root);
             TIRClassParsing.fillMethodShells(aClass, context);
-        }
-        for (var aClass : classes) {
+        });
+        classes.parallelStream().forEach(aClass -> {
             var context = new Context(aClass.unit(), root);
             aClass.addAllFieldsConstructor(context);
-        }
-        for (var aClass : classes) {
-            var context = new Context(aClass.unit(), root);
-            TIRClassParsing.fillMethodExpressions(aClass, context);
-        }
+        });
+        classes.parallelStream().forEach(aClass -> {
+            var context = new TypeContext(aClass.unit(), root);
+            TIRClassParsing.fillMethodExpressions(aClass, context, this);
+        });
+        blocks.parallelStream().forEach(block -> {
+            TIRClassParsing.parseBlock(block.unit(), root, block, this);
+        });
+
         for (var aClass : classes) {
             TIRClassParsing.assertMethodsImplemented(aClass);
         }

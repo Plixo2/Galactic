@@ -12,16 +12,6 @@ import lombok.RequiredArgsConstructor;
 public final class Path extends Expression {
     private final ObjectPath path;
 
-    @Override
-    public Expression dotNotation(String id, Context context) {
-        var next = path.add(id);
-        var theClass = context.getClass(next);
-        if (theClass == null) {
-            return new Path(next);
-        } else {
-            return new ClassExpression(theClass);
-        }
-    }
 
     @Override
     public AType getType() {

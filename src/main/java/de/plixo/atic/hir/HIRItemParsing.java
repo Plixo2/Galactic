@@ -37,12 +37,12 @@ public class HIRItemParsing {
         return new HIRStaticMethod(new HIRMethod(name, parameterList, returnType, blockExpr));
     }
 
-    private static HIRBlock parseBlock(Node node) {
+    private static HIRTopBlock parseBlock(Node node) {
         node.assertType("block");
         var blockExpr = node.get("blockExpr");
         var list = blockExpr.list("blockExprList", "expression").stream()
                 .map(HIRExpressionParsing::parse).toList();
-        return new HIRBlock(node.region(), list);
+        return new HIRTopBlock(node.region(), list);
     }
 
     private static HIRClass parseClass(Node node) {

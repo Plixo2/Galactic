@@ -27,10 +27,9 @@ public class JVMClass extends AClass {
     @SneakyThrows
     public JVMClass(String name) {
         var className = Type.getObjectType(name).getClassName();
-        ClassNode cn = new ClassNode();
-        ClassReader cr = new ClassReader(className);
+        var cn = new ClassNode();
+        var cr = new ClassReader(className);
         cr.accept(cn, 0);
-//        var cn = ByteCodeMemo.getName(className);
         this.name = new ObjectPath(className, ".");
         this.classNode = cn;
     }
@@ -142,20 +141,4 @@ public class JVMClass extends AClass {
         return Objects.hash(name);
     }
 
-    private static List<String> splitDot(String name) {
-        var list = new ArrayList<String>();
-
-        var lastIndex = 0;
-        var length = name.length();
-        for (int i = 0; i < length; i++) {
-            var character = name.charAt(i);
-            if (character == '.') {
-                list.add(name.substring(lastIndex, i));
-                lastIndex = i + 1;
-            }
-        }
-        list.add(name.substring(lastIndex, length));
-
-        return list;
-    }
 }

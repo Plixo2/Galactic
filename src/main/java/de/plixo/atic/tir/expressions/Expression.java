@@ -7,11 +7,12 @@ import de.plixo.atic.types.AType;
 import java.util.List;
 
 public sealed abstract class Expression
-        permits ArrayConstructExpression, BlockExpression, BooleanExpression, BranchExpression,
-        CallNotation, ClassExpression, ConstructExpression, DotNotation, MethodInvokeExpression,
-        NumberExpression, ObjectFieldExpression, ObjectMethodExpression, Path,
+        permits ArrayConstructExpression, AticClassConstructExpression, AticClassExpression,
+        AticPackageExpression, BlockExpression, BooleanExpression, BranchExpression, CallNotation,
+        ClassExpression, ConstructExpression, DotNotation, GetFieldExpression,
+        InstanceCreationExpression, MethodCallExpression, GetMethodExpression, NumberExpression, Path,
         StaticFieldExpression, StaticMethodExpression, StringExpression, SymbolExpression,
-        UnaryExpression, VarDefExpression, VarExpression {
+        UnaryExpression, UnitExpression, VarDefExpression, VarExpression {
 
     public Expression dotNotation(String id, Context context) {
         throw new NullPointerException("dot not implemented for type " + this.getClass().getName());
@@ -26,13 +27,13 @@ public sealed abstract class Expression
     public Expression standartDotExpression(AType type, String id, Context context) {
         var aField = type.getField(id, context);
         if (aField != null) {
-            return new ObjectFieldExpression(this, aField);
+            return new GetFieldExpression(this, aField);
         } else {
             var methods = type.getMethods(id, context);
             if (methods.isEmpty()) {
                 throw new NullPointerException("cant find field or method " + id);
             }
-            return new ObjectMethodExpression(this, methods);
+            return new GetMethodExpression(this, methods);
         }
     }
 

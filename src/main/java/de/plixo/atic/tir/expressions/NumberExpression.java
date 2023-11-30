@@ -8,13 +8,14 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
+@Getter
 public final class NumberExpression extends Expression{
 
-    @Getter
     private final BigDecimal value;
+    private final APrimitive.APrimitiveType type;
 
     @Override
     public AType getType() {
-        return new APrimitive(APrimitive.APrimitiveType.DOUBLE);
+        return new APrimitive(type);
     }
 }

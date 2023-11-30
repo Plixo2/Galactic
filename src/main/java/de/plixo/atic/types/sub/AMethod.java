@@ -4,18 +4,20 @@ import de.plixo.atic.tir.Context;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.MethodOwner;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
 
 @AllArgsConstructor
+@Getter
 public class AMethod {
-    public final int modifier;
-    public final String name;
-    public final AType returnType;
-    public final List<AType> arguments;
-    public final MethodOwner owner;
+    private final int modifier;
+    private final String name;
+    private final AType returnType;
+    private final List<AType> arguments;
+    private final MethodOwner owner;
 
     @Override
     public String toString() {

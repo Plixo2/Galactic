@@ -13,7 +13,7 @@ import java.util.List;
 
 
 @AllArgsConstructor
-public final class HIRBlock implements HIRItem {
+public final class HIRTopBlock implements HIRItem {
 
     private final Region region;
     @Getter

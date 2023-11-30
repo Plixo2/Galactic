@@ -56,7 +56,7 @@ public enum Token {
     GREATER("<", "<", "(<)"),
     SMALLER(">", ">", "(>)"),
     HASH("#", "#", "(#)"),
-    NUMBER("number", "[0-9]", "[0-9\\.]+"),
+    NUMBER("number", "[0-9]", "[0-9\\.a-zA-Z]+"),
     STRING("string", "\"", "text"),
     KEYWORD("keyword", "\\w", "\\w+"),
     ASSIGN("=", "=", "="),

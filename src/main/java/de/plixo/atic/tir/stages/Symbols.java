@@ -1,11 +1,16 @@
 package de.plixo.atic.tir.stages;
 
+import com.sun.source.tree.BreakTree;
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.Scope;
+import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.expressions.*;
+import de.plixo.atic.tir.path.Package;
+import de.plixo.atic.tir.path.Unit;
+import de.plixo.atic.types.AType;
+import de.plixo.atic.types.sub.AField;
 
-public class Symbols implements Tree {
+public class Symbols implements Tree<Context> {
 
 
     @Override
@@ -17,8 +22,20 @@ public class Symbols implements Tree {
 
     @Override
     public Expression parseConstructExpression(ConstructExpression expression, Context context) {
-        var parsed = expression.arguments().stream().map(ref -> parse(ref, context)).toList();
-        return new ConstructExpression(expression.constructType(), parsed);
+
+        var parsed = expression.arguments().stream().map(ref -> {
+            context.pushScope();
+            var parse = parse(ref, context);
+            context.popScope();
+            return parse;
+        }).toList();
+
+        var type = expression.getType();
+        if (type instanceof AticClass aticClass) {
+            return new AticClassConstructExpression(aticClass, parsed);
+        } else {
+            throw new NullPointerException("not supported yet");
+        }
     }
 
     @Override
@@ -32,26 +49,82 @@ public class Symbols implements Tree {
     }
 
     @Override
+    public Expression parseBooleanExpression(BooleanExpression expression, Context context) {
+        return expression;
+    }
+
+    @Override
     public Expression parseDotNotation(DotNotation expression, Context context) {
+        context.pushScope();
         var parsed = parse(expression.object(), context);
-        if (parsed instanceof Path path) {
-            var newElement = path.path().add(expression.id());
-            //TODO check if valid class, otherwise return new path
-            return new Path(newElement);
-        }
-        return new DotNotation(parsed, expression.id());
+        context.popScope();
+
+        var id = expression.id();
+        return switch (parsed) {
+            case UnitExpression unitExpression -> {
+                var unit = unitExpression.unit();
+                var pathElement = unit.locate(id);
+                yield switch (pathElement) {
+                    case Unit subUnit -> new UnitExpression(subUnit);
+                    case Package aPackage -> new AticPackageExpression(aPackage);
+                    case AticClass aClass -> new AticClassExpression(aClass);
+                    case null, default -> {
+                        throw new NullPointerException(
+                                "Symbol " + id + " not found on unit " + unit.name());
+                    }
+                };
+            }
+            case AticPackageExpression packageExpression -> {
+                var thePackage = packageExpression.thePackage();
+                var pathElement = thePackage.locate(id);
+                yield switch (pathElement) {
+                    case Unit unit -> new UnitExpression(unit);
+                    case Package aPackage -> new AticPackageExpression(aPackage);
+                    case AticClass aClass -> new AticClassExpression(aClass);
+                    case null, default -> {
+                        throw new NullPointerException(
+                                "Symbol " + id + " not found on package " + thePackage.name());
+                    }
+                };
+            }
+            case AticClassExpression aticClassExpression -> {
+                var aticClass = aticClassExpression.theClass();
+                var possibleField = aticClass.getField(id, context);
+                if (possibleField != null) {
+                    yield new StaticFieldExpression(aticClass, possibleField);
+                }
+                var possibleMethods = aticClass.getMethods(id, context);
+                if (!possibleMethods.isEmpty()) {
+                    yield new StaticMethodExpression(aticClass, possibleMethods);
+                }
+                throw new NullPointerException("Symbol " + id + " not found on class " + aticClass.name());
+            }
+            default -> new DotNotation(parsed, id);
+        };
     }
 
     @Override
     public Expression parseCallNotation(CallNotation expression, Context context) {
+        context.pushScope();
         var parsed = parse(expression.object(), context);
-        var arguments = expression.arguments().stream().map(ref -> parse(ref, context)).toList();
+        context.popScope();
+
+        var arguments = expression.arguments().stream().map(ref -> {
+            context.pushScope();
+            var parse = parse(ref, context);
+            context.popScope();
+            return parse;
+        }).toList();
         return new CallNotation(parsed, arguments);
     }
 
     @Override
     public Expression parseBranchExpression(BranchExpression expression, Context context) {
+        context.pushScope();
         var parsedCondition = parse(expression.condition(), context);
+        context.popScope();
+
+
         context.pushScope(new Scope(context.scope()));
         var parsedThen = parse(expression.then(), context);
         context.popScope();
@@ -67,7 +140,7 @@ public class Symbols implements Tree {
 
     @Override
     public Expression parseBlockExpression(BlockExpression blockExpression, Context context) {
-        context.pushScope(new Scope(context.scope()));
+        context.pushScope();
         var parsed =
                 blockExpression.expressions().stream().map(ref -> parse(ref, context)).toList();
         context.popScope();
@@ -77,9 +150,20 @@ public class Symbols implements Tree {
     @Override
     public Expression parseVarDefExpression(VarDefExpression varDefExpression, Context context) {
         var scope = context.scope();
-        scope.addVariable(varDefExpression.name(), 0);
+        var name = varDefExpression.name();
+        var existingVariable = scope.getVariable(name);
+        if (existingVariable != null) {
+            throw new NullPointerException("Variable " + name + " already exists");
+        }
+        if (!isValidVariableName(name, context)) {
+            throw new NullPointerException("Variable " + name + " is not a valid name");
+        }
+        var variable = new Scope.Variable(name, 0, null, null);
+        scope.addVariable(variable);
+        context.pushScope();
         var parsed = parse(varDefExpression.expression(), context);
-        return new VarDefExpression(varDefExpression.name(), varDefExpression.hint(), parsed);
+        context.popScope();
+        return new VarDefExpression(name, varDefExpression.hint(), parsed, variable);
     }
 
     @Override
@@ -92,7 +176,19 @@ public class Symbols implements Tree {
         if (variable != null) {
             return new VarExpression(variable);
         } else {
-            return new Path(new ObjectPath(id));
+            var pathElement = context.locate(id);
+            return switch (pathElement) {
+                case Unit unit -> new UnitExpression(unit);
+                case Package aPackage -> new AticPackageExpression(aPackage);
+                case AticClass aClass -> new AticClassExpression(aClass);
+                case null, default -> {
+                    throw new NullPointerException("Symbol " + id + " not found");
+                }
+            };
         }
+    }
+
+    private static boolean isValidVariableName(String name, Context context) {
+        return !name.equals("true") && !name.equals("false") && context.locate(name) == null;
     }
 }

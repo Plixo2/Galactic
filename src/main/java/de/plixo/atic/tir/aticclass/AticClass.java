@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -27,7 +28,7 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 @RequiredArgsConstructor
 public class AticClass extends AClass implements PathElement {
     @Getter
-    private final String className;
+    private final String localName;
     @Getter
     private final Unit unit;
     @Getter
@@ -63,25 +64,25 @@ public class AticClass extends AClass implements PathElement {
     }
 
     private boolean signatureMatch(AMethod method, AMethod aticMethod, Context context) {
-        if (!method.name.equals(aticMethod.name)) {
+        if (!method.name().equals(aticMethod.name())) {
             return false;
         }
-        if (method.arguments.size() != aticMethod.arguments.size()) {
+        if (method.arguments().size() != aticMethod.arguments().size()) {
             return false;
         }
-        for (int i = 0; i < method.arguments.size(); i++) {
-            var aType = method.arguments.get(i);
-            var aticSide = aticMethod.arguments.get(i);
+        for (int i = 0; i < method.arguments().size(); i++) {
+            var aType = method.arguments().get(i);
+            var aticSide = aticMethod.arguments().get(i);
             if (!AType.isSame(aType, aticSide)) {
                 return false;
             }
         }
-        return AType.isSame(method.returnType, aticMethod.returnType);
+        return AType.isSame(method.returnType(), aticMethod.returnType());
     }
 
     @Override
     public ObjectPath path() {
-        return unit.toObjectPath().add(className);
+        return unit.toObjectPath().add(localName);
     }
 
     @Override
@@ -111,17 +112,19 @@ public class AticClass extends AClass implements PathElement {
     @Override
     public @Nullable AField getField(String name, Context context) {
         for (var field : fields) {
-            if (field.name.equals(name)) {
+            if (field.name().equals(name)) {
                 return field;
             }
         }
-        return null;
+        return superClass.getField(name, context);
     }
 
     @Override
     public MethodCollection getMethods(String name, Context context) {
         var aMethods = methods.stream().map(MethodImplementation::asMethod)
-                .filter(ref -> ref.name.equals(name)).toList();
+                .filter(ref -> ref.name().equals(name))
+//                .filter(ref -> Modifier.isPublic(ref.modifier()))
+                .toList();
         var methods = new MethodCollection(name, aMethods);
         if (superClass != null) {
             methods = methods.join(superClass.getMethods(name, context));
@@ -144,9 +147,11 @@ public class AticClass extends AClass implements PathElement {
     public void addAllFieldsConstructor(Context context) {
         var params = new ArrayList<Parameter>();
         for (var field : this.fields) {
-            params.add(new Parameter(field.name, field.type));
+            params.add(new Parameter(field.name(), field.type()));
         }
+//        System.out.println(methods.size());
         addMethod(new AticMethod(this, ACC_PUBLIC, "<init>", params, new AVoid(), null), context);
+//        System.out.println(methods.size());
     }
 
     public Set<AMethod> implementationLeft() {
@@ -162,6 +167,10 @@ public class AticClass extends AClass implements PathElement {
         }
 
         return set;
+    }
+
+    public String name() {
+        return unit().name() + "." + localName();
     }
 
 

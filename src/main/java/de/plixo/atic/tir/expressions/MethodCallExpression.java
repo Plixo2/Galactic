@@ -1,26 +1,26 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.tir.MethodCollection;
-import de.plixo.atic.types.AClass;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.sub.AMethod;
-import de.plixo.atic.tir.Context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-public final class ConstructExpression extends Expression {
+@Getter
+public final class MethodCallExpression extends Expression{
 
-    @Getter
-    private final AType constructType;
-
-    @Getter
+    private final MethodSource source;
+    private final AMethod method;
     private final List<Expression> arguments;
 
     @Override
     public AType getType() {
-        return constructType;
+        return method.returnType();
+    }
+
+    public sealed interface MethodSource permits StaticMethodExpression, GetMethodExpression {
+
     }
 }

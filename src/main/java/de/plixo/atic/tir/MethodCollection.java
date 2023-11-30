@@ -9,10 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+@Getter
 public class MethodCollection {
-    @Getter
     private final String name;
-    @Getter
     private final List<AMethod> methods;
 
     public MethodCollection(String name, List<AMethod> methods) {
@@ -24,15 +23,6 @@ public class MethodCollection {
     public MethodCollection(String name, AMethod method) {
         this.name = name;
         this.methods = List.of(method);
-    }
-
-    public @Nullable AMethod find(List<AType> signature, Context context) {
-        for (AMethod method : methods) {
-            if (method.isCallable(signature, context)) {
-                return method;
-            }
-        }
-        return null;
     }
 
     public MethodCollection join(@Nullable MethodCollection method) {
@@ -51,5 +41,15 @@ public class MethodCollection {
 
     public MethodCollection filter(Predicate<AMethod> predicate) {
         return new MethodCollection(this.name, this.methods.stream().filter(predicate).toList());
+    }
+
+    public @Nullable AMethod findBestMatch(List<AType> types, Context context) {
+        for (AMethod method : methods) {
+            if (method.isCallable(types, context)) {
+                return method;
+            }
+        }
+        return null;
+
     }
 }

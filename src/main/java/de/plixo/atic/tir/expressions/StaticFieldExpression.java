@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.types.AClass;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.sub.AField;
@@ -10,17 +11,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public final class StaticFieldExpression extends Expression {
     @Getter
-    private final AClass aClass;
+    private final AticClass aClass;
     @Getter
     private final AField field;
 
-    @Override
-    public Expression dotNotation(String id, Context context) {
-        return standartDotExpression(field.type,id,context);
-    }
 
     @Override
     public AType getType() {
-        return field.type;
+        return field.type();
     }
 }

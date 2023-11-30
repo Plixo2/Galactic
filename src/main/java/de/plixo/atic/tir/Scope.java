@@ -1,8 +1,11 @@
 package de.plixo.atic.tir;
 
-import lombok.AccessLevel;
+import de.plixo.atic.types.AType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -28,18 +31,23 @@ public class Scope {
         return null;
     }
 
-    public Variable addVariable(String name, int type) {
-        var variable = new Variable(name, type, null);
+
+
+    public void addVariable(Variable variable) {
         variables.add(variable);
-        return variable;
     }
 
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor
     public static class Variable {
         @Getter
         private final String name;
         @Getter
-        private final int variableType;
+        private final int flags;
+
+        @Getter
+        @Setter
+        @Accessors(fluent = false)
+        private @Nullable AType type;
 
         private final @Nullable Variable outsideClosure;
     }

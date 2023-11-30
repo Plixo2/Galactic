@@ -3,13 +3,15 @@ package de.plixo.atic.types.sub;
 import de.plixo.atic.types.AClass;
 import de.plixo.atic.types.AType;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public class AField {
-    public final int modifier;
-    public final String name;
-    public final AType type;
-    public final AClass owner;
+    private final int modifier;
+    private final String name;
+    private final AType type;
+    private final AClass owner;
 
     @Override
     public String toString() {

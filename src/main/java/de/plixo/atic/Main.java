@@ -5,8 +5,6 @@ import de.plixo.atic.lexer.Lexer;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class Main {
