@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.Context;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.AVoid;
 import lombok.Getter;
@@ -15,7 +16,15 @@ public final class BranchExpression extends Expression {
 
 
     @Override
-    public AType getType() {
-        return new AVoid();
+    public AType getType(Context context) {
+        if (elseExpression == null) {
+            return new AVoid();
+        }
+        var left = then.getType(context);
+        var right = elseExpression.getType(context);
+        if (!AType.isAssignableFrom(left, right, context)) {
+            return new AVoid();
+        }
+        return left;
     }
 }

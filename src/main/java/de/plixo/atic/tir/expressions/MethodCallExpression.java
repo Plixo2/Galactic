@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.Context;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.sub.AMethod;
 import lombok.Getter;
@@ -16,7 +17,7 @@ public final class MethodCallExpression extends Expression{
     private final List<Expression> arguments;
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return method.returnType();
     }
 

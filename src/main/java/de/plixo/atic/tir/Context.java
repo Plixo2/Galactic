@@ -4,16 +4,10 @@ import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.PathElement;
 import de.plixo.atic.tir.path.Unit;
 import de.plixo.atic.types.AClass;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
-import de.plixo.atic.types.classes.JVMClass;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 
-import java.util.Objects;
 import java.util.Stack;
 
 public class Context {
@@ -51,17 +45,13 @@ public class Context {
     public @Nullable PathElement locate(String name) {
         return unit.locate(name);
     }
+    public @Nullable AClass locateImported(String name) {
+        return unit.locateImported(name);
+    }
 
     @SneakyThrows
     public @Nullable AClass getClass(ObjectPath objectPath) {
-        var stream = Context.class.getResourceAsStream(objectPath.asJVMPath());
-        if (stream != null) {
-            ClassNode cn = new ClassNode();
-            ClassReader cr = new ClassReader(stream);
-            cr.accept(cn, 0);
-            return new JVMClass(cn.name);
-        }
-        return unit.locateClass(objectPath, this);
+        return unit.locateClass(objectPath, this, true);
     }
 
 }

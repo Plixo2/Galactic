@@ -1,22 +1,20 @@
 package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.APrimitive;
 import de.plixo.atic.types.AType;
+import de.plixo.atic.types.AVoid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.math.BigDecimal;
-
 @RequiredArgsConstructor
 @Getter
-public final class NumberExpression extends Expression{
+public final class AssignExpression extends Expression{
 
-    private final BigDecimal value;
-    private final APrimitive.APrimitiveType type;
+    private final Expression left;
+    private final Expression right;
 
     @Override
     public AType getType(Context context) {
-        return new APrimitive(type);
+        return new AVoid();
     }
 }

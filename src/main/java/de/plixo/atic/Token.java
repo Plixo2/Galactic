@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public enum Token {
     COMMENT(".comment", "\\/\\/", "\\/\\/.*"),
     WHITESPACE("", "\\s", "\\s*"),
-    USE("use", "use\\b", "use"),
+    IMPORT("import", "import\\b", "import"),
     CLASS("class", "class\\b", "class"),
     INTERFACE("interface", "interface\\b", "interface"),
     VOID("void","void\\b","void"),

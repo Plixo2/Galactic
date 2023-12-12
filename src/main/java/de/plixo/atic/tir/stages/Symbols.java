@@ -1,14 +1,11 @@
 package de.plixo.atic.tir.stages;
 
-import com.sun.source.tree.BreakTree;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Scope;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.expressions.*;
 import de.plixo.atic.tir.path.Package;
 import de.plixo.atic.tir.path.Unit;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.sub.AField;
 
 public class Symbols implements Tree<Context> {
 
@@ -21,6 +18,17 @@ public class Symbols implements Tree<Context> {
     }
 
     @Override
+    public Expression parseAssign(AssignExpression expression, Context context) {
+        var left = parse(expression.left(), context);
+        var value = parse(expression.right(), context);
+        if (left instanceof VarExpression varExpression) {
+            return new LocalVariableAssign(varExpression.variable(), value);
+        } else {
+            throw new NullPointerException("not supported yet");
+        }
+    }
+
+    @Override
     public Expression parseConstructExpression(ConstructExpression expression, Context context) {
 
         var parsed = expression.arguments().stream().map(ref -> {
@@ -30,7 +38,8 @@ public class Symbols implements Tree<Context> {
             return parse;
         }).toList();
 
-        var type = expression.getType();
+        //TODO: Change from getType to direct test
+        var type = expression.getType(context);
         if (type instanceof AticClass aticClass) {
             return new AticClassConstructExpression(aticClass, parsed);
         } else {
@@ -97,7 +106,7 @@ public class Symbols implements Tree<Context> {
                 if (!possibleMethods.isEmpty()) {
                     yield new StaticMethodExpression(aticClass, possibleMethods);
                 }
-                throw new NullPointerException("Symbol " + id + " not found on class " + aticClass.name());
+                throw new NullPointerException("Symbol " + id + " not found on class " + aticClass);
             }
             default -> new DotNotation(parsed, id);
         };
@@ -182,6 +191,10 @@ public class Symbols implements Tree<Context> {
                 case Package aPackage -> new AticPackageExpression(aPackage);
                 case AticClass aClass -> new AticClassExpression(aClass);
                 case null, default -> {
+                    var aClass = context.locateImported(id);
+                    if (aClass != null) {
+                        yield new AticClassExpression(aClass);
+                    }
                     throw new NullPointerException("Symbol " + id + " not found");
                 }
             };

@@ -36,8 +36,13 @@ public final class HIRNumber implements HIRExpression {
             };
 
         } else {
-            value = new BigDecimal(number);
-            type = APrimitive.APrimitiveType.DOUBLE;
+            if (number.contains(".")) {
+                value = new BigDecimal(number);
+                type = APrimitive.APrimitiveType.DOUBLE;
+            } else {
+                value = new BigDecimal(number);
+                type = APrimitive.APrimitiveType.INT;
+            }
         }
     }
 

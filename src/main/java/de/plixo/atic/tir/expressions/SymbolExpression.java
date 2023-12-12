@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.Context;
 import de.plixo.atic.types.AType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ public final class SymbolExpression extends Expression {
 
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         throw new NullPointerException("Not implemented");
     }
 }

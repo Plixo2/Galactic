@@ -17,16 +17,16 @@ public final class UnaryExpression extends Expression {
 
     @Override
     public Expression dotNotation(String id, Context context) {
-        return standartDotExpression(getType(), id, context);
+        return standartDotExpression(getType(context), id, context);
     }
 
     @Override
-    public AType getType() {
-        return validate();
+    public AType getType(Context context) {
+        return validate(context);
     }
 
-    public AType validate() {
-        var type = object.getType();
+    public AType validate(Context context) {
+        var type = object.getType(context);
         if ((!(type instanceof APrimitive primitive))) {
             throw new NullPointerException("unary only for primitives " + type);
         }

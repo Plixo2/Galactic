@@ -71,6 +71,7 @@ HIRIdentifier
 HIRNumber
 HIRString
 HIRVarDefinition
+HIRAssign
 ```
 
 build classes and function shells
@@ -89,6 +90,7 @@ DotNotation
 CallNotation
 SymbolExpression
 BlockExpression
+AssignExpression
 ```
 
 Symbol Stage:
@@ -103,13 +105,14 @@ StringExpression
 NumberExpression
 DotNotation -> DotNotation, StaticFieldExpression, StaticMethodExpression,
                (AticPackageExpression, AticClassExpression, UnitExpression -> StaticMethodExpression, StaticFieldExpression)
-
+AticClassExpression -> StaticMethodExpression, StaticFieldExpression
 CallNotation
 BranchExpression
 BlockExpression
 VarDefExpression
 SymbolExpression-> BooleanExpression, VarExpression, 
                     (AticClassExpression, AticPackageExpression, UnitExpression -> StaticMethodExpression, StaticFieldExpression)
+AssignExpression -> LocalVariableAssign
 ```
 
 Infer Stage: 
@@ -123,9 +126,10 @@ Infer Stage:
 ```
 StringExpression
 NumberExpression
+LocalVariableAssign
 DotNotation -> GetFieldExpression, GetMethodExpression
 CallNotation -> MethodCallExpression
-GetMethodExpression -> MethodCallExpression, GetMethodExpression
+GetMethodExpression -> MethodCallExpression
 BranchExpression
 BlockExpression
 VarDefExpression
@@ -144,6 +148,7 @@ Check Stage:
 
 ```
 StringExpression
+LocalVariableAssign
 NumberExpression
 BooleanExpression
 GetFieldExpression

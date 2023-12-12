@@ -3,6 +3,7 @@ package de.plixo.atic.tir;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.sub.AMethod;
 import lombok.Getter;
+import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Getter
+@ToString
 public class MethodCollection {
     private final String name;
     private final List<AMethod> methods;

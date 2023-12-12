@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.MethodCollection;
 import de.plixo.atic.types.AType;
 import lombok.Getter;
@@ -14,7 +15,7 @@ public final class GetMethodExpression extends Expression
 
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         //TODO caller has to check for this case
         throw new NullPointerException("caller has to check for this case");
     }

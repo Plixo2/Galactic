@@ -54,11 +54,12 @@ public class HIRItemParsing {
         var importTypeNode = node.get("importType");
         var dotWordChain = node.get("dotWordChain");
         var wordList = new DotWordChain(dotWordChain);
+        var name = node.getID();
         String importType = null;
         if (importTypeNode.has("id")) {
             importType = importTypeNode.getID();
         }
-        return new HIRImport(dotWordChain.region(), importType, wordList);
+        return new HIRImport(dotWordChain.region(),name, importType, wordList.asObjectPath());
     }
 
 

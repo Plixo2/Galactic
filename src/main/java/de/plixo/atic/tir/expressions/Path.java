@@ -14,7 +14,7 @@ public final class Path extends Expression {
 
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return new AVoid();
     }
 }

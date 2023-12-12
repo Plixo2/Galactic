@@ -20,7 +20,7 @@ public final class ConstructExpression extends Expression {
     private final List<Expression> arguments;
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return constructType;
     }
 }

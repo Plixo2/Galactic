@@ -1,19 +1,14 @@
 package de.plixo.atic.tir.parsing;
 
 import de.plixo.atic.Language;
-import de.plixo.atic.hir.expressions.HIRBlock;
-import de.plixo.atic.hir.items.HIRClass;
-import de.plixo.atic.hir.items.HIRTopBlock;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Scope;
 import de.plixo.atic.tir.TypeContext;
-import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.tir.aticclass.Parameter;
-import de.plixo.atic.tir.path.CompileRoot;
-import de.plixo.atic.tir.path.Unit;
 import de.plixo.atic.types.AClass;
+import de.plixo.atic.types.AType;
 import de.plixo.atic.types.sub.AField;
 
 import static de.plixo.atic.tir.Scope.INPUT;
@@ -21,33 +16,6 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 public class TIRClassParsing {
 
-
-    public static void parse(Unit unit, CompileRoot root, Language language) {
-        for (var hirItem : unit.getHirItems()) {
-            if (hirItem instanceof HIRClass hirClass) {
-                var parsed = TIRClassParsing.parseClass(unit, hirClass);
-                unit.addClass(parsed);
-            } else if (hirItem instanceof HIRTopBlock block) {
-                var hirBlock = new HIRBlock(block.expressions());
-                var aticBlock = new AticBlock(unit, hirBlock);
-                unit.addBlock(aticBlock);
-            }
-        }
-    }
-
-
-    public static void parseBlock(Unit unit, CompileRoot root, AticBlock block, Language language) {
-        var context = new TypeContext(unit, root);
-        var base = TIRExpressionParsing.parse(block.hirBlock(), context);
-        base = language.symbolsStage().parse(base, context);
-        base = language.inferStage().parse(base, context);
-        language.checkStage().parse(base, context);
-
-    }
-
-    public static AticClass parseClass(Unit unit, HIRClass hirClass) {
-        return new AticClass(hirClass.className(), unit, hirClass);
-    }
 
     public static void fillSuperclasses(AticClass aticClass, Context context) {
         var hirClass = aticClass.hirClass();
@@ -80,8 +48,10 @@ public class TIRClassParsing {
 
     public static void fillMethodShells(AticClass aticClass, Context context) {
         for (var method : aticClass.hirClass().methods()) {
-            var parameters = method.parameters().stream().map(ref -> new Parameter(ref.name(),
-                    TIRTypeParsing.parse(ref.type(), context))).toList();
+            var parameters = method.parameters().stream().map(ref -> {
+                var parse = TIRTypeParsing.parse(ref.type(), context);
+                return new Parameter(ref.name(), parse);
+            }).toList();
             var returnType = TIRTypeParsing.parse(method.returnType(), context);
             var aticMethod = new AticMethod(aticClass, ACC_PUBLIC, method.methodName(), parameters,
                     returnType, method);
@@ -93,12 +63,12 @@ public class TIRClassParsing {
                                              Language language) {
         for (var method : aticClass.methods()) {
             var aticMethod = method.aticMethod();
+            context.pushScope();
             aticMethod.parameters().forEach(ref -> {
                 context.scope()
                         .addVariable(new Scope.Variable(ref.name(), INPUT, ref.type(), null));
             });
             context.scope().addVariable(new Scope.Variable("this", INPUT, aticClass, null));
-
 
             var hirMethod = aticMethod.hirMethod();
             if (hirMethod != null) {
@@ -106,7 +76,16 @@ public class TIRClassParsing {
                 aticMethod.body = language.symbolsStage().parse(aticMethod.body, context);
                 aticMethod.body = language.inferStage().parse(aticMethod.body, context);
                 language.checkStage().parse(aticMethod.body, context);
+                var expected = aticMethod.returnType();
+                assert aticMethod.body != null;
+                var found = aticMethod.body.getType(context);
+                if (!AType.isAssignableFrom(expected, found, context)) {
+                    throw new NullPointerException(
+                            "method return type doesnt match, expected " + expected +
+                                    ", but found " + found);
+                }
             }
+            context.popScope();
         }
     }
 
@@ -120,4 +99,14 @@ public class TIRClassParsing {
             throw new NullPointerException("functions to implement left " + builder);
         }
     }
+
+//    public static void testReturnTypes(AticClass aClass) {
+//        for (MethodImplementation method : aClass.methods()) {
+//            var aticMethod = method.aticMethod();
+//            var expected = aticMethod.returnType();
+//
+//            if ()
+//
+//        }
+//    }
 }

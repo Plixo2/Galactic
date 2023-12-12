@@ -1,5 +1,6 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Scope;
 import de.plixo.atic.types.AType;
 import de.plixo.atic.types.AVoid;
@@ -16,7 +17,7 @@ public final class VarDefExpression extends Expression {
     private final @Nullable Scope.Variable variable;
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return new AVoid();
     }
 }

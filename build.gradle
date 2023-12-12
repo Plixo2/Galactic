@@ -23,6 +23,11 @@ dependencies {
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
 
+    implementation 'net.bytebuddy:byte-buddy:1.14.10'
+//    implementation 'net.bytebuddy:byte-buddy-agent:1.7.1'
+    implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.14.10'
+
+
     implementation 'org.ow2.asm:asm:9.5'
     implementation 'org.ow2.asm:asm-commons:9.5'
     implementation 'org.ow2.asm:asm-util:9.5'

@@ -1,0 +1,5 @@
+
+class Some {
+    fn exists() -> boolean = true
+    fn getCount() -> int = 0
+}

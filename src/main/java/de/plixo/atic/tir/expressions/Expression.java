@@ -7,12 +7,13 @@ import de.plixo.atic.types.AType;
 import java.util.List;
 
 public sealed abstract class Expression
-        permits ArrayConstructExpression, AticClassConstructExpression, AticClassExpression,
-        AticPackageExpression, BlockExpression, BooleanExpression, BranchExpression, CallNotation,
-        ClassExpression, ConstructExpression, DotNotation, GetFieldExpression,
-        InstanceCreationExpression, MethodCallExpression, GetMethodExpression, NumberExpression, Path,
-        StaticFieldExpression, StaticMethodExpression, StringExpression, SymbolExpression,
-        UnaryExpression, UnitExpression, VarDefExpression, VarExpression {
+        permits ArrayConstructExpression, AssignExpression, AticClassConstructExpression,
+        AticClassExpression, AticPackageExpression, BlockExpression, BooleanExpression,
+        BranchExpression, CallNotation, ClassExpression, ConstructExpression, DotNotation,
+        FieldExpression, GetMethodExpression, InstanceCreationExpression, LocalVariableAssign,
+        MethodCallExpression, NumberExpression, Path, StaticFieldExpression, StaticMethodExpression,
+        StringExpression, SymbolExpression, UnaryExpression, UnitExpression, VarDefExpression,
+        VarExpression {
 
     public Expression dotNotation(String id, Context context) {
         throw new NullPointerException("dot not implemented for type " + this.getClass().getName());
@@ -27,7 +28,7 @@ public sealed abstract class Expression
     public Expression standartDotExpression(AType type, String id, Context context) {
         var aField = type.getField(id, context);
         if (aField != null) {
-            return new GetFieldExpression(this, aField);
+            return new FieldExpression(this, aField);
         } else {
             var methods = type.getMethods(id, context);
             if (methods.isEmpty()) {
@@ -37,5 +38,5 @@ public sealed abstract class Expression
         }
     }
 
-    public abstract AType getType();
+    public abstract AType getType(Context context);
 }

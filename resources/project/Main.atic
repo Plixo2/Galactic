@@ -1,21 +1,63 @@
+import Some Other.Some
+import @java Boolean java.lang.Boolean
+import @java System java.lang.System
 
-class Test {
+
+class Test extends Some {
     field: java.lang.String
     fn make(w: int) -> java.lang.String = {
         this.field
+        "hello"
+    }
+    fn unwrap(bool: Boolean) -> boolean = {
+        bool.booleanValue()
+    }
+    fn wrap(bool: boolean) -> Boolean = {
+        Boolean.valueOf(bool)
+    }
+    fn wrapAndUnwrap(bool: boolean) -> boolean = {
+        this.unwrap(this.wrap(bool))
+    }
+    fn unwrapAndWrap(bool: Boolean) -> Boolean = {
+        this.wrap(this.unwrap(bool))
     }
 }
 
 
 {
+
+    var in: Main.Test = new Main.Test { "hello" }
+    var c: boolean = in.exists()
+
+    var a: Some = new Some { }
+    a = new Some { }
+
+    var case: int = if a.exists() {
+        a.getCount()
+    } else {
+        a = new Some { }
+        200
+    }
+    System.out.println(case)
+
+    var unwrapped: boolean = new Main.Test { "hello" }.unwrap(Boolean.valueOf("true"))
+
+    var bool: Boolean = Boolean.valueOf("false")
+    System.out.println(bool)
+
+    bool = Boolean.valueOf("true")
+
     var hello: java.lang.String = "Hello"
-    var b: boolean = false
+    var b: Boolean = Boolean.valueOf(hello)
     hello.equalsIgnoreCase("false")
+
     if true {
-        //var other: java.lang.Boolean = java.lang.Boolean.valueOf("true")
-        //b.compareTo(other)
-        //var other2: java.lang.Boolean = java.lang.Boolean.valueOf(false)
-        //b.compareTo(other2)
+        var other: java.lang.Boolean = Boolean.valueOf: "true"
+        b.compareTo(other)
+        var other2: java.lang.Boolean = Boolean.valueOf: false
+        b.compareTo(other2)
+    } else if new Main.Test { "hello" }.unwrap(b) {
+
     } else {
         var test: Main.Test = new Main.Test { "hello" }
         if test.field.isEmpty() {

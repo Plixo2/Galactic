@@ -15,7 +15,7 @@ public final class StringExpression extends Expression {
     private final String value;
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return new JVMClass("java.lang.String");
     }
 }

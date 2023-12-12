@@ -13,6 +13,7 @@ import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.parsing.TIRClassParsing;
+import de.plixo.atic.tir.parsing.TIRUnitParsing;
 import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.stages.CheckFlow;
 import de.plixo.atic.tir.stages.Check;
@@ -70,8 +71,12 @@ public class Language {
             var hirItems = Objects.requireNonNull(hir2.mapping.get(pathUnit),
                     "missing hir items " + "from pathUnit " + pathUnit);
             unit.setHirItems(hirItems);
-            TIRClassParsing.parse(unit, root, this);
+            TIRUnitParsing.parse(unit, root);
         }
+        for (var unit : units) {
+            TIRUnitParsing.parseImports(unit, root);
+        }
+
         var classes = new ArrayList<AticClass>();
         for (var unit : units) {
             classes.addAll(unit.classes());
@@ -81,31 +86,32 @@ public class Language {
             blocks.addAll(unit.blocks());
         }
 
+
+
         for (var aClass : classes) {
             var context = new Context(aClass.unit(), root);
             TIRClassParsing.fillSuperclasses(aClass, context);
         }
 
-
         //types are known here
-        classes.parallelStream().forEach(aClass -> {
+        classes.stream().forEach(aClass -> {
             var context = new Context(aClass.unit(), root);
             TIRClassParsing.fillFields(aClass, context);
         });
-        classes.parallelStream().forEach(aClass -> {
+        classes.stream().forEach(aClass -> {
             var context = new Context(aClass.unit(), root);
             TIRClassParsing.fillMethodShells(aClass, context);
         });
-        classes.parallelStream().forEach(aClass -> {
+        classes.stream().forEach(aClass -> {
             var context = new Context(aClass.unit(), root);
             aClass.addAllFieldsConstructor(context);
         });
-        classes.parallelStream().forEach(aClass -> {
+        classes.stream().forEach(aClass -> {
             var context = new TypeContext(aClass.unit(), root);
             TIRClassParsing.fillMethodExpressions(aClass, context, this);
         });
-        blocks.parallelStream().forEach(block -> {
-            TIRClassParsing.parseBlock(block.unit(), root, block, this);
+        blocks.stream().forEach(block -> {
+            TIRUnitParsing.parseBlock(block.unit(), root, block, this);
         });
 
         for (var aClass : classes) {

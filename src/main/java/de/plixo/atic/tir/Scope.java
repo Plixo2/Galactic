@@ -1,10 +1,7 @@
 package de.plixo.atic.tir;
 
 import de.plixo.atic.types.AType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +35,7 @@ public class Scope {
     }
 
     @AllArgsConstructor
+    @ToString
     public static class Variable {
         @Getter
         private final String name;

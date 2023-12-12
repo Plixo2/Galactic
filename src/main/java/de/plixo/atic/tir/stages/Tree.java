@@ -27,7 +27,7 @@ public interface Tree<C extends Context> {
                     parseMethodCallExpression(methodCallExpression, context);
             case NumberExpression numberExpression ->
                     parseNumberExpression(numberExpression, context);
-            case GetFieldExpression fieldExpression ->
+            case FieldExpression fieldExpression ->
                     parseObjectFieldExpression(fieldExpression, context);
             case GetMethodExpression methodExpression ->
                     parseObjectMethodExpression(methodExpression, context);
@@ -53,7 +53,20 @@ public interface Tree<C extends Context> {
             case UnitExpression unitExpression -> parseUnitExpression(unitExpression, context);
             case InstanceCreationExpression instanceCreationExpression ->
                     parseInstanceCreationExpression(instanceCreationExpression, context);
+            case LocalVariableAssign localVariableAssign ->
+                    parseLocalVariableAssign(localVariableAssign, context);
+            case AssignExpression assignExpression ->
+                    parseAssign(assignExpression, context);
         }, expression.getClass().getSimpleName());
+    }
+    default Expression parseAssign(AssignExpression expression,
+                                                C context) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseLocalVariableAssign(LocalVariableAssign expression,
+                                                       C context) {
+        return defaultBehavior(expression);
     }
 
     default Expression parseInstanceCreationExpression(InstanceCreationExpression expression,
@@ -124,7 +137,7 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseObjectFieldExpression(GetFieldExpression expression, C context) {
+    default Expression parseObjectFieldExpression(FieldExpression expression, C context) {
         return defaultBehavior(expression);
     }
 

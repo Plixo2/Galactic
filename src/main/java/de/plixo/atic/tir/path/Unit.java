@@ -3,17 +3,22 @@ package de.plixo.atic.tir.path;
 import de.plixo.atic.files.PathEntity;
 import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.tir.Context;
+import de.plixo.atic.tir.Import;
 import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
-import de.plixo.atic.tir.expressions.BlockExpression;
+import de.plixo.atic.types.AClass;
 import de.plixo.atic.types.MethodOwner;
+import de.plixo.atic.types.classes.JVMClass;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +39,9 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     @Getter
     private final List<AticBlock> blocks = new ArrayList<>();
 
+    @Getter
+    private final List<Import> imports = new ArrayList<>();
+
     private final List<AticMethod> staticMethods = new ArrayList<>();
 
     @Setter
@@ -44,6 +52,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     public void addClass(AticClass aticClass) {
         this.classes.add(aticClass);
     }
+
     public void addBlock(AticBlock block) {
         this.blocks.add(block);
     }
@@ -69,6 +78,16 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
         return List.of(this);
     }
 
+
+    public @Nullable AClass locateImported(String name) {
+        for (var anImport : imports) {
+            if (anImport.alias().equals(name)) {
+                return anImport.importedClass();
+            }
+        }
+        return null;
+    }
+
     @Override
     public @Nullable PathElement locate(String name) {
         for (var aClass : classes) {
@@ -79,7 +98,37 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
         return null;
     }
 
-    public @Nullable AticClass locateClass(ObjectPath path, Context context) {
+    public @Nullable AClass locateClass(ObjectPath path, Context context, boolean useImports) {
+        if (path.names().size() == 1 && useImports) {
+            var name = path.names().get(0);
+            for (var anImport : imports) {
+                if (anImport.alias().equals(name)) {
+                    return anImport.importedClass();
+                }
+            }
+        }
+        var jvmClass = locateJVMClass(path);
+        if (jvmClass != null) {
+            return jvmClass;
+        }
+        return locateAticClass(path, context);
+    }
+
+
+    @SneakyThrows
+    public @Nullable JVMClass locateJVMClass(ObjectPath objectPath) {
+        var stream = Context.class.getResourceAsStream(objectPath.asJVMPath());
+        if (stream != null) {
+            ClassNode cn = new ClassNode();
+            ClassReader cr = new ClassReader(stream);
+            cr.accept(cn, 0);
+            return new JVMClass(cn.name);
+        }
+        return null;
+    }
+
+    public @Nullable AticClass locateAticClass(ObjectPath path, Context context) {
+
         CompileRoot prev = context.root();
         var iterator = path.names().iterator();
         while (iterator.hasNext()) {
@@ -108,4 +157,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     }
 
 
+    public void addImport(String name, AClass aticClass) {
+        imports.add(new Import(name, aticClass));
+    }
 }

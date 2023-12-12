@@ -4,7 +4,6 @@ import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.expressions.*;
 import de.plixo.atic.types.APrimitive;
 import de.plixo.atic.types.AType;
-import de.plixo.atic.types.sub.AMethod;
 
 import java.lang.reflect.Modifier;
 
@@ -14,6 +13,18 @@ public class Check implements Tree<Context> {
         throw new NullPointerException(
                 "Expression of type " + expression.getClass().getSimpleName() +
                         " not implemented for CheckTypes stage");
+    }
+
+    @Override
+    public Expression parseLocalVariableAssign(LocalVariableAssign expression, Context context) {
+
+        var parsed = parse(expression.expression(), context);
+        var variable = expression.variable();
+        assert variable != null;
+        if (!AType.isAssignableFrom(variable.getType(), parsed.getType(context), context)) {
+            throw new NullPointerException("variable type does not match expression type");
+        }
+        return expression;
     }
 
     @Override
@@ -32,7 +43,7 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseObjectFieldExpression(GetFieldExpression expression, Context context) {
+    public Expression parseObjectFieldExpression(FieldExpression expression, Context context) {
         parse(expression.object(), context);
         var modifier = expression.field().modifier();
         if (!Modifier.isPublic(modifier)) {
@@ -57,7 +68,7 @@ public class Check implements Tree<Context> {
         }
         for (int i = 0; i < expected.size(); i++) {
             var expectedType = expected.get(i);
-            var foundType = found.get(i).getType();
+            var foundType = found.get(i).getType(context);
             if (!AType.isAssignableFrom(expectedType, foundType, context)) {
                 throw new NullPointerException("method call arguments dont match");
             }
@@ -76,7 +87,7 @@ public class Check implements Tree<Context> {
         parse(expression.condition(), context);
         parse(expression.then(), context);
 
-        var found = expression.condition().getType();
+        var found = expression.condition().getType(context);
         if (!AType.isAssignableFrom(APrimitive.BOOLEAN, found, context)) {
             throw new NullPointerException("condition is not boolean, its " + found);
         }
@@ -99,9 +110,10 @@ public class Check implements Tree<Context> {
 
         if (expression.hint() != null) {
             var expected = expression.hint();
-            var found = expression.expression().getType();
+            var found = expression.expression().getType(context);
             if (!AType.isAssignableFrom(expected, found, context)) {
-                throw new NullPointerException("hint does not match expression, expected " + expected + " found " + found);
+                throw new NullPointerException(
+                        "hint does not match expression, expected " + expected + " found " + found);
             }
         }
 
@@ -139,7 +151,7 @@ public class Check implements Tree<Context> {
         }
         for (int i = 0; i < expected.size(); i++) {
             var expectedType = expected.get(i);
-            var foundType = found.get(i).getType();
+            var foundType = found.get(i).getType(context);
             if (!AType.isAssignableFrom(expectedType, foundType, context)) {
                 throw new NullPointerException("constructor call arguments dont match");
             }

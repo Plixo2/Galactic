@@ -43,6 +43,13 @@ public class HIRExpressionParsing {
             currentExpression = parseMember(currentExpression, memberNode);
         }
 
+        var assignOpt = node.get("assignOpt");
+        if (assignOpt.has("expression")) {
+            var expression = assignOpt.get("expression");
+            var value = HIRExpressionParsing.parse(expression);
+            return new HIRAssign(currentExpression, value);
+        }
+
         return currentExpression;
     }
 

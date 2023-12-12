@@ -4,7 +4,6 @@ import de.plixo.atic.hir.expressions.*;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.expressions.*;
 
-import java.util.List;
 import java.util.Objects;
 
 public class TIRExpressionParsing {
@@ -20,11 +19,17 @@ public class TIRExpressionParsing {
             case HIRNumber hirNumber -> parseNumber(hirNumber, context);
             case HIRString hirString -> parseStringExpression(hirString, context);
             case HIRVarDefinition hirVarDefinition -> parseVarDefinition(hirVarDefinition, context);
+            case HIRAssign hirAssign -> parseConstructExpression(hirAssign, context);
         }, expression.getClass().getName());
     }
 
+    private static AssignExpression parseConstructExpression(HIRAssign hirAssign, Context context) {
+        return new AssignExpression(parse(hirAssign.left(), context),
+                parse(hirAssign.right(), context));
+    }
 
-    private static ConstructExpression parseConstructExpression(HIRConstruct hirConstruct, Context context) {
+    private static ConstructExpression parseConstructExpression(HIRConstruct hirConstruct,
+                                                                Context context) {
         var type = TIRTypeParsing.parse(hirConstruct.hirType(), context);
         var arguments =
                 hirConstruct.parameters().stream().map(ref -> parse(ref.value(), context)).toList();
@@ -46,7 +51,8 @@ public class TIRExpressionParsing {
         return new BranchExpression(condition, code, elseExpression);
     }
 
-    private static VarDefExpression parseVarDefinition(HIRVarDefinition varDefinition, Context context) {
+    private static VarDefExpression parseVarDefinition(HIRVarDefinition varDefinition,
+                                                       Context context) {
         var type = TIRTypeParsing.parse(varDefinition.type(), context);
         var expression = parse(varDefinition.value(), context);
         var name = varDefinition.name();

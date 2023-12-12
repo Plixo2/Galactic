@@ -11,13 +11,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public final class StaticFieldExpression extends Expression {
     @Getter
-    private final AticClass aClass;
+    private final AClass aClass;
     @Getter
     private final AField field;
 
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return field.type();
     }
 }

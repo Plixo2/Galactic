@@ -20,7 +20,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;

@@ -15,7 +15,10 @@ public final class BlockExpression extends Expression {
     private final List<Expression> expressions;
 
     @Override
-    public AType getType() {
-        return new AVoid();
+    public AType getType(Context context) {
+        if (expressions.isEmpty()) {
+            return new AVoid();
+        }
+        return expressions.get(expressions.size() - 1).getType(context);
     }
 }

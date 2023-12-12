@@ -1,7 +1,6 @@
 package de.plixo.atic.lexer;
 
 import de.plixo.atic.exceptions.reasons.GrammarRuleFailure;
-import de.plixo.atic.macro.Processor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -88,11 +87,8 @@ public class GrammarReader {
                         stream.consume();
                         e.isConcrete = true;
                     }
-                } else if (testToken(stream, JAVA_LINK)) {
-                    stream.consume();
-                    final String linkName = stream.current().data;
-                    entries.add(new MacroEntry(getLinkMethod(linkName)));
-                    stream.consume();
+                } else if (testToken(stream, MACRO_LINK)) {
+                    throw new NullPointerException("Macro links are not implemented anymore");
                 } else {
                     throw new GrammarRuleFailure(
                             "Expected keyword or literal, but got " + stream.current()).create();
@@ -126,20 +122,6 @@ public class GrammarReader {
                     "Expected " + token.name() + ", but got " + stream.current()).create();
         }
         return stream.current().data;
-    }
-
-    private static Method getLinkMethod(String name) {
-        if (name.equals("macro")) {
-            try {
-                var process = Processor.class.getMethod("process", TokenStream.class);
-                process.setAccessible(true);
-                return process;
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            throw new NullPointerException("Unknown link method \"" + name + "\"");
-        }
     }
 
     private static void consume(TokenStream<?> stream) {
@@ -209,7 +191,7 @@ public class GrammarReader {
         OR("\\|", "\\|"),
         HIDDEN("\\?", "\\?"),
         CONCRETE("\\!", "\\!"),
-        JAVA_LINK("@", "\\@"),
+        MACRO_LINK("@", "\\@"),
         COMMENT("//", "//.*"),
 
 

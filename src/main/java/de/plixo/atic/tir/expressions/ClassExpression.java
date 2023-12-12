@@ -13,7 +13,7 @@ public final class ClassExpression extends Expression {
     private final AClass aClass;
 
     @Override
-    public AType getType() {
+    public AType getType(Context context) {
         return new AVoid();
     }
 }
