@@ -2,61 +2,59 @@
 
 Tokens for Tokenizer
 ```
-COMMENT
-WHITESPACE
-USE
-CLASS
-INTERFACE
-VOID
-INT
-BYTE
-SHORT
-LONG
-FLOAT
-DOUBLE
-BOOLEAN
-CHAR
-FUNCTION
-IF
-NEW
-ELSE
-EXTENDS
-IMPLEMENTS
-RETURN
-VAR
-NATIVE
-ASSIGN_ARROW
-SINGLE_EXPR_ARROW
-PARENTHESES_O
-PARENTHESES_C
-BRACES_O
-BRACES_C
-BRACKET_O
-BRACKET_C
-SEPARATOR
-DOT
-COLON
-SEMICOLON
-NON_EQUALS
-EQUALS
-AT
-SMALLER_EQUALS
-GREATER_EQUALS
-OR
-AND
-NOT
-PLUS
-MINUS
-MUL
-DIV
-GREATER
-SMALLER
-HASH
-NUMBER
-STRING
-KEYWORD
-ASSIGN
-END_OF_FILE
+<WHITESPACE>
+<EOF>
+"->"
+"=>"
+"!="
+"=="
+"<="
+">="
+"||"
+"&&"
+'{'
+'}'
+'['
+']'
+'('
+')'
+'.'
+';'
+','
+':'
+'='
+'+'
+'-'
+'/'
+'*'
+'!'
+'<'
+'>'
+'@'
+'#'
+"class"
+"interface"
+"void"
+"int"
+"byte"
+"short"
+"long"
+"float"
+"double"
+"boolean"
+"char"
+"fn"
+"if"
+"else"
+"new"
+"extends"
+"implements"
+"return"
+"var"
+"import"
+"word"
+"string"
+"number"
 ```
 Grammar for Parser inside resources/cfg.txt
 
@@ -76,10 +74,11 @@ HIRAssign
 
 build classes and function shells
 
+//TODO fill steps here
 
 HIR to Expression
 - converts HIR to Expression
-- resolves generics (TODO)
+- links generics (TODO)
 ```
 ConstructExpression
 StringExpression

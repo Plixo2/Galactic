@@ -1,20 +1,25 @@
 package de.plixo.atic.tir;
 
 import de.plixo.atic.files.FileTreeEntry;
-import de.plixo.atic.hir.HIRItemParsing;
 import de.plixo.atic.hir.HIRUnitParsing;
-import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.parsing.Parser;
 import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.Package;
 import de.plixo.atic.tir.path.Unit;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-
+/**
+ * Converts the FileTree into a Compiler Tree (Unit and Package)
+ */
 public class TreeBuilding {
 
 
+    /**
+     * crates a Root for the Compiler (Unit or Package)
+     *
+     * @param root file tree root
+     * @return root of the compiler
+     */
     public static CompileRoot convertRoot(FileTreeEntry root) {
         return switch (root) {
             case FileTreeEntry.FileTreeUnit unit -> createUnit(null, unit);
@@ -41,16 +46,17 @@ public class TreeBuilding {
 
     private static Unit createUnit(@Nullable Package parent, FileTreeEntry.FileTreeUnit unit) {
         var createdUnit = new Unit(parent, unit.localName(), unit);
-//
         switch (unit.syntaxResult()) {
             case Parser.FailedRule failedRule -> {
                 failedRule.records().forEach(System.out::println);
-                throw new NullPointerException("Failed rule " + failedRule.failedRule() + " in " + failedRule.parentRule());
+                throw new NullPointerException("Failed rule " + failedRule.failedRule() + " in " +
+                        failedRule.parentRule());
                 //TODO error reporting
             }
             case Parser.FailedLiteral failedLiteral -> {
                 failedLiteral.records().forEach(System.out::println);
-                throw failedLiteral.consumedLiteral().createException("expected " + failedLiteral.expectedLiteral());
+                throw failedLiteral.consumedLiteral()
+                        .createException("expected " + failedLiteral.expectedLiteral());
                 //TODO error reporting
             }
             case Parser.SyntaxMatch syntaxMatch -> {

@@ -8,6 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a Package of code (a folder)
+ */
 @RequiredArgsConstructor
 public final class Package implements CompileRoot, PathElement {
     @Getter
@@ -15,8 +18,8 @@ public final class Package implements CompileRoot, PathElement {
 
     private @Nullable final Package parent;
 
-    List<Unit> units = new ArrayList<>();
-    List<Package> packages = new ArrayList<>();
+    private final List<Unit> units = new ArrayList<>();
+    private final List<Package> packages = new ArrayList<>();
 
 
     @Override
@@ -36,9 +39,9 @@ public final class Package implements CompileRoot, PathElement {
     }
 
     @Override
-    public List<Unit> flatUnits() {
+    public List<Unit> getUnits() {
         var list = new ArrayList<>(units);
-        packages.forEach(ref -> list.addAll(ref.flatUnits()));
+        packages.forEach(ref -> list.addAll(ref.getUnits()));
         return list;
     }
 

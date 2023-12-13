@@ -6,6 +6,11 @@ import de.plixo.atic.types.Type;
 
 import java.util.List;
 
+/**
+ * Base class for all expressions,
+ * Not all Expressions are used in all stages
+ * see flow.md
+ */
 public sealed abstract class Expression
         permits ArrayConstructExpression, AssignExpression, AticClassConstructExpression,
         AticClassExpression, AticPackageExpression, BlockExpression, BooleanExpression,

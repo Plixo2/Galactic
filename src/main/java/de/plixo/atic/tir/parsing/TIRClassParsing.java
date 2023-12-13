@@ -14,6 +14,9 @@ import de.plixo.atic.types.sub.Field;
 import static de.plixo.atic.tir.Scope.INPUT;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
+/**
+ * different stages used in compiling a class
+ */
 public class TIRClassParsing {
 
 
@@ -100,13 +103,4 @@ public class TIRClassParsing {
         }
     }
 
-//    public static void testReturnTypes(AticClass aClass) {
-//        for (MethodImplementation method : aClass.methods()) {
-//            var aticMethod = method.aticMethod();
-//            var expected = aticMethod.returnType();
-//
-//            if ()
-//
-//        }
-//    }
 }

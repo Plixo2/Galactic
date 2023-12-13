@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * A collection of methods from a given name, with different signatures
+ */
 @Getter
 @ToString
 public class MethodCollection {

@@ -10,25 +10,20 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+@Getter
 @RequiredArgsConstructor
 public final class HIRMethod {
 
-    @Getter
     private final String methodName;
-    @Getter
     private final List<Parameter> parameters;
-    @Getter
     private final HIRType returnType;
-
-    @Getter
     private final HIRExpression expression;
 
 
+    @Getter
     @RequiredArgsConstructor
     public static class Parameter {
-        @Getter
         private final String name;
-        @Getter
         private final HIRType type;
 
     }

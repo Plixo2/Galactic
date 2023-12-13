@@ -12,6 +12,9 @@ import de.plixo.atic.tir.Context;
 
 import java.util.Objects;
 
+/**
+ * Parses a {@link HIRType} to a {@link Type}
+ */
 public class TIRTypeParsing {
     public static Type parse(HIRType type, Context context) {
         return switch (type) {

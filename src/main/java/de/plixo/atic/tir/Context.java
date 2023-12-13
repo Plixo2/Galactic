@@ -10,6 +10,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
 
+/**
+ * Context for the compiler, including scopes and the current unit.
+ * Subtypes are can be used to add additional information to the compiler, like type hints.
+ */
 public class Context {
 
     private final Unit unit;

@@ -11,10 +11,13 @@ import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.Unit;
 
+/**
+ * Functions used for parsing a unit
+ */
 public class TIRUnitParsing {
 
     public static void parse(Unit unit, CompileRoot root) {
-        for (var hirItem : unit.getHirItems()) {
+        for (var hirItem : unit.hirItems()) {
             if (hirItem instanceof HIRClass hirClass) {
                 var parsed = new AticClass(hirClass.className(), unit, hirClass);
                 unit.addClass(parsed);
@@ -29,7 +32,7 @@ public class TIRUnitParsing {
     }
 
     public static void parseImports(Unit unit, CompileRoot root) {
-        for (var hirItem : unit.getHirItems()) {
+        for (var hirItem : unit.hirItems()) {
             if (hirItem instanceof HIRImport hirImport) {
                 var path = hirImport.path();
                 var importType = hirImport.importType();

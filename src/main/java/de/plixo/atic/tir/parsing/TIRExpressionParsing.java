@@ -6,6 +6,10 @@ import de.plixo.atic.tir.expressions.*;
 
 import java.util.Objects;
 
+
+/**
+ * Converts HIRExpression to a Expression, without any checking
+ */
 public class TIRExpressionParsing {
 
     public static Expression parse(HIRExpression expression, Context context) {

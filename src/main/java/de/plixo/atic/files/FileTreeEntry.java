@@ -26,10 +26,35 @@ public sealed abstract class FileTreeEntry {
     private final String localName;
     private final String name;
 
+    /**
+     * Lex the file and stores the tokens in the unit
+     * @param tokenizer the tokenizer to use
+     */
     public void lex(Tokenizer tokenizer) {
         switch (this) {
             case FileTreeUnit unit -> {
-                lexUnit(unit, tokenizer);
+                String src;
+                try {
+                    src = FileUtils.readFileToString(unit.file, StandardCharsets.UTF_8);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                var recordList = tokenizer.fromFile(unit.file, src);
+                var filteredTokens = recordList.stream().filter(ref -> switch (ref.token()) {
+                    case UnknownToken ignored -> {
+                        throw ref.createException();
+                        //TODO Error reporting
+                    }
+                    case WhiteSpaceToken ignored -> false;
+                    default -> true;
+                }).toList();
+                var tokens = new ArrayList<>(filteredTokens);
+                int line = 0;
+                if (!tokens.isEmpty()) {
+                    line = tokens.get(tokens.size() - 1).position().line();
+                }
+                tokens.add(new TokenRecord(new EOFToken(), "", new Position(unit.file, line)));
+                unit.tokens = tokens;
             }
             case FileTreePackage treePackage -> {
                 treePackage.children().parallelStream().forEach(ref -> {
@@ -39,31 +64,11 @@ public sealed abstract class FileTreeEntry {
         }
     }
 
-    private void lexUnit(FileTreeUnit unit, Tokenizer tokenizer) {
-        String src;
-        try {
-            src = FileUtils.readFileToString(unit.file, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        var recordList = tokenizer.fromFile(unit.file, src);
-        var filteredTokens = recordList.stream().filter(ref -> switch (ref.token()) {
-            case UnknownToken ignored -> {
-                throw ref.createException();
-                //TODO Error reporting
-            }
-            case WhiteSpaceToken ignored -> false;
-            default -> true;
-        }).toList();
-        var tokens = new ArrayList<TokenRecord>(filteredTokens);
-        int line = 0;
-        if (!tokens.isEmpty()) {
-            line = tokens.get(tokens.size() - 1).position().line();
-        }
-        tokens.add(new TokenRecord(new EOFToken(), "", new Position(unit.file, line)));
-        unit.tokens = tokens;
-    }
 
+    /**
+     * Creates a CFG from the tokens
+     * @param rule the grammar rule to apply
+     */
     public void parse(Grammar.Rule rule) {
         switch (this) {
             case FileTreeUnit unit -> {
@@ -78,6 +83,10 @@ public sealed abstract class FileTreeEntry {
         }
     }
 
+
+    /**
+     * Represents a file
+     */
     @Getter
     public static final class FileTreeUnit extends FileTreeEntry {
         private final File file;
@@ -91,6 +100,9 @@ public sealed abstract class FileTreeEntry {
 
     }
 
+    /**
+     * Represents a folder
+     */
     @Getter
     public static final class FileTreePackage extends FileTreeEntry {
         private final List<FileTreeEntry> children;

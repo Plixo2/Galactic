@@ -6,6 +6,11 @@ import de.plixo.atic.types.PrimitiveType;
 import de.plixo.atic.types.Type;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Used for conversion of types: boxing, unboxing, int to float, etc.
+ */
+
+@Deprecated
 public class TIRTypeConversion {
 
     public static @Nullable Expression convert(Expression object, Type expected, Context context) {

@@ -8,6 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Scope for variables
+ */
 @RequiredArgsConstructor
 public class Scope {
 
@@ -34,6 +37,10 @@ public class Scope {
         variables.add(variable);
     }
 
+
+    /**
+     * A Variable, the Type will be resolved in the Infer Stage
+     */
     @AllArgsConstructor
     @ToString
     public static class Variable {
@@ -49,6 +56,10 @@ public class Scope {
 
         private final @Nullable Variable outsideClosure;
     }
+
+    /**
+     * Flags for Variables types
+     */
 
     public static int INPUT = 1;
     public static int FINAL = 1 << 1;

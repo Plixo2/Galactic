@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
+
+/**
+ * Static code block
+ */
 @RequiredArgsConstructor
 @Getter
 public class AticBlock {

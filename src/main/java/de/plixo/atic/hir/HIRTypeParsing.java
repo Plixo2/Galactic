@@ -10,6 +10,9 @@ import de.plixo.atic.hir.types.HIRType;
 
 import java.util.Objects;
 
+/**
+ * Parses a type node to a HIRType
+ */
 public class HIRTypeParsing {
     public static HIRType parse(Node node) {
         node.assertType("type");

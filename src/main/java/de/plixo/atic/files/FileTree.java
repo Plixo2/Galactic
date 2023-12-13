@@ -6,8 +6,17 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * Generates a FileTreeEntry from a given File
+ */
 public class FileTree {
 
+    /**
+     * Generates a FileTreeEntry from a given File recursively
+     * @param file root file of the tree
+     * @param filePattern regex pattern for files to include
+     * @return root of the FileTree
+     */
     public static @Nullable FileTreeEntry generateFileTree(File file, String filePattern) {
         return get(null, file, filePattern);
     }

@@ -12,6 +12,9 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+/**
+ * Represents a method, either of a class or a Unit (represented by the {@link MethodOwner}).
+ */
 @RequiredArgsConstructor
 public class AticMethod {
 

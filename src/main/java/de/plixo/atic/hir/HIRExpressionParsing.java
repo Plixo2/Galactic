@@ -8,6 +8,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Parses an expression node from the CFG into a HIRExpression
+ */
 public class HIRExpressionParsing {
     public static HIRExpression parse(Node node) {
         node.assertType("expression");

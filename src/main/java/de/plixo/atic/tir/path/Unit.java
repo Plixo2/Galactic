@@ -9,8 +9,8 @@ import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.types.Class;
-import de.plixo.atic.types.MethodOwner;
 import de.plixo.atic.types.JVMClass;
+import de.plixo.atic.types.MethodOwner;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -23,31 +23,32 @@ import org.objectweb.asm.tree.ClassNode;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a Unit of code (a file)
+ * Has code-blocks, classes, imports and static methods
+ */
 @RequiredArgsConstructor
+@Getter
 public final class Unit implements CompileRoot, PathElement, MethodOwner {
     @Nullable
     final Package parent;
-    @Getter
     final String localName;
 
-    @Getter
     private final FileTreeEntry.FileTreeUnit treeUnit;
 
-    @Getter
     private final List<AticClass> classes = new ArrayList<>();
 
-    @Getter
     private final List<AticBlock> blocks = new ArrayList<>();
 
-    @Getter
     private final List<Import> imports = new ArrayList<>();
 
     private final List<AticMethod> staticMethods = new ArrayList<>();
 
-    @Setter
-    @Getter
-    @Accessors(fluent = false)
     private List<HIRItem> hirItems = new ArrayList<>();
+
+    public void addItem(HIRItem item) {
+        hirItems.add(item);
+    }
 
     public void addClass(AticClass aticClass) {
         this.classes.add(aticClass);
@@ -74,7 +75,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     }
 
     @Override
-    public List<Unit> flatUnits() {
+    public List<Unit> getUnits() {
         return List.of(this);
     }
 
@@ -107,11 +108,11 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
                 }
             }
         }
-        var jvmClass = locateJVMClass(path);
-        if (jvmClass != null) {
-            return jvmClass;
+        var aticClass = locateAticClass(path, context);
+        if (aticClass != null) {
+            return aticClass;
         }
-        return locateAticClass(path, context);
+        return locateJVMClass(path);
     }
 
 

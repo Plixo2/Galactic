@@ -5,6 +5,9 @@ import de.plixo.atic.lexer.tokens.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class contains all tokens used by the lexer.
+ */
 public class AticTokens {
     public List<Token> tokens() {
         var tokens = new ArrayList<Token>();

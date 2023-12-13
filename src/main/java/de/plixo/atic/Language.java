@@ -24,6 +24,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Objects;
 
+
+/**
+ * The Language class is the entry point for the compiler.
+ * It contains the stages of the compiler.
+ */
 @RequiredArgsConstructor
 @Getter
 public class Language {
@@ -36,6 +41,10 @@ public class Language {
     private Check checkStage = new Check();
     private CheckFlow checkFlowStage = new CheckFlow();
 
+    /**
+     * Generates the grammar from the grammar file in the classpath
+     * @return the grammar rule set
+     */
     private Grammar.RuleSet generateGrammar() {
         var resource = Objects.requireNonNull(Main.class.getResource(configFile));
         String grammarStr;
@@ -49,7 +58,7 @@ public class Language {
     }
 
     public void parse(File file) {
-        var time = System.currentTimeMillis();
+        var startTime = System.currentTimeMillis();
 
         var grammar = generateGrammar();
         var rule = Objects.requireNonNull(grammar.get(entryRule), "missing unit2 rule");
@@ -67,12 +76,12 @@ public class Language {
         compile(root);
 
 
-        var currentTime = System.currentTimeMillis();
-        System.out.println("Took " + (currentTime - time) + " ms");
+        var endTime = System.currentTimeMillis();
+        System.out.println("Took " + (endTime - startTime) + " ms");
     }
 
     private void compile(CompileRoot root) {
-        var units = root.flatUnits();
+        var units = root.getUnits();
 
         for (var unit : units) {
             TIRUnitParsing.parse(unit, root);

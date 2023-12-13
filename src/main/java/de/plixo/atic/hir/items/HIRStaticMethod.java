@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public final class HIRStaticMethod implements HIRItem {
-    @Getter
     private final HIRMethod hirMethod;
 
 }

@@ -10,6 +10,10 @@ import de.plixo.atic.tir.ObjectPath;
 
 import java.util.ArrayList;
 
+
+/**
+ * Parses a class node from the CFG into a HIRClass
+ */
 public class HIRClassParsing {
     public static HIRClass parse(Node node) {
         node.assertType("class");

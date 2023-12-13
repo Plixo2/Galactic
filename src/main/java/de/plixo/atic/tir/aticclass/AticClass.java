@@ -24,6 +24,9 @@ import java.util.*;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
+/**
+ * Represents a class inside a Unit
+ */
 @RequiredArgsConstructor
 public class AticClass extends Class implements PathElement {
     @Getter

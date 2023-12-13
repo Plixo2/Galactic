@@ -4,6 +4,10 @@ import de.plixo.atic.hir.items.*;
 import de.plixo.atic.hir.utils.DotWordChain;
 import de.plixo.atic.parsing.Node;
 
+
+/**
+ * Parses an item node from a Unit a HIRItem
+ */
 public class HIRItemParsing {
 
     public static HIRItem parse(Node node) {
