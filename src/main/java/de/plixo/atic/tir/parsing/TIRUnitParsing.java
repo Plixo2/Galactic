@@ -2,7 +2,9 @@ package de.plixo.atic.tir.parsing;
 
 import de.plixo.atic.Language;
 import de.plixo.atic.hir.expressions.HIRBlock;
-import de.plixo.atic.hir.items.*;
+import de.plixo.atic.hir.items.HIRClass;
+import de.plixo.atic.hir.items.HIRImport;
+import de.plixo.atic.hir.items.HIRTopBlock;
 import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
@@ -20,18 +22,10 @@ public class TIRUnitParsing {
                 var hirBlock = new HIRBlock(block.expressions());
                 var aticBlock = new AticBlock(unit, hirBlock);
                 unit.addBlock(aticBlock);
+            } else if (!(hirItem instanceof HIRImport)) {
+                throw new NullPointerException("unknown hir item " + hirItem);
             }
         }
-    }
-
-
-    public static void parseBlock(Unit unit, CompileRoot root, AticBlock block, Language language) {
-        var context = new TypeContext(unit, root);
-        var base = TIRExpressionParsing.parse(block.hirBlock(), context);
-        base = language.symbolsStage().parse(base, context);
-        base = language.inferStage().parse(base, context);
-        language.checkStage().parse(base, context);
-
     }
 
     public static void parseImports(Unit unit, CompileRoot root) {
@@ -67,5 +61,15 @@ public class TIRUnitParsing {
                 }
             }
         }
+    }
+
+    public static void fillBlockExpressions(Unit unit, CompileRoot root, AticBlock block,
+                                            Language language) {
+        var context = new TypeContext(unit, root);
+        var base = TIRExpressionParsing.parse(block.hirBlock(), context);
+        base = language.symbolsStage().parse(base, context);
+        base = language.inferStage().parse(base, context);
+        language.checkStage().parse(base, context);
+        block.expression(base);
     }
 }

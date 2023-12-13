@@ -4,7 +4,7 @@ import de.plixo.atic.common.PrimitiveType;
 import de.plixo.atic.hir.types.HIRArrayType;
 import de.plixo.atic.hir.types.HIRPrimitive;
 import de.plixo.atic.hir.utils.DotWordChain;
-import de.plixo.atic.lexer.Node;
+import de.plixo.atic.parsing.Node;
 import de.plixo.atic.hir.types.HIRClassType;
 import de.plixo.atic.hir.types.HIRType;
 
@@ -24,7 +24,7 @@ public class HIRTypeParsing {
     }
 
     private static HIRPrimitive parsePrimitiveType(Node node) {
-        var name = Objects.requireNonNull(node.child().record()).data();
+        var name = Objects.requireNonNull(node.child().record()).literal();
         node.assertType("primitive");
         var primitive = switch (name) {
             case "int" -> PrimitiveType.INT;

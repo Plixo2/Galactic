@@ -2,8 +2,8 @@ package de.plixo.atic.tir.stages;
 
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.expressions.*;
-import de.plixo.atic.types.APrimitive;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.PrimitiveType;
+import de.plixo.atic.types.Type;
 
 import java.lang.reflect.Modifier;
 
@@ -21,7 +21,7 @@ public class Check implements Tree<Context> {
         var parsed = parse(expression.expression(), context);
         var variable = expression.variable();
         assert variable != null;
-        if (!AType.isAssignableFrom(variable.getType(), parsed.getType(context), context)) {
+        if (!Type.isAssignableFrom(variable.getType(), parsed.getType(context), context)) {
             throw new NullPointerException("variable type does not match expression type");
         }
         return expression;
@@ -69,7 +69,7 @@ public class Check implements Tree<Context> {
         for (int i = 0; i < expected.size(); i++) {
             var expectedType = expected.get(i);
             var foundType = found.get(i).getType(context);
-            if (!AType.isAssignableFrom(expectedType, foundType, context)) {
+            if (!Type.isAssignableFrom(expectedType, foundType, context)) {
                 throw new NullPointerException("method call arguments dont match");
             }
         }
@@ -88,7 +88,7 @@ public class Check implements Tree<Context> {
         parse(expression.then(), context);
 
         var found = expression.condition().getType(context);
-        if (!AType.isAssignableFrom(APrimitive.BOOLEAN, found, context)) {
+        if (!Type.isAssignableFrom(PrimitiveType.BOOLEAN, found, context)) {
             throw new NullPointerException("condition is not boolean, its " + found);
         }
         if (expression.elseExpression() != null) {
@@ -111,7 +111,7 @@ public class Check implements Tree<Context> {
         if (expression.hint() != null) {
             var expected = expression.hint();
             var found = expression.expression().getType(context);
-            if (!AType.isAssignableFrom(expected, found, context)) {
+            if (!Type.isAssignableFrom(expected, found, context)) {
                 throw new NullPointerException(
                         "hint does not match expression, expected " + expected + " found " + found);
             }
@@ -152,7 +152,7 @@ public class Check implements Tree<Context> {
         for (int i = 0; i < expected.size(); i++) {
             var expectedType = expected.get(i);
             var foundType = found.get(i).getType(context);
-            if (!AType.isAssignableFrom(expectedType, foundType, context)) {
+            if (!Type.isAssignableFrom(expectedType, foundType, context)) {
                 throw new NullPointerException("constructor call arguments dont match");
             }
         }

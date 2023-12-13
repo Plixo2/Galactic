@@ -1,10 +1,9 @@
 package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.Scope;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +16,7 @@ public final class LocalVariableAssign extends Expression {
     private final Expression expression;
 
     @Override
-    public AType getType(Context context) {
-        return new AVoid();
+    public Type getType(Context context) {
+        return new VoidType();
     }
 }

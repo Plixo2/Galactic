@@ -1,7 +1,7 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.Context;
 import lombok.Getter;
@@ -14,7 +14,7 @@ public final class Path extends Expression {
 
 
     @Override
-    public AType getType(Context context) {
-        return new AVoid();
+    public Type getType(Context context) {
+        return new VoidType();
     }
 }

@@ -31,11 +31,5 @@ public final class HIRMethod {
         @Getter
         private final HIRType type;
 
-        public JsonElement toJson() {
-            var jsonObject = new JsonObject();
-            jsonObject.addProperty("name", name);
-            jsonObject.add("type", type.toJson());
-            return jsonObject;
-        }
     }
 }

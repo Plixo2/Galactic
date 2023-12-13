@@ -10,12 +10,12 @@ import de.plixo.atic.tir.aticclass.method.MethodImplementation;
 import de.plixo.atic.tir.aticclass.method.NewMethod;
 import de.plixo.atic.tir.path.PathElement;
 import de.plixo.atic.tir.path.Unit;
-import de.plixo.atic.types.AClass;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
-import de.plixo.atic.types.classes.JVMClass;
-import de.plixo.atic.types.sub.AField;
-import de.plixo.atic.types.sub.AMethod;
+import de.plixo.atic.types.Class;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
+import de.plixo.atic.types.JVMClass;
+import de.plixo.atic.types.sub.Field;
+import de.plixo.atic.types.sub.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -25,16 +25,16 @@ import java.util.*;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 @RequiredArgsConstructor
-public class AticClass extends AClass implements PathElement {
+public class AticClass extends Class implements PathElement {
     @Getter
     private final String localName;
     @Getter
     private final Unit unit;
     @Getter
     private final HIRClass hirClass;
-    public AClass superClass = new JVMClass("java.lang.Object");
-    public List<AClass> interfaces = new ArrayList<>();
-    public List<AField> fields = new ArrayList<>();
+    public Class superClass = new JVMClass("java.lang.Object");
+    public List<Class> interfaces = new ArrayList<>();
+    public List<Field> fields = new ArrayList<>();
 
     @Getter
     private final List<MethodImplementation> methods = new ArrayList<>();
@@ -51,7 +51,7 @@ public class AticClass extends AClass implements PathElement {
                 return;
             }
         }
-        for (AClass anInterface : interfaces) {
+        for (Class anInterface : interfaces) {
             for (var abstractMethod : anInterface.getMethods()) {
                 if (signatureMatch(abstractMethod, aMethod, context)) {
                     methods.add(new ImplementedMethod(abstractMethod, method));
@@ -62,7 +62,7 @@ public class AticClass extends AClass implements PathElement {
         methods.add(new NewMethod(method));
     }
 
-    private boolean signatureMatch(AMethod method, AMethod aticMethod, Context context) {
+    private boolean signatureMatch(Method method, Method aticMethod, Context context) {
         if (!method.name().equals(aticMethod.name())) {
             return false;
         }
@@ -72,11 +72,11 @@ public class AticClass extends AClass implements PathElement {
         for (int i = 0; i < method.arguments().size(); i++) {
             var aType = method.arguments().get(i);
             var aticSide = aticMethod.arguments().get(i);
-            if (!AType.isSame(aType, aticSide)) {
+            if (!Type.isSame(aType, aticSide)) {
                 return false;
             }
         }
-        return AType.isSame(method.returnType(), aticMethod.returnType());
+        return Type.isSame(method.returnType(), aticMethod.returnType());
     }
 
     @Override
@@ -91,14 +91,14 @@ public class AticClass extends AClass implements PathElement {
 
 
     @Override
-    public List<AMethod> getAbstractMethods() {
+    public List<Method> getAbstractMethods() {
         return methods.stream().filter(ref -> ref instanceof AbstractMethod)
                 .map(MethodImplementation::asMethod).toList();
     }
 
     @Override
-    public List<AMethod> getMethods() {
-        var list = new ArrayList<AMethod>();
+    public List<Method> getMethods() {
+        var list = new ArrayList<Method>();
         list.addAll(methods.stream().map(MethodImplementation::asMethod).toList());
         list.addAll(superClass.getMethods());
         for (var anInterface : interfaces) {
@@ -109,7 +109,7 @@ public class AticClass extends AClass implements PathElement {
     }
 
     @Override
-    public @Nullable AField getField(String name, Context context) {
+    public @Nullable Field getField(String name, Context context) {
         for (var field : fields) {
             if (field.name().equals(name)) {
                 return field;
@@ -133,12 +133,12 @@ public class AticClass extends AClass implements PathElement {
     }
 
     @Override
-    public @Nullable AClass getSuperClass() {
+    public @Nullable Class getSuperClass() {
         return superClass;
     }
 
     @Override
-    public List<AClass> getInterfaces() {
+    public List<Class> getInterfaces() {
         return interfaces;
     }
 
@@ -149,12 +149,12 @@ public class AticClass extends AClass implements PathElement {
             params.add(new Parameter(field.name(), field.type()));
         }
 //        System.out.println(methods.size());
-        addMethod(new AticMethod(this, ACC_PUBLIC, "<init>", params, new AVoid(), null), context);
+        addMethod(new AticMethod(this, ACC_PUBLIC, "<init>", params, new VoidType(), null), context);
 //        System.out.println(methods.size());
     }
 
-    public Set<AMethod> implementationLeft() {
-        var set = new HashSet<AMethod>();
+    public Set<Method> implementationLeft() {
+        var set = new HashSet<Method>();
         set.addAll(superClass.getAbstractMethods());
         for (var anInterface : interfaces) {
             set.addAll(anInterface.getAbstractMethods());

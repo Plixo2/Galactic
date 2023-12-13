@@ -2,8 +2,8 @@ package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.hir.UnaryFunctions;
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.APrimitive;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.PrimitiveType;
+import de.plixo.atic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,18 +21,18 @@ public final class UnaryExpression extends Expression {
     }
 
     @Override
-    public AType getType(Context context) {
+    public Type getType(Context context) {
         return validate(context);
     }
 
-    public AType validate(Context context) {
+    public Type validate(Context context) {
         var type = object.getType(context);
-        if ((!(type instanceof APrimitive primitive))) {
+        if ((!(type instanceof PrimitiveType primitive))) {
             throw new NullPointerException("unary only for primitives " + type);
         }
         switch (function) {
             case NEGATE_LOGIC -> {
-                if (!primitive.equals(APrimitive.APrimitiveType.BOOLEAN)) {
+                if (!primitive.equals(PrimitiveType.APrimitiveType.BOOLEAN)) {
                     throw new NullPointerException("only negate (logic) a boolean");
                 }
             }

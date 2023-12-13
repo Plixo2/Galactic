@@ -2,7 +2,7 @@ package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.hir.expressions.HIRExpression;
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.Type;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public sealed abstract class Expression
     }
 
 
-    public Expression standartDotExpression(AType type, String id, Context context) {
+    public Expression standartDotExpression(Type type, String id, Context context) {
         var aField = type.getField(id, context);
         if (aField != null) {
             return new FieldExpression(this, aField);
@@ -38,5 +38,5 @@ public sealed abstract class Expression
         }
     }
 
-    public abstract AType getType(Context context);
+    public abstract Type getType(Context context);
 }

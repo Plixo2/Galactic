@@ -1,8 +1,8 @@
 package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -16,14 +16,14 @@ public final class BranchExpression extends Expression {
 
 
     @Override
-    public AType getType(Context context) {
+    public Type getType(Context context) {
         if (elseExpression == null) {
-            return new AVoid();
+            return new VoidType();
         }
         var left = then.getType(context);
         var right = elseExpression.getType(context);
-        if (!AType.isAssignableFrom(left, right, context)) {
-            return new AVoid();
+        if (!Type.isAssignableFrom(left, right, context)) {
+            return new VoidType();
         }
         return left;
     }

@@ -2,7 +2,7 @@ package de.plixo.atic.hir;
 
 import de.plixo.atic.hir.items.*;
 import de.plixo.atic.hir.utils.DotWordChain;
-import de.plixo.atic.lexer.Node;
+import de.plixo.atic.parsing.Node;
 
 public class HIRItemParsing {
 

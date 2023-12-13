@@ -1,9 +1,8 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.tir.aticclass.AticClass;
-import de.plixo.atic.types.AClass;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.sub.AField;
+import de.plixo.atic.types.Class;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.sub.Field;
 import de.plixo.atic.tir.Context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +10,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public final class StaticFieldExpression extends Expression {
     @Getter
-    private final AClass aClass;
+    private final Class aClass;
     @Getter
-    private final AField field;
+    private final Field field;
 
 
     @Override
-    public AType getType(Context context) {
+    public Type getType(Context context) {
         return field.type();
     }
 }

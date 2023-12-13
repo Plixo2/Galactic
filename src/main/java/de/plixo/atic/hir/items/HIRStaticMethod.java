@@ -9,16 +9,5 @@ import lombok.RequiredArgsConstructor;
 public final class HIRStaticMethod implements HIRItem {
     @Getter
     private final HIRMethod hirMethod;
-    @Override
-    public JsonElement toJson() {
-        var jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "import");
-        jsonObject.addProperty("method", hirMethod.methodName());
-        return jsonObject;
-    }
 
-    @Override
-    public String toPrintName() {
-        return "static Method-" + hirMethod.methodName();
-    }
 }

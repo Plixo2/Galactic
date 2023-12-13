@@ -1,19 +1,17 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.types.AClass;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
+import de.plixo.atic.types.Class;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import de.plixo.atic.tir.Context;
 import lombok.RequiredArgsConstructor;
 
-import java.lang.reflect.Modifier;
-
 @RequiredArgsConstructor
 public final class ClassExpression extends Expression {
-    private final AClass aClass;
+    private final Class aClass;
 
     @Override
-    public AType getType(Context context) {
-        return new AVoid();
+    public Type getType(Context context) {
+        return new VoidType();
     }
 }

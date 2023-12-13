@@ -5,7 +5,7 @@ import de.plixo.atic.hir.items.HIRField;
 import de.plixo.atic.hir.items.HIRMethod;
 import de.plixo.atic.hir.types.HIRClassType;
 import de.plixo.atic.hir.types.HIRType;
-import de.plixo.atic.lexer.Node;
+import de.plixo.atic.parsing.Node;
 import de.plixo.atic.tir.ObjectPath;
 
 import java.util.ArrayList;

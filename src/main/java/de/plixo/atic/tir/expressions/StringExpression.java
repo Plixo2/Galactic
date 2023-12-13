@@ -1,10 +1,8 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.types.AClass;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.Type;
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.Converter;
-import de.plixo.atic.types.classes.JVMClass;
+import de.plixo.atic.types.JVMClass;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +13,7 @@ public final class StringExpression extends Expression {
     private final String value;
 
     @Override
-    public AType getType(Context context) {
+    public Type getType(Context context) {
         return new JVMClass("java.lang.String");
     }
 }

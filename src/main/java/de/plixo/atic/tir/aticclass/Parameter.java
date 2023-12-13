@@ -1,8 +1,6 @@
 package de.plixo.atic.tir.aticclass;
 
-import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.AType;
-import lombok.AccessLevel;
+import de.plixo.atic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +9,6 @@ public class Parameter {
     @Getter
     private final String name;
     @Getter
-    private final AType type;
+    private final Type type;
 
 }

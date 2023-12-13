@@ -16,13 +16,4 @@ public final class HIRVarDefinition implements HIRExpression{
     @Getter
     private final HIRExpression value;
 
-    @Override
-    public JsonElement toJson() {
-        var jsonObject = new JsonObject();
-        jsonObject.addProperty("type", this.getClass().getSimpleName());
-        jsonObject.addProperty("name", name);
-        jsonObject.add("var-type", type.toJson());
-        jsonObject.add("value", value.toJson());
-        return jsonObject;
-    }
 }

@@ -1,7 +1,7 @@
 package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -14,7 +14,7 @@ public final class DotNotation extends Expression {
     private final String id;
 
     @Override
-    public AType getType(Context context) {
+    public Type getType(Context context) {
         throw new NullPointerException("not computed yet");
     }
 

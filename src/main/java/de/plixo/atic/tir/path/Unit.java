@@ -1,6 +1,6 @@
 package de.plixo.atic.tir.path;
 
-import de.plixo.atic.files.PathEntity;
+import de.plixo.atic.files.FileTreeEntry;
 import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Import;
@@ -8,9 +8,9 @@ import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
-import de.plixo.atic.types.AClass;
+import de.plixo.atic.types.Class;
 import de.plixo.atic.types.MethodOwner;
-import de.plixo.atic.types.classes.JVMClass;
+import de.plixo.atic.types.JVMClass;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -31,7 +31,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     final String localName;
 
     @Getter
-    private final PathEntity.PathUnit pathUnit;
+    private final FileTreeEntry.FileTreeUnit treeUnit;
 
     @Getter
     private final List<AticClass> classes = new ArrayList<>();
@@ -79,7 +79,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     }
 
 
-    public @Nullable AClass locateImported(String name) {
+    public @Nullable Class locateImported(String name) {
         for (var anImport : imports) {
             if (anImport.alias().equals(name)) {
                 return anImport.importedClass();
@@ -98,7 +98,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
         return null;
     }
 
-    public @Nullable AClass locateClass(ObjectPath path, Context context, boolean useImports) {
+    public @Nullable Class locateClass(ObjectPath path, Context context, boolean useImports) {
         if (path.names().size() == 1 && useImports) {
             var name = path.names().get(0);
             for (var anImport : imports) {
@@ -157,7 +157,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     }
 
 
-    public void addImport(String name, AClass aticClass) {
+    public void addImport(String name, Class aticClass) {
         imports.add(new Import(name, aticClass));
     }
 }

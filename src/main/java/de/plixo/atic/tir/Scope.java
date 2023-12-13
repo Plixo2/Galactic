@@ -1,6 +1,6 @@
 package de.plixo.atic.tir;
 
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.Type;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ public class Scope {
         @Getter
         @Setter
         @Accessors(fluent = false)
-        private @Nullable AType type;
+        private @Nullable Type type;
 
         private final @Nullable Variable outsideClosure;
     }

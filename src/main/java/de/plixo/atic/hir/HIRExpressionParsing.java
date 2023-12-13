@@ -2,7 +2,7 @@ package de.plixo.atic.hir;
 
 import de.plixo.atic.hir.expressions.*;
 import de.plixo.atic.hir.utils.ExpressionCommaList;
-import de.plixo.atic.lexer.Node;
+import de.plixo.atic.parsing.Node;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

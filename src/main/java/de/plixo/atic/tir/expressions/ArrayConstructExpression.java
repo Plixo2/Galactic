@@ -1,8 +1,8 @@
 package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.AArray;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.ArrayType;
+import de.plixo.atic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,13 +12,13 @@ import java.util.List;
 public final class ArrayConstructExpression extends Expression {
 
     @Getter
-    private final AType elementType;
+    private final Type elementType;
 
     @Getter
     private final List<Expression> values;
 
     @Override
-    public AType getType(Context context) {
-        return new AArray(elementType);
+    public Type getType(Context context) {
+        return new ArrayType(elementType);
     }
 }

@@ -1,7 +1,7 @@
 package de.plixo.atic.tir.expressions;
 
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import de.plixo.atic.tir.Context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +15,9 @@ public final class BlockExpression extends Expression {
     private final List<Expression> expressions;
 
     @Override
-    public AType getType(Context context) {
+    public Type getType(Context context) {
         if (expressions.isEmpty()) {
-            return new AVoid();
+            return new VoidType();
         }
         return expressions.get(expressions.size() - 1).getType(context);
     }

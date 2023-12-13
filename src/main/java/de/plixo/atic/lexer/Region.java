@@ -1,31 +1,16 @@
 package de.plixo.atic.lexer;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+/**
+ * Region over a node or snippet
+ * @param left upper location
+ * @param right lower location
+ */
+public record Region(Position left, Position right) {
 
-import java.io.File;
-
-public record Region(File file, Position left, Position right) {
-
-    public static Region fromPosition(File file, Position position) {
-        return new Region(file, position, position);
+    public int minLine() {
+        return left.line();
     }
-
-    @Override
-    public String toString() {
-        return "(" + left.line() + ":" + left.from() + ")-(" + right.line() + ":" + right.to() +
-                ")";
-    }
-
-    public JsonElement toJson() {
-        // var jsonObject = new JsonObject();
-        //jsonObject.addProperty("desc", toString);
-        // return jsonObject;
-        return new JsonPrimitive(toString());
-    }
-
-    public String debugFormat() {
-        var path = file.getAbsolutePath();
-        return path + ":" + (left.line()) + ":" + (left.from());
+    public int maxLine() {
+        return right.line();
     }
 }

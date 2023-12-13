@@ -1,100 +1,83 @@
 package de.plixo.atic.lexer;
 
-import de.plixo.atic.Token;
-import lombok.Getter;
-import lombok.NonNull;
+import de.plixo.atic.lexer.tokens.Token;
+import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
+/**
+ * Converts an input string into a stream of tokens
+ */
+@AllArgsConstructor
 public class Tokenizer {
-    @Getter
     private final List<Token> tokens;
 
-    public Tokenizer(List<Token> tokens) {
-        this.tokens = tokens;
+    /**
+     * Creates tokens from a string from a file, by splitting all the lines.
+     * This can be made parallel in the future.
+     * @param sourceFile source file for insights (can be null)
+     * @param src file source
+     * @return generated tokens
+     */
+    public List<TokenRecord> fromFile(@Nullable File sourceFile, String src) {
+        var tokens = new ArrayList<TokenRecord>();
+        var iterator = src.lines().iterator();
+        var index = 0;
+        while (iterator.hasNext()) {
+            var line = iterator.next();
+            tokens.addAll(tokenize(line, sourceFile, index));
+            index += 1;
+        }
+        return tokens;
     }
 
-    public TokenResult apply(int line, @NonNull String text) {
-        var records = new ArrayList<Record>();
-        int charCount = 0;
-        final int length = text.length();
-        final StringBuilder capturedChars = new StringBuilder();
-        while (charCount < length) {
-            final String subString = text.substring(charCount);
-            var matchedToken = tokens.stream().filter(f -> f.peek.test(subString)).findAny();
-            if (matchedToken.isEmpty()) {
-                return new TokenFailure(subString, charCount);
-            }
-            capturedChars.append(text.charAt(charCount));
-            final int countCopy = charCount;
-            charCount += 1;
-            while (charCount < length) {
-                capturedChars.append(text.charAt(charCount));
-                charCount += 1;
-                if (!matchedToken.get().capture.test(capturedChars.toString())) {
-                    capturedChars.deleteCharAt(capturedChars.length() - 1);
-                    charCount -= 1;
-                    break;
+    /**
+     * checks all tokens to see what fits the first character.
+     * Then test everything again to see if it fits the rest of the text.
+     * Then the function creates a record of the first fitting token and
+     * continues to match the rest of the string.
+     * @param string the string to make tokens out of
+     * @param file to source file (can be null)
+     * @param line source line
+     * @return generated records
+     */
+    public List<TokenRecord> tokenize(String string, @Nullable File file, int line) {
+        if (string.isEmpty()) {
+            return new ArrayList<>();
+        }
+        var position = new Position(file, line);
+        var records = new ArrayList<TokenRecord>();
+        var matchingStartTokens = new ArrayList<Token>(5);
+        var length = string.length();
+        for (int index = 0; index < length; index++) {
+            var currentChar = string.charAt(index);
+            for (Token token : tokens) {
+                if (token.startsWith(currentChar)) {
+                    matchingStartTokens.add(token);
                 }
             }
-            var position = new Position(line, countCopy + 1, charCount + 1);
-            records.add(new Record(matchedToken.get(), capturedChars.toString(), position));
-            capturedChars.setLength(0);
-        }
-        return new TokenSuccess(records);
-    }
-
-    public sealed interface TokenResult {
-
-    }
-
-    public record TokenSuccess(List<Record> records) implements TokenResult {
-
-    }
-
-    public record TokenFailure(String text, int charCount) implements TokenResult {
-
-    }
-
-    public static <T> void apply(@NonNull String text, @NonNull List<T> tokens,
-                                 @NonNull TokenConsumer<T> consumer,
-                                 @NonNull BiConsumer<Integer, String> onError,
-                                 @NonNull BiFunction<T, String, Boolean> tokenPeekPredicate,
-                                 @NonNull BiFunction<T, String, Boolean> tokenCapturePredicate) {
-
-        int charCount = 0;
-        final int length = text.length();
-        final StringBuilder capturedChars = new StringBuilder();
-        while (charCount < length) {
-            final String subString = text.substring(charCount);
-            final Optional<T> matchedToken =
-                    tokens.stream().filter(f -> tokenPeekPredicate.apply(f, subString)).findAny();
-            if (matchedToken.isEmpty()) {
-                onError.accept(charCount, subString);
+            boolean matched = false;
+            for (var matchingStart : matchingStartTokens) {
+                var next = matchingStart.matches(string, index);
+                if (next < 0) {
+                    continue;
+                }
+                var literal = string.substring(index, Math.min(next, length));
+                records.add(new TokenRecord(matchingStart, literal, position));
+                index = next - 1;
+                matched = true;
                 break;
             }
-            capturedChars.append(text.charAt(charCount));
-            final int countCopy = charCount;
-            charCount += 1;
-            while (charCount < length) {
-                capturedChars.append(text.charAt(charCount));
-                charCount += 1;
-                if (!tokenCapturePredicate.apply(matchedToken.get(), capturedChars.toString())) {
-                    capturedChars.deleteCharAt(capturedChars.length() - 1);
-                    charCount -= 1;
-                    break;
-                }
+            if (!matched) {
+                var literal = string.substring(index, Math.min(index + 1, length));
+                records.add(new TokenRecord(Token.unknownToken(), literal, position));
             }
-            consumer.apply(matchedToken.get(), capturedChars.toString(), countCopy, charCount);
-            capturedChars.setLength(0);
+            matchingStartTokens.clear();
         }
-    }
 
-    public interface TokenConsumer<T> {
-        void apply(T token, String data, int from, int to);
+        return records;
     }
 }

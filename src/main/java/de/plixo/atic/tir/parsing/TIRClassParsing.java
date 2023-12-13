@@ -7,9 +7,9 @@ import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.tir.aticclass.Parameter;
-import de.plixo.atic.types.AClass;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.sub.AField;
+import de.plixo.atic.types.Class;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.sub.Field;
 
 import static de.plixo.atic.tir.Scope.INPUT;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -21,12 +21,12 @@ public class TIRClassParsing {
         var hirClass = aticClass.hirClass();
         var hirType = hirClass.superClass();
         var superClass = TIRTypeParsing.parse(hirType, context);
-        if (!(superClass instanceof AClass aClass)) {
+        if (!(superClass instanceof Class aClass)) {
             throw new NullPointerException("not a class");
         }
         var interfaces = hirClass.interfaces().stream().map(ref -> {
             var parse = TIRTypeParsing.parse(ref, context);
-            if (!(parse instanceof AClass interfaceClass)) {
+            if (!(parse instanceof Class interfaceClass)) {
                 throw new NullPointerException("not a class");
             }
             return interfaceClass;
@@ -41,7 +41,7 @@ public class TIRClassParsing {
         for (var field : hirClass.fields()) {
             var name = field.name();
             var type = TIRTypeParsing.parse(field.type(), context);
-            var e = new AField(ACC_PUBLIC, name, type, aticClass);
+            var e = new Field(ACC_PUBLIC, name, type, aticClass);
             aticClass.fields.add(e);
         }
     }
@@ -79,7 +79,7 @@ public class TIRClassParsing {
                 var expected = aticMethod.returnType();
                 assert aticMethod.body != null;
                 var found = aticMethod.body.getType(context);
-                if (!AType.isAssignableFrom(expected, found, context)) {
+                if (!Type.isAssignableFrom(expected, found, context)) {
                     throw new NullPointerException(
                             "method return type doesnt match, expected " + expected +
                                     ", but found " + found);

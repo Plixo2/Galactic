@@ -2,17 +2,15 @@ package de.plixo.atic.tir.aticclass;
 
 import de.plixo.atic.hir.items.HIRMethod;
 import de.plixo.atic.tir.expressions.Expression;
-import de.plixo.atic.types.AType;
+import de.plixo.atic.types.Type;
 import de.plixo.atic.types.MethodOwner;
-import de.plixo.atic.types.sub.AMethod;
+import de.plixo.atic.types.sub.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.List;
-
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 @RequiredArgsConstructor
 public class AticMethod {
@@ -30,7 +28,7 @@ public class AticMethod {
     private final List<Parameter> parameters;
 
     @Getter
-    private final AType returnType;
+    private final Type returnType;
 
     @Getter
     private final @Nullable HIRMethod hirMethod;
@@ -38,9 +36,9 @@ public class AticMethod {
     public @Nullable Expression body = null;
 
 
-    public AMethod asAMethod() {
+    public Method asAMethod() {
         var types = parameters().stream().map(Parameter::type).toList();
-        return new AMethod(access, localName(), returnType(), types, owner());
+        return new Method(access, localName(), returnType(), types, owner());
     }
 
     @Override

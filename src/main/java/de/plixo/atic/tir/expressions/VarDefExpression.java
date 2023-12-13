@@ -2,8 +2,8 @@ package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Scope;
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.AVoid;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -12,12 +12,12 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 public final class VarDefExpression extends Expression {
     private final String name;
-    private final @Nullable AType hint;
+    private final @Nullable Type hint;
     private final Expression expression;
     private final @Nullable Scope.Variable variable;
 
     @Override
-    public AType getType(Context context) {
-        return new AVoid();
+    public Type getType(Context context) {
+        return new VoidType();
     }
 }

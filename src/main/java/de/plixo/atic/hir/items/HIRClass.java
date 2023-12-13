@@ -22,21 +22,6 @@ public final class HIRClass implements HIRItem {
     @Getter
     private final List<HIRMethod> methods;
 
-    @Override
-    public JsonElement toJson() {
-        var jsonObject = new JsonObject();
-        jsonObject.addProperty("type", "class");
-        jsonObject.addProperty("name", toPrintName());
-        if (superClass != null) {
-            jsonObject.add("extends", superClass.toJson());
-        }
-        return jsonObject;
-    }
-
-    @Override
-    public String toPrintName() {
-        return "class-" + className;
-    }
 
 
 

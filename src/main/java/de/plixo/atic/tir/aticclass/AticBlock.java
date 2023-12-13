@@ -1,7 +1,7 @@
 package de.plixo.atic.tir.aticclass;
 
-import de.plixo.atic.hir.expressions.HIRBlock;
-import de.plixo.atic.tir.expressions.BlockExpression;
+import de.plixo.atic.hir.expressions.HIRExpression;
+import de.plixo.atic.tir.expressions.Expression;
 import de.plixo.atic.tir.path.Unit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 public class AticBlock {
     private final Unit unit;
-    private final HIRBlock hirBlock;
+    private final HIRExpression hirBlock;
     @Setter
-    private @Nullable BlockExpression expression;
+    private @Nullable Expression expression;
 }

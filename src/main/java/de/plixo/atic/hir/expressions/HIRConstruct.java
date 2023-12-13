@@ -18,16 +18,6 @@ public final class HIRConstruct implements HIRExpression {
     private final List<ConstructParam> parameters;
 
 
-    @Override
-    public JsonElement toJson() {
-        var jsonObject = new JsonObject();
-        jsonObject.addProperty("type", this.getClass().getSimpleName());
-        jsonObject.add("class", hirType.toJson());
-        var array = new JsonArray();
-        parameters.forEach(arg -> array.add(arg.toJson()));
-        jsonObject.add("parameters", array);
-        return jsonObject;
-    }
 
     @RequiredArgsConstructor
     public static class ConstructParam {
@@ -36,11 +26,5 @@ public final class HIRConstruct implements HIRExpression {
         @Getter
         private final HIRExpression value;
 
-        public JsonElement toJson() {
-            var jsonObject = new JsonObject();
-            jsonObject.addProperty("name", name);
-            jsonObject.add("value", value.toJson());
-            return jsonObject;
-        }
     }
 }

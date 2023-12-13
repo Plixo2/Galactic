@@ -2,7 +2,7 @@ package de.plixo.atic.hir.utils;
 
 import de.plixo.atic.hir.HIRExpressionParsing;
 import de.plixo.atic.hir.expressions.HIRExpression;
-import de.plixo.atic.lexer.Node;
+import de.plixo.atic.parsing.Node;
 
 import java.util.List;
 

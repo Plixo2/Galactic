@@ -2,7 +2,7 @@ package de.plixo.atic.tir.aticclass.method;
 
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.tir.aticclass.Parameter;
-import de.plixo.atic.types.sub.AMethod;
+import de.plixo.atic.types.sub.Method;
 import lombok.RequiredArgsConstructor;
 
 import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
@@ -13,9 +13,9 @@ public final class AbstractMethod implements MethodImplementation {
     private final AticMethod method;
 
     @Override
-    public AMethod asMethod() {
+    public Method asMethod() {
         var types = method.parameters().stream().map(Parameter::type).toList();
-        return new AMethod(ACC_PUBLIC | ACC_ABSTRACT, method.localName(), method.returnType(),
+        return new Method(ACC_PUBLIC | ACC_ABSTRACT, method.localName(), method.returnType(),
                 types, method.owner());
     }
 

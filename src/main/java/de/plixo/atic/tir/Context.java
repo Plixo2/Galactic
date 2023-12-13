@@ -3,7 +3,7 @@ package de.plixo.atic.tir;
 import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.PathElement;
 import de.plixo.atic.tir.path.Unit;
-import de.plixo.atic.types.AClass;
+import de.plixo.atic.types.Class;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.jetbrains.annotations.Nullable;
@@ -45,12 +45,12 @@ public class Context {
     public @Nullable PathElement locate(String name) {
         return unit.locate(name);
     }
-    public @Nullable AClass locateImported(String name) {
+    public @Nullable Class locateImported(String name) {
         return unit.locateImported(name);
     }
 
     @SneakyThrows
-    public @Nullable AClass getClass(ObjectPath objectPath) {
+    public @Nullable Class getClass(ObjectPath objectPath) {
         return unit.locateClass(objectPath, this, true);
     }
 

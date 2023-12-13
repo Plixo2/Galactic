@@ -1,9 +1,8 @@
 package de.plixo.atic.tir.stages;
 
-import de.plixo.atic.tir.Scope;
 import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.expressions.*;
-import de.plixo.atic.types.AClass;
+import de.plixo.atic.types.Class;
 
 import java.util.Objects;
 
@@ -135,7 +134,7 @@ public class Infer implements Tree<TypeContext> {
         var parsed = parse(expression.object(), context);
 
         var id = expression.id();
-        if (parsed.getType(context) instanceof AClass aClass) {
+        if (parsed.getType(context) instanceof Class aClass) {
             var field = aClass.getField(id, context);
             if (field != null) {
                 return new FieldExpression(parsed, field);

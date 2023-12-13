@@ -14,13 +14,4 @@ public final class HIRBlock implements HIRExpression {
     @Getter
     private final List<HIRExpression> expressions;
 
-    @Override
-    public JsonElement toJson() {
-        var jsonObject = new JsonObject();
-        jsonObject.addProperty("type", this.getClass().getSimpleName());
-        var array = new JsonArray();
-        expressions.forEach(arg -> array.add(arg.toJson()));
-        jsonObject.add("expressions", array);
-        return jsonObject;
-    }
 }

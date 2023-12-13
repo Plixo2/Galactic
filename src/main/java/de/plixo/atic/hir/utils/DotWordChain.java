@@ -1,6 +1,6 @@
 package de.plixo.atic.hir.utils;
 
-import de.plixo.atic.lexer.Node;
+import de.plixo.atic.parsing.Node;
 import de.plixo.atic.tir.ObjectPath;
 import lombok.Getter;
 

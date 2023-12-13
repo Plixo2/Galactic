@@ -1,36 +1,65 @@
 package de.plixo.atic.tir;
 
-import de.plixo.atic.Language;
-import de.plixo.atic.files.PathEntity;
+import de.plixo.atic.files.FileTreeEntry;
+import de.plixo.atic.hir.HIRItemParsing;
+import de.plixo.atic.hir.HIRUnitParsing;
+import de.plixo.atic.hir.items.HIRItem;
+import de.plixo.atic.parsing.Parser;
 import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.Package;
 import de.plixo.atic.tir.path.Unit;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 public class TreeBuilding {
 
-    public static CompileRoot toTree(Language.HIR2 hir2) {
-        return switch (hir2.projectPath()) {
-            case PathEntity.PathUnit unit -> createUnit(null, unit, hir2);
-            case PathEntity.PathDir pathDir -> createPackage(null, pathDir, hir2);
+
+    public static CompileRoot convertRoot(FileTreeEntry root) {
+        return switch (root) {
+            case FileTreeEntry.FileTreeUnit unit -> createUnit(null, unit);
+            case FileTreeEntry.FileTreePackage treePackage -> createPackage(null, treePackage);
         };
     }
 
-    private static Package createPackage(@Nullable Package parent, PathEntity.PathDir pathDir,
-                                         Language.HIR2 hir2) {
-        var aPackage = new Package(pathDir.localName(), parent);
-        var subPackages =
-                pathDir.subDirs().stream().map(dir -> createPackage(aPackage, dir, hir2)).toList();
+    private static Package createPackage(@Nullable Package parent,
+                                         FileTreeEntry.FileTreePackage treePackage) {
+        var thePackage = new Package(treePackage.localName(), parent);
 
-        var units = pathDir.units().stream().map(pathUnit -> createUnit(aPackage, pathUnit, hir2))
-                .toList();
-        subPackages.forEach(aPackage::addPackage);
-        units.forEach(aPackage::addUnit);
-        return aPackage;
+        treePackage.children().forEach(ref -> {
+            switch (ref) {
+                case FileTreeEntry.FileTreeUnit unit -> {
+                    thePackage.addUnit(createUnit(thePackage, unit));
+                }
+                case FileTreeEntry.FileTreePackage subPackage -> {
+                    thePackage.addPackage(createPackage(thePackage, subPackage));
+                }
+            }
+        });
+        return thePackage;
     }
 
-    private static Unit createUnit(@Nullable Package parent, PathEntity.PathUnit unit,
-                                   Language.HIR2 hir2) {
-        return new Unit(parent, unit.localName(), unit);
+    private static Unit createUnit(@Nullable Package parent, FileTreeEntry.FileTreeUnit unit) {
+        var createdUnit = new Unit(parent, unit.localName(), unit);
+//
+        switch (unit.syntaxResult()) {
+            case Parser.FailedRule failedRule -> {
+                failedRule.records().forEach(System.out::println);
+                throw new NullPointerException("Failed rule " + failedRule.failedRule() + " in " + failedRule.parentRule());
+                //TODO error reporting
+            }
+            case Parser.FailedLiteral failedLiteral -> {
+                failedLiteral.records().forEach(System.out::println);
+                throw failedLiteral.consumedLiteral().createException("expected " + failedLiteral.expectedLiteral());
+                //TODO error reporting
+            }
+            case Parser.SyntaxMatch syntaxMatch -> {
+                HIRUnitParsing.parse(createdUnit, syntaxMatch.node());
+            }
+            case null -> {
+                throw new NullPointerException("syntaxResult should be known");
+            }
+        }
+        return createdUnit;
     }
 }

@@ -1,4 +1,4 @@
-unit2 := itemList! "EOF"?
+unit := itemList! "EOF"?
 
 itemList := item itemList ||
 item := import | class | block | method
@@ -63,7 +63,7 @@ dotWordChainOpt := "."? dotWordChain ||
 
 
 
-id := "keyword"
+id := "word"
 number := "number"
 string := "string"
 

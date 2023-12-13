@@ -1,7 +1,7 @@
 package de.plixo.atic.tir;
 
-import de.plixo.atic.types.AType;
-import de.plixo.atic.types.sub.AMethod;
+import de.plixo.atic.types.Type;
+import de.plixo.atic.types.sub.Method;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.Nullable;
@@ -14,22 +14,22 @@ import java.util.function.Predicate;
 @ToString
 public class MethodCollection {
     private final String name;
-    private final List<AMethod> methods;
+    private final List<Method> methods;
 
-    public MethodCollection(String name, List<AMethod> methods) {
+    public MethodCollection(String name, List<Method> methods) {
         this.name = name;
         this.methods = methods;
     }
 
 
-    public MethodCollection(String name, AMethod method) {
+    public MethodCollection(String name, Method method) {
         this.name = name;
         this.methods = List.of(method);
     }
 
     public MethodCollection join(@Nullable MethodCollection method) {
         if (method != null) {
-            var objects = new ArrayList<AMethod>();
+            var objects = new ArrayList<Method>();
             objects.addAll(this.methods);
             objects.addAll(method.methods);
             return new MethodCollection(name, objects);
@@ -41,12 +41,12 @@ public class MethodCollection {
         return methods.isEmpty();
     }
 
-    public MethodCollection filter(Predicate<AMethod> predicate) {
+    public MethodCollection filter(Predicate<Method> predicate) {
         return new MethodCollection(this.name, this.methods.stream().filter(predicate).toList());
     }
 
-    public @Nullable AMethod findBestMatch(List<AType> types, Context context) {
-        for (AMethod method : methods) {
+    public @Nullable Method findBestMatch(List<Type> types, Context context) {
+        for (Method method : methods) {
             if (method.isCallable(types, context)) {
                 return method;
             }
