@@ -1,8 +1,6 @@
-package de.plixo.atic.types.sub;
+package de.plixo.atic.types;
 
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.Type;
-import de.plixo.atic.types.MethodOwner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -58,12 +58,18 @@ public class HIRItemParsing {
         var importTypeNode = node.get("importType");
         var dotWordChain = node.get("dotWordChain");
         var wordList = new DotWordChain(dotWordChain);
-        var name = node.getID();
+        var importName = node.get("importName");
+        String name;
+        if (importName.has("id")) {
+            name = importName.getID();
+        } else {
+            name = "*";
+        }
         String importType = null;
         if (importTypeNode.has("id")) {
             importType = importTypeNode.getID();
         }
-        return new HIRImport(dotWordChain.region(),name, importType, wordList.asObjectPath());
+        return new HIRImport(dotWordChain.region(), name, importType, wordList.asObjectPath());
     }
 
 

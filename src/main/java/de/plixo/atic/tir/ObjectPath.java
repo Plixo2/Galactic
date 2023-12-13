@@ -9,10 +9,10 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Represents any Path.
+ * Represents any Path. e.g. java.lang.String or java/lang/String
  */
+@Getter
 public class ObjectPath {
-    @Getter
     private final List<String> names;
 
     public ObjectPath(String name) {
@@ -52,7 +52,7 @@ public class ObjectPath {
 
 
     public String asJVMPath() {
-        return "/" +String.join("/", names) + ".class";
+        return String.join("/", names) + ".class";
     }
 
     @Override

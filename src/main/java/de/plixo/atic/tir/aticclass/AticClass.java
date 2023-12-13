@@ -13,11 +13,9 @@ import de.plixo.atic.tir.path.Unit;
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.Type;
 import de.plixo.atic.types.VoidType;
-import de.plixo.atic.types.JVMClass;
-import de.plixo.atic.types.sub.Field;
-import de.plixo.atic.types.sub.Method;
+import de.plixo.atic.types.Field;
+import de.plixo.atic.types.Method;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -27,7 +25,6 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 /**
  * Represents a class inside a Unit
  */
-@RequiredArgsConstructor
 public class AticClass extends Class implements PathElement {
     @Getter
     private final String localName;
@@ -35,7 +32,15 @@ public class AticClass extends Class implements PathElement {
     private final Unit unit;
     @Getter
     private final HIRClass hirClass;
-    public Class superClass = new JVMClass("java.lang.Object");
+    public Class superClass;
+
+    public AticClass(String localName, Unit unit, HIRClass hirClass, Class defaultSuperClass) {
+        this.localName = localName;
+        this.unit = unit;
+        this.hirClass = hirClass;
+        this.superClass = defaultSuperClass;
+    }
+
     public List<Class> interfaces = new ArrayList<>();
     public List<Field> fields = new ArrayList<>();
 
@@ -112,6 +117,11 @@ public class AticClass extends Class implements PathElement {
     }
 
     @Override
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    @Override
     public @Nullable Field getField(String name, Context context) {
         for (var field : fields) {
             if (field.name().equals(name)) {
@@ -125,7 +135,6 @@ public class AticClass extends Class implements PathElement {
     public MethodCollection getMethods(String name, Context context) {
         var aMethods = methods.stream().map(MethodImplementation::asMethod)
                 .filter(ref -> ref.name().equals(name))
-//                .filter(ref -> Modifier.isPublic(ref.modifier()))
                 .toList();
         var methods = new MethodCollection(name, aMethods);
         if (superClass != null) {
@@ -157,8 +166,7 @@ public class AticClass extends Class implements PathElement {
     }
 
     public Set<Method> implementationLeft() {
-        var set = new HashSet<Method>();
-        set.addAll(superClass.getAbstractMethods());
+        var set = new HashSet<>(superClass.getAbstractMethods());
         for (var anInterface : interfaces) {
             set.addAll(anInterface.getAbstractMethods());
         }

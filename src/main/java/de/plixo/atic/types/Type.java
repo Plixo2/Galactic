@@ -1,7 +1,6 @@
 package de.plixo.atic.types;
 
 
-import de.plixo.atic.types.sub.Field;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.MethodCollection;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +21,8 @@ public abstract class Type {
     public String getDescriptor() {
         return String.valueOf(getKind());
     }
+
+    public abstract boolean equals(Object o);
 
     /**
      * test if a is lower in the chain then b

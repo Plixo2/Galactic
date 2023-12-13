@@ -2,7 +2,7 @@ package de.plixo.atic.tir.expressions;
 
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.types.Type;
-import de.plixo.atic.types.sub.Method;
+import de.plixo.atic.types.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

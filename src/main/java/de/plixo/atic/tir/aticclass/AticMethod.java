@@ -4,7 +4,7 @@ import de.plixo.atic.hir.items.HIRMethod;
 import de.plixo.atic.tir.expressions.Expression;
 import de.plixo.atic.types.Type;
 import de.plixo.atic.types.MethodOwner;
-import de.plixo.atic.types.sub.Method;
+import de.plixo.atic.types.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;

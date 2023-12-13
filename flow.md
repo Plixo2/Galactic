@@ -144,6 +144,8 @@ Check Stage:
 - check types
 - check void types
 - TODO tests if fields, methods and classes are accessible
+- TODO check duplicate fields, methods and classes
+- TODO check duplicate imports 
 
 ```
 StringExpression

@@ -3,6 +3,7 @@ package de.plixo.atic.tir.parsing;
 import de.plixo.atic.hir.expressions.*;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.expressions.*;
+import de.plixo.atic.types.Type;
 
 import java.util.Objects;
 
@@ -57,7 +58,12 @@ public class TIRExpressionParsing {
 
     private static VarDefExpression parseVarDefinition(HIRVarDefinition varDefinition,
                                                        Context context) {
-        var type = TIRTypeParsing.parse(varDefinition.type(), context);
+        Type type;
+        if (varDefinition.type() != null) {
+            type = TIRTypeParsing.parse(varDefinition.type(), context);
+        } else {
+            type = null;
+        }
         var expression = parse(varDefinition.value(), context);
         var name = varDefinition.name();
         return new VarDefExpression(name, type, expression, null);

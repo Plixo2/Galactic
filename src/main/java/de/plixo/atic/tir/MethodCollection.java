@@ -1,7 +1,7 @@
 package de.plixo.atic.tir;
 
 import de.plixo.atic.types.Type;
-import de.plixo.atic.types.sub.Method;
+import de.plixo.atic.types.Method;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.Nullable;

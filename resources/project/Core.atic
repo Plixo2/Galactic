@@ -1,0 +1,7 @@
+
+
+class Transform {
+    fn make() -> void = {
+        1
+    }
+}

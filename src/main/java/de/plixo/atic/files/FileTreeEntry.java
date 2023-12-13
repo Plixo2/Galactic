@@ -27,10 +27,10 @@ public sealed abstract class FileTreeEntry {
     private final String name;
 
     /**
-     * Lex the file and stores the tokens in the unit
+     * Reads the File, turns it into tokens, then stores the tokens in the unit
      * @param tokenizer the tokenizer to use
      */
-    public void lex(Tokenizer tokenizer) {
+    public void readAndLex(Tokenizer tokenizer) {
         switch (this) {
             case FileTreeUnit unit -> {
                 String src;
@@ -58,7 +58,7 @@ public sealed abstract class FileTreeEntry {
             }
             case FileTreePackage treePackage -> {
                 treePackage.children().parallelStream().forEach(ref -> {
-                    ref.lex(tokenizer);
+                    ref.readAndLex(tokenizer);
                 });
             }
         }

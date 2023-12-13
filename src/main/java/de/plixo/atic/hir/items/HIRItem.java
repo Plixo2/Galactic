@@ -1,7 +1,8 @@
 package de.plixo.atic.hir.items;
 
-import com.google.gson.JsonElement;
-
+/**
+ * Top Level Items of a Unit
+ */
 public sealed interface HIRItem permits HIRTopBlock, HIRClass, HIRImport, HIRStaticMethod {
 
 }

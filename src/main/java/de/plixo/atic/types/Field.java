@@ -1,4 +1,4 @@
-package de.plixo.atic.types.sub;
+package de.plixo.atic.types;
 
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.Type;

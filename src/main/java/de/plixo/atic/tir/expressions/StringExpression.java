@@ -1,8 +1,9 @@
 package de.plixo.atic.tir.expressions;
 
+import de.plixo.atic.boundary.JVMLoader;
+import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.types.Type;
 import de.plixo.atic.tir.Context;
-import de.plixo.atic.types.JVMClass;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,6 +15,11 @@ public final class StringExpression extends Expression {
 
     @Override
     public Type getType(Context context) {
-        return new JVMClass("java.lang.String");
+        var objectPath = new ObjectPath("java", "lang", "String");
+        var stringClass = JVMLoader.asJVMClass(objectPath, context.loadedBytecode());
+        if (stringClass == null) {
+            throw new NullPointerException("cant find java.lang.Object");
+        }
+        return stringClass;
     }
 }

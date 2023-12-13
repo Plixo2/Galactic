@@ -1,10 +1,13 @@
 package de.plixo.atic;
 
 import com.google.common.io.Resources;
+import de.plixo.atic.boundary.JVMLoader;
+import de.plixo.atic.boundary.LoadedBytecode;
 import de.plixo.atic.files.FileTree;
 import de.plixo.atic.lexer.Tokenizer;
 import de.plixo.atic.parsing.Grammar;
 import de.plixo.atic.tir.Context;
+import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.TreeBuilding;
 import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.aticclass.AticBlock;
@@ -36,13 +39,16 @@ public class Language {
     private final String configFile = "/cfg.txt";
     private final String entryRule = "unit";
 
-    private Symbols symbolsStage = new Symbols();
-    private Infer inferStage = new Infer();
-    private Check checkStage = new Check();
-    private CheckFlow checkFlowStage = new CheckFlow();
+    private final LoadedBytecode loadedBytecode = new LoadedBytecode();
+
+    private final Symbols symbolsStage = new Symbols();
+    private final Infer inferStage = new Infer();
+    private final Check checkStage = new Check();
+    private final CheckFlow checkFlowStage = new CheckFlow();
 
     /**
      * Generates the grammar from the grammar file in the classpath
+     *
      * @return the grammar rule set
      */
     private Grammar.RuleSet generateGrammar() {
@@ -69,7 +75,7 @@ public class Language {
         if (rootEntry == null) {
             throw new NullPointerException("cant find a valid root entry");
         }
-        rootEntry.lex(tokenizer);
+        rootEntry.readAndLex(tokenizer);
         rootEntry.parse(rule);
 
         var root = TreeBuilding.convertRoot(rootEntry);
@@ -82,12 +88,16 @@ public class Language {
 
     private void compile(CompileRoot root) {
         var units = root.getUnits();
-
-        for (var unit : units) {
-            TIRUnitParsing.parse(unit, root);
+        var objectPath = new ObjectPath("java", "lang", "Object");
+        var defaultSuperClass = JVMLoader.asJVMClass(objectPath, loadedBytecode);
+        if (defaultSuperClass == null) {
+            throw new NullPointerException("cant find java.lang.Object");
         }
         for (var unit : units) {
-            TIRUnitParsing.parseImports(unit, root);
+            TIRUnitParsing.parse(unit, defaultSuperClass);
+        }
+        for (var unit : units) {
+            TIRUnitParsing.parseImports(unit, root, loadedBytecode);
         }
 
         var classes = new ArrayList<AticClass>();
@@ -100,25 +110,25 @@ public class Language {
         }
 
         for (var aClass : classes) {
-            var context = new Context(aClass.unit(), root);
+            var context = new Context(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillSuperclasses(aClass, context);
         }
 
         //types are known here
         classes.forEach(aClass -> {
-            var context = new Context(aClass.unit(), root);
+            var context = new Context(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillFields(aClass, context);
         });
         classes.forEach(aClass -> {
-            var context = new Context(aClass.unit(), root);
+            var context = new Context(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillMethodShells(aClass, context);
         });
         classes.forEach(aClass -> {
-            var context = new Context(aClass.unit(), root);
+            var context = new Context(aClass.unit(), root, loadedBytecode);
             aClass.addAllFieldsConstructor(context);
         });
         classes.forEach(aClass -> {
-            var context = new TypeContext(aClass.unit(), root);
+            var context = new TypeContext(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillMethodExpressions(aClass, context, this);
         });
         blocks.forEach(block -> {

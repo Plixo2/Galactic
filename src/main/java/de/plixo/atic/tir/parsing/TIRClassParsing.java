@@ -9,7 +9,8 @@ import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.tir.aticclass.Parameter;
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.Type;
-import de.plixo.atic.types.sub.Field;
+import de.plixo.atic.types.VoidType;
+import de.plixo.atic.types.Field;
 
 import static de.plixo.atic.tir.Scope.INPUT;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -81,8 +82,11 @@ public class TIRClassParsing {
                 language.checkStage().parse(aticMethod.body, context);
                 var expected = aticMethod.returnType();
                 assert aticMethod.body != null;
+
                 var found = aticMethod.body.getType(context);
-                if (!Type.isAssignableFrom(expected, found, context)) {
+                var isVoid = Type.isSame(expected, new VoidType());
+                var typeMatch = Type.isAssignableFrom(expected, found, context);
+                if (!typeMatch && !isVoid) {
                     throw new NullPointerException(
                             "method return type doesnt match, expected " + expected +
                                     ", but found " + found);

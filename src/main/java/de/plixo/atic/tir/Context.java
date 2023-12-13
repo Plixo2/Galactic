@@ -1,5 +1,6 @@
 package de.plixo.atic.tir;
 
+import de.plixo.atic.boundary.LoadedBytecode;
 import de.plixo.atic.tir.path.CompileRoot;
 import de.plixo.atic.tir.path.PathElement;
 import de.plixo.atic.tir.path.Unit;
@@ -17,17 +18,21 @@ import java.util.Stack;
 public class Context {
 
     private final Unit unit;
+    @Getter
+    private final CompileRoot root;
+
+    @Getter
+    private final LoadedBytecode loadedBytecode;
 
     private final Stack<Scope> scopes = new Stack<>();
 
-    public Context(Unit unit, CompileRoot root) {
+    public Context(Unit unit, CompileRoot root, LoadedBytecode loadedBytecode) {
         this.unit = unit;
         this.root = root;
+        this.loadedBytecode = loadedBytecode;
         pushScope(new Scope(null));
     }
 
-    @Getter
-    private final CompileRoot root;
 
     public void pushScope(Scope scope) {
         scopes.push(scope);
@@ -49,6 +54,7 @@ public class Context {
     public @Nullable PathElement locate(String name) {
         return unit.locate(name);
     }
+
     public @Nullable Class locateImported(String name) {
         return unit.locateImported(name);
     }

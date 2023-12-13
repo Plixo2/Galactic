@@ -1,4 +1,5 @@
 import Some Other.Some
+import * Core
 import @java Boolean java.lang.Boolean
 import @java System java.lang.System
 
@@ -26,13 +27,15 @@ class Test extends Some {
 
 {
 
-    var in: Main.Test = new Main.Test { "hello" }
+    var parser: Transform = new Transform {}
+
+    var in: Test = new Test { "hello" }
     var c: boolean = in.exists()
 
     var a: Some = new Some { }
     a = new Some { }
 
-    var case: int = if a.exists() {
+    var case = if a.exists() {
         a.getCount()
     } else {
         a = new Some { }
@@ -56,10 +59,10 @@ class Test extends Some {
         b.compareTo(other)
         var other2: java.lang.Boolean = Boolean.valueOf: false
         b.compareTo(other2)
-    } else if new Main.Test { "hello" }.unwrap(b) {
+    } else if new Test { "hello" }.unwrap(b) {
 
     } else {
-        var test: Main.Test = new Main.Test { "hello" }
+        var test: Test = new Test { "hello" }
         if test.field.isEmpty() {
             if test.make(0i).isEmpty() {
                 "hi"

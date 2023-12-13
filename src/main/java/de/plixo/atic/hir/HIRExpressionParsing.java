@@ -1,6 +1,7 @@
 package de.plixo.atic.hir;
 
 import de.plixo.atic.hir.expressions.*;
+import de.plixo.atic.hir.types.HIRType;
 import de.plixo.atic.hir.utils.ExpressionCommaList;
 import de.plixo.atic.parsing.Node;
 
@@ -117,7 +118,14 @@ public class HIRExpressionParsing {
     private static HIRVarDefinition parseVarDefinition(Node node) {
         node.assertType("variableDefinition");
         var name = node.getID();
-        var type = HIRTypeParsing.parse(node.get("type"));
+        var typeHint = node.get("typeHint");
+        HIRType type;
+        if (typeHint.has("type")) {
+            type = HIRTypeParsing.parse(typeHint.get("type"));
+        } else {
+            type = null;
+        }
+
         var values = HIRExpressionParsing.parse(node.get("expression"));
         return new HIRVarDefinition(name, type, values);
     }

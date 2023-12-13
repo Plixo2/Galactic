@@ -1,5 +1,8 @@
 package de.plixo.atic.tir.path;
 
+import de.plixo.atic.boundary.JVMLoadedClass;
+import de.plixo.atic.boundary.JVMLoader;
+import de.plixo.atic.boundary.LoadedBytecode;
 import de.plixo.atic.files.FileTreeEntry;
 import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.tir.Context;
@@ -9,13 +12,10 @@ import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.types.Class;
-import de.plixo.atic.types.JVMClass;
 import de.plixo.atic.types.MethodOwner;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -112,20 +112,13 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
         if (aticClass != null) {
             return aticClass;
         }
-        return locateJVMClass(path);
+        return locateJVMClass(path, context.loadedBytecode());
     }
 
 
     @SneakyThrows
-    public @Nullable JVMClass locateJVMClass(ObjectPath objectPath) {
-        var stream = Context.class.getResourceAsStream(objectPath.asJVMPath());
-        if (stream != null) {
-            ClassNode cn = new ClassNode();
-            ClassReader cr = new ClassReader(stream);
-            cr.accept(cn, 0);
-            return new JVMClass(cn.name);
-        }
-        return null;
+    public @Nullable JVMLoadedClass locateJVMClass(ObjectPath objectPath, LoadedBytecode bytecode) {
+        return JVMLoader.asJVMClass(objectPath, bytecode);
     }
 
     public @Nullable AticClass locateAticClass(ObjectPath path, Context context) {
