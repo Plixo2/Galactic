@@ -1,16 +1,10 @@
-package de.plixo.atic.tir;
+package test;
 
 import com.google.common.reflect.ClassPath;
-import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.ByteBuddyAgent;
-import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 
 import java.lang.instrument.Instrumentation;
-import java.lang.management.ClassLoadingMXBean;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class JVMLocator {

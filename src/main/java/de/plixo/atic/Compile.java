@@ -22,7 +22,6 @@ import static org.objectweb.asm.Opcodes.*;
 @Deprecated
 public class Compile {
 
-//    @SneakyThrows
 //    public void compile(Expression expression) {
 //
 //        if (true) {
@@ -46,7 +45,6 @@ public class Compile {
 //        FileUtils.writeByteArrayToFile(outFile, b);
 //    }
 //
-//    @SneakyThrows
 //    private ClassNode newClass(String name) {
 //        var classNode = new ClassNode(ASM9);
 //        classNode.version = 61;

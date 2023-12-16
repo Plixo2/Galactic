@@ -7,15 +7,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class Class extends Type implements MethodOwner {
+public abstract class Class extends Type {
 
+
+    public abstract String name();
+    public abstract ClassSource getSource();
     public abstract ObjectPath path();
 
     @Override
     public String toString() {
         return "AClass{" + "name='" + path() + "}";
     }
-
 
     public abstract boolean isInterface();
     public abstract List<Method> getAbstractMethods();

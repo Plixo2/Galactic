@@ -18,7 +18,7 @@ public class ClassDebugger {
     public static void main(String[] args) {
 //        ClassReader cr = new ClassReader(getInputStream(TestObj.class));
 //        ClassReader cr = new ClassReader(new FileInputStream("resources/test/OutClass.class"));
-        ClassReader cr = new ClassReader("test/TestInterface");
+        ClassReader cr = new ClassReader(getInputStream(Child.class));
         var printWriter = new PrintWriter(new FileOutputStream("resources/jarlog.txt"));
         var classVisitor = new TraceClassVisitor(printWriter);
         printWriter.flush();

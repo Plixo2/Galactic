@@ -1,6 +1,6 @@
 package de.plixo.atic.lexer.tokens;
 
-public final class EOFToken extends Token{
+public final class EOFToken extends Token {
     public EOFToken() {
         super("EOF");
     }

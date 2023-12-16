@@ -6,7 +6,7 @@ package de.plixo.atic.lexer.tokens;
 public final class UnknownToken extends Token {
 
     UnknownToken() {
-        super("?????");
+        super("???");
     }
     @Override
     public boolean startsWith(char str) {

@@ -127,6 +127,9 @@ public class Language {
             var context = new Context(aClass.unit(), root, loadedBytecode);
             aClass.addAllFieldsConstructor(context);
         });
+
+        //expressions can be evaluated here
+
         classes.forEach(aClass -> {
             var context = new TypeContext(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillMethodExpressions(aClass, context, this);

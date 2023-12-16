@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class contains all tokens used by the lexer.
+ * Contains all tokens used by the lexer.
  */
 public class AticTokens {
     public List<Token> tokens() {
         var tokens = new ArrayList<Token>();
         tokens.add(new WhiteSpaceToken());
+        tokens.add(new CommentToken());
         tokens.add(new LiteralToken("->"));
         tokens.add(new LiteralToken("=>"));
         tokens.add(new LiteralToken("!="));

@@ -1,7 +1,16 @@
-
+import @java ArrayList java.util.ArrayList
 
 class Transform {
     fn make() -> void = {
         1
+    }
+}
+
+class IList extends ArrayList {
+    fn exists() -> boolean = true
+    fn getCount() -> int = 0
+
+    fn get(index: int) -> int = {
+        if false { 9 } else { 1 }
     }
 }

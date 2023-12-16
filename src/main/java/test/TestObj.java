@@ -4,8 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class TestObj implements I2 {
-
+public class TestObj {
+    public TestObj(double integer) {
+        this.testObj = null;
+        this.integer = (int) integer;
+    }
     public TestObj(TestObj testObj, double integer) {
         this.testObj = testObj;
         this.integer = (int) integer;
@@ -21,15 +24,16 @@ public class TestObj implements I2 {
         this.intArray = intArray;
     }
 
-    public TestObj() {
-    }
-
     public TestObj testObj;
     public int integer;
     public int[] intArray;
     public Object obj;
     public Object[] objArray;
     public List<String> strings;
+
+    public void make() {
+
+    }
 
 
     public void test() {
@@ -42,10 +46,10 @@ public class TestObj implements I2 {
         };
     }
 
-    @Override
-    public String asString() {
-        return toString();
-    }
+//    @Override
+//    public String asString() {
+//        return toString();
+//    }
 
     @Override
     public String toString() {

@@ -15,11 +15,11 @@ public class Method {
     private final String name;
     private final Type returnType;
     private final List<Type> arguments;
-    private final MethodOwner owner;
+    private final Class owner;
 
     @Override
     public String toString() {
-        return "AMethod{" + "modifier=" + modifier + ", name='" + name + '\'' + ", returnType=" +
+        return "Method{" + "modifier=" + modifier + ", name='" + name + '\'' + ", returnType=" +
                 returnType + ", arguments=" + arguments + ", owner=" + owner + '}';
     }
 
@@ -54,19 +54,4 @@ public class Method {
         return Modifier.isAbstract(modifier);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Method method = (Method) o;
-        return modifier == method.modifier && Objects.equals(name, method.name) &&
-                Objects.equals(returnType, method.returnType) &&
-                Objects.equals(arguments, method.arguments) &&
-                Objects.equals(owner, method.owner);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(modifier, name, returnType, arguments, owner);
-    }
 }

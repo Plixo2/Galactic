@@ -1,6 +1,5 @@
 package de.plixo.atic.tir.path;
 
-import de.plixo.atic.boundary.JVMLoadedClass;
 import de.plixo.atic.boundary.JVMLoader;
 import de.plixo.atic.boundary.LoadedBytecode;
 import de.plixo.atic.files.FileTreeEntry;
@@ -12,13 +11,9 @@ import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.types.Class;
-import de.plixo.atic.types.MethodOwner;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +24,7 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 @Getter
-public final class Unit implements CompileRoot, PathElement, MethodOwner {
+public final class Unit implements CompileRoot, PathElement {
     @Nullable
     final Package parent;
     final String localName;
@@ -116,8 +111,7 @@ public final class Unit implements CompileRoot, PathElement, MethodOwner {
     }
 
 
-    @SneakyThrows
-    public @Nullable JVMLoadedClass locateJVMClass(ObjectPath objectPath, LoadedBytecode bytecode) {
+    public @Nullable Class locateJVMClass(ObjectPath objectPath, LoadedBytecode bytecode) {
         return JVMLoader.asJVMClass(objectPath, bytecode);
     }
 

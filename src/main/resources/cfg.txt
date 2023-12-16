@@ -39,7 +39,8 @@ assignOpt := "="? expression! ||
 
 object := initialisation | branch | blockExpr | string | number | id | "("? expression! ")"?!
 
-initialisation := "new"? type! "{"? initialisationFieldList "}"?!
+initialisation := "new"? type! initialisationList!
+initialisationList := "{"? initialisationFieldList! "}"?! ||
 initialisationFieldList := initialisationField initialisationFieldListOpt! ||
 initialisationFieldListOpt := ","? initialisationFieldList! ||
 initialisationField := expression

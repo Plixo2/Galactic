@@ -3,6 +3,7 @@ package de.plixo.atic.files;
 import de.plixo.atic.lexer.Position;
 import de.plixo.atic.lexer.TokenRecord;
 import de.plixo.atic.lexer.Tokenizer;
+import de.plixo.atic.lexer.tokens.CommentToken;
 import de.plixo.atic.lexer.tokens.EOFToken;
 import de.plixo.atic.lexer.tokens.UnknownToken;
 import de.plixo.atic.lexer.tokens.WhiteSpaceToken;
@@ -46,6 +47,7 @@ public sealed abstract class FileTreeEntry {
                         //TODO Error reporting
                     }
                     case WhiteSpaceToken ignored -> false;
+                    case CommentToken ignored -> false;
                     default -> true;
                 }).toList();
                 var tokens = new ArrayList<>(filteredTokens);

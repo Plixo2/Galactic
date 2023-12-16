@@ -121,6 +121,7 @@ Infer Stage:
 - in this stage every expression has to have a valid type that 
   can be called using `.getType`
 
+//TODO call super methods
 
 ```
 StringExpression

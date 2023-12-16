@@ -1,8 +1,15 @@
 import Some Other.Some
 import * Core
+import IntList Core.IList
+
+import @java Consumer java.util.function.Consumer
+import @java Function java.util.function.Function
 import @java Boolean java.lang.Boolean
 import @java System java.lang.System
-
+import @java Object java.lang.Object
+import @java ArrayList java.util.ArrayList
+import @java List java.util.List
+import @java TestObj test.TestObj
 
 class Test extends Some {
     field: java.lang.String
@@ -24,15 +31,40 @@ class Test extends Some {
     }
 }
 
+class Runnable implements Consumer {
+    fn accept(o: Object) -> void = {
+        System.out.println(o)
+    }
+}
+
+class Mapper implements Function {
+    fn apply(o: Object) -> Object = {
+        o.toString()
+    }
+}
 
 {
+    var a: IntList = new IntList
+    var number: int = a.get: 0
+    a.forEach: new Runnable
+    var mapped = a.stream().map(new Mapper)
+    mapped.forEach: new Runnable
+    var list: List = mapped.toList()
+}
 
+{
+    var testOBJ = new TestObj { new TestObj { 0d }, 1.0 }
+
+
+    var list: List = new ArrayList
+
+    var IEEE = 0f
     var parser: Transform = new Transform {}
 
     var in: Test = new Test { "hello" }
     var c: boolean = in.exists()
 
-    var a: Some = new Some { }
+    var a: Some = new Test { "hello" }
     a = new Some { }
 
     var case = if a.exists() {

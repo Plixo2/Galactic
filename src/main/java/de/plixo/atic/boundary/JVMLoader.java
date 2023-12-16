@@ -3,8 +3,6 @@ package de.plixo.atic.boundary;
 import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.*;
-import de.plixo.atic.types.Field;
-import de.plixo.atic.types.Method;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -14,6 +12,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Helper class to load classes from the JVM, uses {@link LoadedBytecode} for mapping classes to
+ * paths
+ */
 public class JVMLoader {
     public static @Nullable JVMLoadedClass asJVMClass(ObjectPath path, LoadedBytecode bytecode) {
         var loadedClass = bytecode.getClass(path);
@@ -28,7 +30,7 @@ public class JVMLoader {
     }
 
     private static JVMLoadedClass generate(ObjectPath path, InputStream stream,
-                                           LoadedBytecode bytecode) {
+                                        LoadedBytecode bytecode) {
         var loadedClass = bytecode.getClass(path);
         if (loadedClass != null) {
             return loadedClass;
@@ -42,7 +44,8 @@ public class JVMLoader {
         }
         classReader.accept(classNode, 0);
 
-        var jvmLoadedClass = new JVMLoadedClass(path);
+        var jvmLoadedClass =
+                new JVMLoadedClass(new ClassSource.JVMSource(classNode), path, classNode.name);
         bytecode.putClass(path, jvmLoadedClass);
         generate(jvmLoadedClass, classNode, bytecode);
 
@@ -71,10 +74,8 @@ public class JVMLoader {
 
 
         for (var anInterface : classNode.interfaces) {
-//            System.out.println("Interface: " + anInterface);
             var interfacePath = new ObjectPath(anInterface.replace("/", "."), ".");
-            interfaces.add(
-                    asJVMClass(interfacePath, bytecode));
+            interfaces.add(asJVMClass(interfacePath, bytecode));
         }
 
         for (var fieldNode : classNode.fields) {
@@ -102,7 +103,6 @@ public class JVMLoader {
 
 
     private static @Nullable InputStream getBytecode(ObjectPath path) {
-//        System.out.println(path.asJVMPath());
         return ClassLoader.getSystemResourceAsStream(path.asJVMPath());
     }
 
@@ -126,9 +126,8 @@ public class JVMLoader {
                     new PrimitiveType(PrimitiveType.APrimitiveType.DOUBLE);
             case org.objectweb.asm.Type.ARRAY ->
                     new ArrayType(getType(type.getElementType(), bytecode));
-            case org.objectweb.asm.Type.OBJECT -> {
-                yield asJVMClass(new ObjectPath(type.getClassName(), "."), bytecode);
-            }
+            case org.objectweb.asm.Type.OBJECT ->
+                    asJVMClass(new ObjectPath(type.getClassName(), "."), bytecode);
             default -> {
                 throw new NullPointerException("cant fetch type");
             }

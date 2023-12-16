@@ -8,9 +8,9 @@ import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
 import de.plixo.atic.tir.aticclass.Parameter;
 import de.plixo.atic.types.Class;
+import de.plixo.atic.types.Field;
 import de.plixo.atic.types.Type;
 import de.plixo.atic.types.VoidType;
-import de.plixo.atic.types.Field;
 
 import static de.plixo.atic.tir.Scope.INPUT;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -35,7 +35,6 @@ public class TIRClassParsing {
             }
             return interfaceClass;
         }).toList();
-
         aticClass.superClass = aClass;
         aticClass.interfaces = interfaces;
     }
@@ -57,8 +56,8 @@ public class TIRClassParsing {
                 return new Parameter(ref.name(), parse);
             }).toList();
             var returnType = TIRTypeParsing.parse(method.returnType(), context);
-            var aticMethod = new AticMethod(aticClass, ACC_PUBLIC, method.methodName(), parameters,
-                    returnType, method);
+            var aticMethod =
+                    new AticMethod(ACC_PUBLIC, method.methodName(), parameters, returnType, method,aticClass);
             aticClass.addMethod(aticMethod, context);
         }
     }

@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Remembers all loaded classes from the classpath
+ */
 public class LoadedBytecode {
 
     private final Map<ObjectPath, JVMLoadedClass> classes = new HashMap<>();

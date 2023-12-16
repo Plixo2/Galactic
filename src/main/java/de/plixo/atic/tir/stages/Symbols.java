@@ -6,6 +6,7 @@ import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.expressions.*;
 import de.plixo.atic.tir.path.Package;
 import de.plixo.atic.tir.path.Unit;
+import de.plixo.atic.types.Class;
 
 public class Symbols implements Tree<Context> {
 
@@ -40,10 +41,10 @@ public class Symbols implements Tree<Context> {
 
         //TODO: Change from getType to direct test
         var type = expression.getType(context);
-        if (type instanceof AticClass aticClass) {
-            return new AticClassConstructExpression(aticClass, parsed);
+        if (type instanceof Class aClass) {
+            return new AticClassConstructExpression(aClass, parsed);
         } else {
-            throw new NullPointerException("not supported yet");
+            throw new NullPointerException("not supported yet from class " + type);
         }
     }
 
@@ -76,7 +77,7 @@ public class Symbols implements Tree<Context> {
                 yield switch (pathElement) {
                     case Unit subUnit -> new UnitExpression(subUnit);
                     case Package aPackage -> new AticPackageExpression(aPackage);
-                    case AticClass aClass -> new AticClassExpression(aClass);
+                    case AticClass aClass -> new StaticClassExpression(aClass);
                     case null, default -> {
                         throw new NullPointerException(
                                 "Symbol " + id + " not found on unit " + unit.name());
@@ -89,15 +90,15 @@ public class Symbols implements Tree<Context> {
                 yield switch (pathElement) {
                     case Unit unit -> new UnitExpression(unit);
                     case Package aPackage -> new AticPackageExpression(aPackage);
-                    case AticClass aClass -> new AticClassExpression(aClass);
+                    case AticClass aClass -> new StaticClassExpression(aClass);
                     case null, default -> {
                         throw new NullPointerException(
                                 "Symbol " + id + " not found on package " + thePackage.name());
                     }
                 };
             }
-            case AticClassExpression aticClassExpression -> {
-                var aticClass = aticClassExpression.theClass();
+            case StaticClassExpression staticClassExpression -> {
+                var aticClass = staticClassExpression.theClass();
                 var possibleField = aticClass.getField(id, context);
                 if (possibleField != null) {
                     yield new StaticFieldExpression(aticClass, possibleField);
@@ -189,11 +190,11 @@ public class Symbols implements Tree<Context> {
             return switch (pathElement) {
                 case Unit unit -> new UnitExpression(unit);
                 case Package aPackage -> new AticPackageExpression(aPackage);
-                case AticClass aClass -> new AticClassExpression(aClass);
+                case AticClass aClass -> new StaticClassExpression(aClass);
                 case null, default -> {
                     var aClass = context.locateImported(id);
                     if (aClass != null) {
-                        yield new AticClassExpression(aClass);
+                        yield new StaticClassExpression(aClass);
                     }
                     throw new NullPointerException("Symbol " + id + " not found");
                 }

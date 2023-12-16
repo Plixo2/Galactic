@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public final class AticClassExpression extends Expression{
+public final class StaticClassExpression extends Expression{
     private final Class theClass;
 
     @Override

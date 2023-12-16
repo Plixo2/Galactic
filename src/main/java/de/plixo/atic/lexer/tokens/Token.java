@@ -7,8 +7,8 @@ import lombok.Getter;
  */
 @Getter
 public sealed abstract class Token
-        permits CharToken, EOFToken, LiteralToken, NumberToken, StringToken, UnknownToken,
-        WhiteSpaceToken, WordToken {
+        permits CharToken, CommentToken, EOFToken, LiteralToken, NumberToken, StringToken,
+        UnknownToken, WhiteSpaceToken, WordToken {
 
     /**
      * Alias used inside the grammar

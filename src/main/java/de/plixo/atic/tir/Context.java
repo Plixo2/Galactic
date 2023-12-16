@@ -59,7 +59,6 @@ public class Context {
         return unit.locateImported(name);
     }
 
-    @SneakyThrows
     public @Nullable Class getClass(ObjectPath objectPath) {
         return unit.locateClass(objectPath, this, true);
     }

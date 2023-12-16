@@ -13,7 +13,7 @@ import java.util.List;
  */
 public sealed abstract class Expression
         permits ArrayConstructExpression, AssignExpression, AticClassConstructExpression,
-        AticClassExpression, AticPackageExpression, BlockExpression, BooleanExpression,
+        StaticClassExpression, AticPackageExpression, BlockExpression, BooleanExpression,
         BranchExpression, CallNotation, ClassExpression, ConstructExpression, DotNotation,
         FieldExpression, GetMethodExpression, InstanceCreationExpression, LocalVariableAssign,
         MethodCallExpression, NumberExpression, Path, StaticFieldExpression, StaticMethodExpression,

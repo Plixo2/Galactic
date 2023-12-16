@@ -10,11 +10,8 @@ import de.plixo.atic.tir.aticclass.method.MethodImplementation;
 import de.plixo.atic.tir.aticclass.method.NewMethod;
 import de.plixo.atic.tir.path.PathElement;
 import de.plixo.atic.tir.path.Unit;
+import de.plixo.atic.types.*;
 import de.plixo.atic.types.Class;
-import de.plixo.atic.types.Type;
-import de.plixo.atic.types.VoidType;
-import de.plixo.atic.types.Field;
-import de.plixo.atic.types.Method;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -160,9 +157,7 @@ public class AticClass extends Class implements PathElement {
         for (var field : this.fields) {
             params.add(new Parameter(field.name(), field.type()));
         }
-//        System.out.println(methods.size());
-        addMethod(new AticMethod(this, ACC_PUBLIC, "<init>", params, new VoidType(), null), context);
-//        System.out.println(methods.size());
+        addMethod(new AticMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, this), context);
     }
 
     public Set<Method> implementationLeft() {
@@ -181,6 +176,11 @@ public class AticClass extends Class implements PathElement {
 
     public String name() {
         return unit().name() + "." + localName();
+    }
+
+    @Override
+    public ClassSource getSource() {
+        return new ClassSource.AticSource(this);
     }
 
 

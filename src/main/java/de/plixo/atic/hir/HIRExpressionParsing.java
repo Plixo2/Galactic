@@ -107,7 +107,8 @@ public class HIRExpressionParsing {
     private static HIRConstruct parseConstruct(Node node) {
         node.assertType("initialisation");
         var type = HIRTypeParsing.parse(node.get("type"));
-        var list = node.list("initialisationFieldList", "initialisationFieldListOpt",
+        var initialisationList = node.get("initialisationList");
+        var list = initialisationList.list("initialisationFieldList", "initialisationFieldListOpt",
                 "initialisationField").stream().map(ref -> {
             var hirExpression = HIRExpressionParsing.parse(ref.get("expression"));
             return new HIRConstruct.ConstructParam("expr", hirExpression);

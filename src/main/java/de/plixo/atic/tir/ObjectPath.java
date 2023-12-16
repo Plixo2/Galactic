@@ -28,7 +28,7 @@ public class ObjectPath {
     }
 
     public ObjectPath(List<String> names) {
-        this.names = names;
+        this.names = new ArrayList<>(names);
     }
 
     public ObjectPath add(String name) {
@@ -45,11 +45,11 @@ public class ObjectPath {
     public String asDotString() {
         return String.join(".", names);
     }
+
+
     public String asSlashString() {
         return String.join("/", names);
     }
-
-
 
     public String asJVMPath() {
         return String.join("/", names) + ".class";

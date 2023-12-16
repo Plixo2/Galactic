@@ -1,12 +1,13 @@
 package de.plixo.atic.types;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ArrayType extends Type {
-    public Type elementType;
+    private final Type elementType;
     @Override
     public String toString() {
         return "AArray{" + "elementType=" + elementType + '}';

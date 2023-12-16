@@ -46,8 +46,8 @@ public interface Tree<C extends Context> {
             case VarExpression varExpression -> parseVarExpression(varExpression, context);
             case AticClassConstructExpression aticClassConstructExpression ->
                     parseAticClassConstructExpression(aticClassConstructExpression, context);
-            case AticClassExpression aticClassExpression ->
-                    parseAticClassExpression(aticClassExpression, context);
+            case StaticClassExpression staticClassExpression ->
+                    parseAticClassExpression(staticClassExpression, context);
             case AticPackageExpression aticPackageExpression ->
                     parseAticPackageExpression(aticPackageExpression, context);
             case UnitExpression unitExpression -> parseUnitExpression(unitExpression, context);
@@ -83,7 +83,7 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseAticClassExpression(AticClassExpression expression, C context) {
+    default Expression parseAticClassExpression(StaticClassExpression expression, C context) {
         return defaultBehavior(expression);
     }
 

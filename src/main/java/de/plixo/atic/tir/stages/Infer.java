@@ -3,7 +3,9 @@ package de.plixo.atic.tir.stages;
 import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.expressions.*;
 import de.plixo.atic.types.Class;
+import de.plixo.atic.types.Type;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Infer implements Tree<TypeContext> {
@@ -36,16 +38,23 @@ public class Infer implements Tree<TypeContext> {
     @Override
     public Expression parseAticClassConstructExpression(AticClassConstructExpression expression,
                                                         TypeContext context) {
-        var parsedArguments = expression.arguments().stream().map(ref -> {
-            var parsedRef = parse(ref, context);
-            return parsedRef;
-        }).toList();
+        var parsedArguments = expression.arguments().stream().map(ref -> parse(ref, context)).toList();
 
         var constructors = expression.constructType().getMethods("<init>", context);
-        var bestMatch = constructors.findBestMatch(
-                parsedArguments.stream().map(ref -> ref.getType(context)).toList(), context);
+        constructors = constructors.filter(ref -> ref.owner().equals(expression.constructType()));
+        constructors.methods().forEach(System.out::println);
+        System.out.println("constructors.methods().size() = " + constructors.methods().size());
+
+        var types = parsedArguments.stream().map(ref -> ref.getType(context)).toList();
+        var bestMatch = constructors.findBestMatch(types, context);
+
+        System.out.println("bestMatch = " + bestMatch);
+
         if (bestMatch == null) {
             throw new NullPointerException("cant find fitting constructor");
+        }
+        if (!bestMatch.isCallable(types, context)) {
+            throw new NullPointerException("cant call constructor");
         }
         return new InstanceCreationExpression(bestMatch, expression.constructType(),parsedArguments);
     }
@@ -132,6 +141,8 @@ public class Infer implements Tree<TypeContext> {
     @Override
     public Expression parseDotNotation(DotNotation expression, TypeContext context) {
         var parsed = parse(expression.object(), context);
+
+
 
         var id = expression.id();
         if (parsed.getType(context) instanceof Class aClass) {
