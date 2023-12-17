@@ -11,7 +11,6 @@ import java.io.StringWriter;
 
 public class JsonUtil {
     public static void saveJsonObj(File file, JsonElement json) {
-        //  Thread.startVirtualThread(() -> {
         try {
             if (!file.exists()) {
                 makeFile(file);
@@ -29,8 +28,6 @@ public class JsonUtil {
         } catch (IOException var6) {
             var6.printStackTrace();
         }
-        //     });
-
     }
 
     public static void makeFile(File file) {

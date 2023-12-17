@@ -3,6 +3,7 @@ package de.plixo.atic.tir.expressions;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.MethodCollection;
 import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +17,6 @@ public final class GetMethodExpression extends Expression
 
     @Override
     public Type getType(Context context) {
-        //TODO caller has to check for this case
-        throw new NullPointerException("caller has to check for this case");
+        return new VoidType();
     }
 }

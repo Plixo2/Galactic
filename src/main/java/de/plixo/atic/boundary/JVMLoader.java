@@ -1,6 +1,7 @@
 package de.plixo.atic.boundary;
 
 import de.plixo.atic.tir.ObjectPath;
+import de.plixo.atic.tir.aticclass.MethodOwner;
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.*;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +46,7 @@ public class JVMLoader {
         classReader.accept(classNode, 0);
 
         var jvmLoadedClass =
-                new JVMLoadedClass(new ClassSource.JVMSource(classNode), path, classNode.name);
+                new JVMLoadedClass(classNode, path, classNode.name);
         bytecode.putClass(path, jvmLoadedClass);
         generate(jvmLoadedClass, classNode, bytecode);
 
@@ -90,7 +91,7 @@ public class JVMLoader {
                     getType(org.objectweb.asm.Type.getReturnType(methodNode.desc), bytecode);
             var args = Arrays.stream(argumentTypes).map(ref -> getType(ref, bytecode)).toList();
             methods.add(
-                    new Method(methodNode.access, methodNode.name, returnType, args, loadedClass));
+                    new Method(methodNode.access, methodNode.name, returnType, args, new MethodOwner.ClassOwner(loadedClass)));
         }
 
         loadedClass.setInterfaces(interfaces);

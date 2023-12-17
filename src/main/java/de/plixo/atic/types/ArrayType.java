@@ -1,11 +1,13 @@
 package de.plixo.atic.types;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
 @RequiredArgsConstructor
+@Getter
 public class ArrayType extends Type {
     private final Type elementType;
     @Override
@@ -25,6 +27,7 @@ public class ArrayType extends Type {
     public char getKind() {
         return '[';
     }
+
 
     @Override
     public String getDescriptor() {

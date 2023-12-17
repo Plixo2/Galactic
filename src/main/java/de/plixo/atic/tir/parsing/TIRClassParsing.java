@@ -6,11 +6,10 @@ import de.plixo.atic.tir.Scope;
 import de.plixo.atic.tir.TypeContext;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
+import de.plixo.atic.tir.aticclass.MethodOwner;
 import de.plixo.atic.tir.aticclass.Parameter;
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.Field;
-import de.plixo.atic.types.Type;
-import de.plixo.atic.types.VoidType;
 
 import static de.plixo.atic.tir.Scope.INPUT;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -57,7 +56,8 @@ public class TIRClassParsing {
             }).toList();
             var returnType = TIRTypeParsing.parse(method.returnType(), context);
             var aticMethod =
-                    new AticMethod(ACC_PUBLIC, method.methodName(), parameters, returnType, method,aticClass);
+                    new AticMethod(ACC_PUBLIC, method.methodName(), parameters, returnType, method,
+                            new MethodOwner.ClassOwner(aticClass));
             aticClass.addMethod(aticMethod, context);
         }
     }
@@ -68,29 +68,12 @@ public class TIRClassParsing {
             var aticMethod = method.aticMethod();
             context.pushScope();
             aticMethod.parameters().forEach(ref -> {
-                context.scope()
-                        .addVariable(new Scope.Variable(ref.name(), INPUT, ref.type(), null));
+                var variable = new Scope.Variable(ref.name(), INPUT, ref.type(), null);
+                ref.variable(variable);
+                context.scope().addVariable(variable);
             });
             context.scope().addVariable(new Scope.Variable("this", INPUT, aticClass, null));
-
-            var hirMethod = aticMethod.hirMethod();
-            if (hirMethod != null) {
-                aticMethod.body = TIRExpressionParsing.parse(hirMethod.expression(), context);
-                aticMethod.body = language.symbolsStage().parse(aticMethod.body, context);
-                aticMethod.body = language.inferStage().parse(aticMethod.body, context);
-                language.checkStage().parse(aticMethod.body, context);
-                var expected = aticMethod.returnType();
-                assert aticMethod.body != null;
-
-                var found = aticMethod.body.getType(context);
-                var isVoid = Type.isSame(expected, new VoidType());
-                var typeMatch = Type.isAssignableFrom(expected, found, context);
-                if (!typeMatch && !isVoid) {
-                    throw new NullPointerException(
-                            "method return type doesnt match, expected " + expected +
-                                    ", but found " + found);
-                }
-            }
+            TIRMethodParsing.parse(aticMethod, context, language);
             context.popScope();
         }
     }

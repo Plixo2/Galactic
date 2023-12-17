@@ -19,4 +19,14 @@ public final class NumberExpression extends Expression{
     public Type getType(Context context) {
         return new PrimitiveType(type);
     }
+
+    public Object asObject() {
+        return switch (type) {
+            case INT, BYTE, SHORT, CHAR -> Integer.valueOf(value.intValue());
+            case LONG -> value.longValue();
+            case FLOAT -> value.floatValue();
+            case DOUBLE -> value.doubleValue();
+            case BOOLEAN -> throw new NullPointerException("Boolean not implemented");
+        };
+    }
 }

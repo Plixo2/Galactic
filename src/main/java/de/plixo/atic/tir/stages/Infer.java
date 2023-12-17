@@ -1,11 +1,11 @@
 package de.plixo.atic.tir.stages;
 
 import de.plixo.atic.tir.TypeContext;
+import de.plixo.atic.tir.aticclass.MethodOwner;
 import de.plixo.atic.tir.expressions.*;
 import de.plixo.atic.types.Class;
-import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 
-import java.util.List;
 import java.util.Objects;
 
 public class Infer implements Tree<TypeContext> {
@@ -38,25 +38,24 @@ public class Infer implements Tree<TypeContext> {
     @Override
     public Expression parseAticClassConstructExpression(AticClassConstructExpression expression,
                                                         TypeContext context) {
-        var parsedArguments = expression.arguments().stream().map(ref -> parse(ref, context)).toList();
+        var parsedArguments =
+                expression.arguments().stream().map(ref -> parse(ref, context)).toList();
 
         var constructors = expression.constructType().getMethods("<init>", context);
-        constructors = constructors.filter(ref -> ref.owner().equals(expression.constructType()));
-        constructors.methods().forEach(System.out::println);
-        System.out.println("constructors.methods().size() = " + constructors.methods().size());
-
+        constructors = constructors.filter(
+                ref -> ref.owner().equals(new MethodOwner.ClassOwner(expression.constructType())));
         var types = parsedArguments.stream().map(ref -> ref.getType(context)).toList();
         var bestMatch = constructors.findBestMatch(types, context);
-
-        System.out.println("bestMatch = " + bestMatch);
 
         if (bestMatch == null) {
             throw new NullPointerException("cant find fitting constructor");
         }
+
         if (!bestMatch.isCallable(types, context)) {
             throw new NullPointerException("cant call constructor");
         }
-        return new InstanceCreationExpression(bestMatch, expression.constructType(),parsedArguments);
+        return new InstanceCreationExpression(bestMatch, expression.constructType(),
+                parsedArguments);
     }
 
     @Override
@@ -81,7 +80,8 @@ public class Infer implements Tree<TypeContext> {
     public Expression parseCallNotation(CallNotation expression, TypeContext context) {
         var parsed = parse(expression.object(), context);
 
-        var parsedArguments = expression.arguments().stream().map(ref -> parse(ref, context)).toList();
+        var parsedArguments =
+                expression.arguments().stream().map(ref -> parse(ref, context)).toList();
 
         var types = parsedArguments.stream().map(ref -> ref.getType(context)).toList();
 
@@ -90,13 +90,16 @@ public class Infer implements Tree<TypeContext> {
             if (bestMatch == null) {
                 throw new NullPointerException("Method type types " + types + " not found");
             }
-            return new MethodCallExpression(methodExpression, bestMatch, parsedArguments);
+            return new MethodCallExpression(methodExpression, bestMatch,
+                    methodExpression.object().getType(context), parsedArguments);
         } else if (parsed instanceof StaticMethodExpression methodExpression) {
             var bestMatch = methodExpression.methods().findBestMatch(types, context);
             if (bestMatch == null) {
-                throw new NullPointerException("Method type types " + types + " not found " + methodExpression.methods());
+                throw new NullPointerException(
+                        "Method types " + types + " not found " + methodExpression.methods());
             }
-            return new MethodCallExpression(methodExpression, bestMatch, parsedArguments);
+            return new MethodCallExpression(methodExpression, bestMatch, new VoidType(),
+                    parsedArguments);
         } else {
             throw new NullPointerException("can only call methods");
         }
@@ -142,20 +145,10 @@ public class Infer implements Tree<TypeContext> {
     public Expression parseDotNotation(DotNotation expression, TypeContext context) {
         var parsed = parse(expression.object(), context);
 
-
-
         var id = expression.id();
         if (parsed.getType(context) instanceof Class aClass) {
-            var field = aClass.getField(id, context);
-            if (field != null) {
-                return new FieldExpression(parsed, field);
-            }
-            var methods = aClass.getMethods(id, context);
-            if (!methods.isEmpty()) {
-                return new GetMethodExpression(parsed, methods);
-            }
-            throw new NullPointerException(
-                    "Field or Methods " + id + " not found in class " + aClass.path());
+            return Objects.requireNonNull(aClass.getDotNotation(parsed, id, context),
+                    "Symbol " + id + " not found on Object " + aClass.name());
 
         } else {
             throw new NullPointerException("only fields in classes are supported " + expression);

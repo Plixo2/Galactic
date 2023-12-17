@@ -3,6 +3,7 @@ package de.plixo.atic;
 import com.google.common.io.Resources;
 import de.plixo.atic.boundary.JVMLoader;
 import de.plixo.atic.boundary.LoadedBytecode;
+import de.plixo.atic.compiler.Compiler;
 import de.plixo.atic.files.FileTree;
 import de.plixo.atic.lexer.Tokenizer;
 import de.plixo.atic.parsing.Grammar;
@@ -21,10 +22,12 @@ import de.plixo.atic.tir.stages.Infer;
 import de.plixo.atic.tir.stages.Symbols;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -32,12 +35,12 @@ import java.util.Objects;
  * The Language class is the entry point for the compiler.
  * It contains the stages of the compiler.
  */
-@RequiredArgsConstructor
 @Getter
 public class Language {
     private final String filePattern = "atic";
     private final String configFile = "/cfg.txt";
     private final String entryRule = "unit";
+    private final @Nullable String mainClass;
 
     private final LoadedBytecode loadedBytecode = new LoadedBytecode();
 
@@ -45,6 +48,10 @@ public class Language {
     private final Infer inferStage = new Infer();
     private final Check checkStage = new Check();
     private final CheckFlow checkFlowStage = new CheckFlow();
+
+    public Language(@Nullable String mainClass) {
+        this.mainClass = mainClass;
+    }
 
     /**
      * Generates the grammar from the grammar file in the classpath
@@ -79,14 +86,29 @@ public class Language {
         rootEntry.parse(rule);
 
         var root = TreeBuilding.convertRoot(rootEntry);
-        compile(root);
+        read(root);
+        write(root);
 
 
         var endTime = System.currentTimeMillis();
         System.out.println("Took " + (endTime - startTime) + " ms");
     }
 
-    private void compile(CompileRoot root) {
+    private void write(CompileRoot root) {
+        var units = root.getUnits();
+        var compiler = new Compiler();
+        try {
+            for (var unit : units) {
+                var context = new Context(unit, root, loadedBytecode);
+                compiler.compile(unit, context);
+            }
+            compiler.makeJarFile(mainClass);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void read(CompileRoot root) {
         var units = root.getUnits();
         var objectPath = new ObjectPath("java", "lang", "Object");
         var defaultSuperClass = JVMLoader.asJVMClass(objectPath, loadedBytecode);
@@ -115,6 +137,12 @@ public class Language {
         }
 
         //types are known here
+
+        units.forEach(unit -> {
+            var context = new Context(unit, root, loadedBytecode);
+            TIRUnitParsing.fillMethodShells(unit, context);
+        });
+
         classes.forEach(aClass -> {
             var context = new Context(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillFields(aClass, context);
@@ -130,12 +158,18 @@ public class Language {
 
         //expressions can be evaluated here
 
+
         classes.forEach(aClass -> {
             var context = new TypeContext(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillMethodExpressions(aClass, context, this);
         });
         blocks.forEach(block -> {
             TIRUnitParsing.fillBlockExpressions(block.unit(), root, block, this);
+        });
+
+        units.forEach(unit -> {
+            var context = new TypeContext(unit, root, loadedBytecode);
+            TIRUnitParsing.fillMethodExpressions(unit, context, this);
         });
 
         for (var aClass : classes) {

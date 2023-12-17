@@ -21,7 +21,8 @@ field := id ":" type!
 block := blockExpr
 
 method := "fn"? id! "("?! parameterList! ")"?! "->"?! type! "=" expression!
-parameterList := parameter parameterList! ||
+parameterList := parameter parameterListOpt! ||
+parameterListOpt := "," parameterList! ||
 parameter := id ":"?! type!
 
 blockExpr := "{"? blockExprList!

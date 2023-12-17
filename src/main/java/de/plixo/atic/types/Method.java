@@ -1,6 +1,7 @@
 package de.plixo.atic.types;
 
 import de.plixo.atic.tir.Context;
+import de.plixo.atic.tir.aticclass.MethodOwner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,7 +16,7 @@ public class Method {
     private final String name;
     private final Type returnType;
     private final List<Type> arguments;
-    private final Class owner;
+    private final MethodOwner owner;
 
     @Override
     public String toString() {

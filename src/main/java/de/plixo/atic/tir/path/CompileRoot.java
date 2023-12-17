@@ -14,5 +14,5 @@ public sealed interface CompileRoot permits Package, Unit {
     String name();
     ObjectPath toObjectPath();
     List<Unit> getUnits();
-    @Nullable PathElement locate(String name);
+    PathElement toPathElement();
 }

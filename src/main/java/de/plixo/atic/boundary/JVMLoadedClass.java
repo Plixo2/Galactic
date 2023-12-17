@@ -8,6 +8,7 @@ import de.plixo.atic.types.Class;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -22,7 +23,8 @@ import java.util.Objects;
 @Setter
 public class JVMLoadedClass extends Class {
 
-    private final ClassSource source;
+    @Getter
+    private final ClassNode node;
     private final ObjectPath path;
     private final String name;
     private int access = 0;
@@ -39,7 +41,7 @@ public class JVMLoadedClass extends Class {
 
     @Override
     public ClassSource getSource() {
-        return source;
+        return new ClassSource.JVMSource(node);
     }
 
     @Override

@@ -18,9 +18,7 @@ public abstract class Type {
 
     public abstract char getKind();
 
-    public String getDescriptor() {
-        return String.valueOf(getKind());
-    }
+    public abstract String getDescriptor();
 
     public abstract boolean equals(Object o);
 
@@ -37,7 +35,7 @@ public abstract class Type {
         if (same) {
             return true;
         }
-        if ((b instanceof Class bClass) && (a instanceof Class aClass)) {
+        if ((b instanceof Class bClass) && (a instanceof Class)) {
             var superType = bClass.getSuperClass();
             if (superType == null) {
                 return false;
@@ -49,6 +47,19 @@ public abstract class Type {
             }
             return isAssignableFrom(a, superType, context);
         }
+        if ((b instanceof ArrayType bClass && bClass.elementType() instanceof Class clazz) && (a instanceof ArrayType arrayType)) {
+            var superType = clazz.getSuperClass();
+            if (superType == null) {
+                return false;
+            }
+            for (var anInterface : clazz.getInterfaces()) {
+                if (isAssignableFrom(arrayType.elementType(), anInterface, context)) {
+                    return true;
+                }
+            }
+            return isAssignableFrom(arrayType.elementType(), superType, context);
+        }
+
         return false;
     }
 

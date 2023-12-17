@@ -2,11 +2,10 @@ package de.plixo.atic.tir.stages;
 
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Scope;
-import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.expressions.*;
-import de.plixo.atic.tir.path.Package;
-import de.plixo.atic.tir.path.Unit;
 import de.plixo.atic.types.Class;
+
+import java.util.Objects;
 
 public class Symbols implements Tree<Context> {
 
@@ -39,7 +38,6 @@ public class Symbols implements Tree<Context> {
             return parse;
         }).toList();
 
-        //TODO: Change from getType to direct test
         var type = expression.getType(context);
         if (type instanceof Class aClass) {
             return new AticClassConstructExpression(aClass, parsed);
@@ -73,41 +71,18 @@ public class Symbols implements Tree<Context> {
         return switch (parsed) {
             case UnitExpression unitExpression -> {
                 var unit = unitExpression.unit();
-                var pathElement = unit.locate(id);
-                yield switch (pathElement) {
-                    case Unit subUnit -> new UnitExpression(subUnit);
-                    case Package aPackage -> new AticPackageExpression(aPackage);
-                    case AticClass aClass -> new StaticClassExpression(aClass);
-                    case null, default -> {
-                        throw new NullPointerException(
-                                "Symbol " + id + " not found on unit " + unit.name());
-                    }
-                };
+                yield Objects.requireNonNull(unit.getDotNotation(id),
+                        "Symbol " + id + " not found in unit " + unit.name());
             }
             case AticPackageExpression packageExpression -> {
                 var thePackage = packageExpression.thePackage();
-                var pathElement = thePackage.locate(id);
-                yield switch (pathElement) {
-                    case Unit unit -> new UnitExpression(unit);
-                    case Package aPackage -> new AticPackageExpression(aPackage);
-                    case AticClass aClass -> new StaticClassExpression(aClass);
-                    case null, default -> {
-                        throw new NullPointerException(
-                                "Symbol " + id + " not found on package " + thePackage.name());
-                    }
-                };
+                yield Objects.requireNonNull(thePackage.getDotNotation(id),
+                        "Symbol " + id + " not found in package " + thePackage.name());
             }
             case StaticClassExpression staticClassExpression -> {
                 var aticClass = staticClassExpression.theClass();
-                var possibleField = aticClass.getField(id, context);
-                if (possibleField != null) {
-                    yield new StaticFieldExpression(aticClass, possibleField);
-                }
-                var possibleMethods = aticClass.getMethods(id, context);
-                if (!possibleMethods.isEmpty()) {
-                    yield new StaticMethodExpression(aticClass, possibleMethods);
-                }
-                throw new NullPointerException("Symbol " + id + " not found on class " + aticClass);
+                yield Objects.requireNonNull(aticClass.getStaticDotNotation(id, context),
+                        "Symbol " + id + " not found in class " + aticClass.name());
             }
             default -> new DotNotation(parsed, id);
         };
@@ -182,27 +157,14 @@ public class Symbols implements Tree<Context> {
         if (id.equals("true") || id.equals("false")) {
             return new BooleanExpression(Boolean.parseBoolean(id));
         }
-        var variable = context.scope().getVariable(id);
-        if (variable != null) {
-            return new VarExpression(variable);
-        } else {
-            var pathElement = context.locate(id);
-            return switch (pathElement) {
-                case Unit unit -> new UnitExpression(unit);
-                case Package aPackage -> new AticPackageExpression(aPackage);
-                case AticClass aClass -> new StaticClassExpression(aClass);
-                case null, default -> {
-                    var aClass = context.locateImported(id);
-                    if (aClass != null) {
-                        yield new StaticClassExpression(aClass);
-                    }
-                    throw new NullPointerException("Symbol " + id + " not found");
-                }
-            };
+        var symbolExpression = context.getSymbolExpression(id, context);
+        if (symbolExpression != null) {
+            return symbolExpression;
         }
+        throw new NullPointerException("Symbol " + id + " not found");
     }
 
     private static boolean isValidVariableName(String name, Context context) {
-        return !name.equals("true") && !name.equals("false") && context.locate(name) == null;
+        return !name.equals("true") && !name.equals("false");
     }
 }

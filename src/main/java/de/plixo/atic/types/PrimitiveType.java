@@ -61,6 +61,11 @@ public class PrimitiveType extends Type {
         };
     }
 
+    @Override
+    public String getDescriptor() {
+        return String.valueOf(getKind());
+    }
+
     @RequiredArgsConstructor
     public enum APrimitiveType {
         INT(true),

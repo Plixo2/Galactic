@@ -49,7 +49,7 @@ public class HIRClassParsing {
     private static HIRMethod parseMethod(Node node) {
         node.assertType("method");
         var name = node.getID();
-        var parameters = node.list("parameterList", "parameter");
+        var parameters = node.list("parameterList", "parameterListOpt", "parameter");
         var returnType = HIRTypeParsing.parse(node.get("type"));
         var blockExpr = HIRExpressionParsing.parse(node.get("expression"));
         var parameterList = parameters.stream().map(param -> {

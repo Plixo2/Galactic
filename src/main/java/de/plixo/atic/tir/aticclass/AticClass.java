@@ -22,7 +22,7 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 /**
  * Represents a class inside a Unit
  */
-public class AticClass extends Class implements PathElement {
+public class AticClass extends Class {
     @Getter
     private final String localName;
     @Getter
@@ -157,7 +157,8 @@ public class AticClass extends Class implements PathElement {
         for (var field : this.fields) {
             params.add(new Parameter(field.name(), field.type()));
         }
-        addMethod(new AticMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, this), context);
+        var owner = new MethodOwner.ClassOwner(this);
+        addMethod(new AticMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, owner), context);
     }
 
     public Set<Method> implementationLeft() {

@@ -3,6 +3,7 @@ package de.plixo.atic.tir.expressions;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.path.Unit;
 import de.plixo.atic.types.Type;
+import de.plixo.atic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +14,6 @@ public final class UnitExpression extends Expression{
 
     @Override
     public Type getType(Context context) {
-        //TODO throw sensible error here, or return void
-        throw new NullPointerException("UnitExpression has no type");
+        return new VoidType();
     }
 }

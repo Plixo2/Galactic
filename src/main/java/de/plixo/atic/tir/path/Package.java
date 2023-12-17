@@ -1,6 +1,9 @@
 package de.plixo.atic.tir.path;
 
 import de.plixo.atic.tir.ObjectPath;
+import de.plixo.atic.tir.expressions.AticPackageExpression;
+import de.plixo.atic.tir.expressions.Expression;
+import de.plixo.atic.tir.expressions.UnitExpression;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -12,13 +15,15 @@ import java.util.List;
  * Represents a Package of code (a folder)
  */
 @RequiredArgsConstructor
-public final class Package implements CompileRoot, PathElement {
+public final class Package implements CompileRoot {
     @Getter
     private final String localName;
 
     private @Nullable final Package parent;
 
+    @Getter
     private final List<Unit> units = new ArrayList<>();
+    @Getter
     private final List<Package> packages = new ArrayList<>();
 
 
@@ -45,6 +50,11 @@ public final class Package implements CompileRoot, PathElement {
         return list;
     }
 
+    @Override
+    public PathElement toPathElement() {
+        return new PathElement.PackageElement(this);
+    }
+
     public void addPackage(Package packages) {
         this.packages.add(packages);
     }
@@ -53,16 +63,15 @@ public final class Package implements CompileRoot, PathElement {
         units.add(unit);
     }
 
-    @Override
-    public @Nullable PathElement locate(String name) {
+    public @Nullable Expression getDotNotation(String name) {
         for (Package aPackage : packages) {
             if (aPackage.localName().equals(name)) {
-                return aPackage;
+                return new AticPackageExpression(aPackage);
             }
         }
         for (Unit unit : units) {
             if (unit.localName().equals(name)) {
-                return unit;
+               return new UnitExpression(unit);
             }
         }
         return null;

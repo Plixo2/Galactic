@@ -6,10 +6,15 @@ import de.plixo.atic.files.FileTreeEntry;
 import de.plixo.atic.hir.items.HIRItem;
 import de.plixo.atic.tir.Context;
 import de.plixo.atic.tir.Import;
+import de.plixo.atic.tir.MethodCollection;
 import de.plixo.atic.tir.ObjectPath;
 import de.plixo.atic.tir.aticclass.AticBlock;
 import de.plixo.atic.tir.aticclass.AticClass;
 import de.plixo.atic.tir.aticclass.AticMethod;
+import de.plixo.atic.tir.aticclass.MethodOwner;
+import de.plixo.atic.tir.expressions.Expression;
+import de.plixo.atic.tir.expressions.StaticClassExpression;
+import de.plixo.atic.tir.expressions.StaticMethodExpression;
 import de.plixo.atic.types.Class;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +29,7 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 @Getter
-public final class Unit implements CompileRoot, PathElement {
+public final class Unit implements CompileRoot {
     @Nullable
     final Package parent;
     final String localName;
@@ -44,6 +49,11 @@ public final class Unit implements CompileRoot, PathElement {
     public void addItem(HIRItem item) {
         hirItems.add(item);
     }
+    public void addStaticMethod(AticMethod method) {
+        staticMethods.add(method);
+    }
+
+
 
     public void addClass(AticClass aticClass) {
         this.classes.add(aticClass);
@@ -74,8 +84,12 @@ public final class Unit implements CompileRoot, PathElement {
         return List.of(this);
     }
 
+    @Override
+    public PathElement toPathElement() {
+        return new PathElement.UnitElement(this);
+    }
 
-    public @Nullable Class locateImported(String name) {
+    public @Nullable Class getImportedClass(String name) {
         for (var anImport : imports) {
             if (anImport.alias().equals(name)) {
                 return anImport.importedClass();
@@ -84,12 +98,17 @@ public final class Unit implements CompileRoot, PathElement {
         return null;
     }
 
-    @Override
-    public @Nullable PathElement locate(String name) {
+    public @Nullable Expression getDotNotation(String name) {
         for (var aClass : classes) {
             if (aClass.localName().equals(name)) {
-                return aClass;
+                return new StaticClassExpression(aClass);
             }
+        }
+        var methods = staticMethods.stream().map(AticMethod::asAMethod)
+                .filter(ref -> ref.name().equals(name)).toList();
+        var methodCollection = new MethodCollection(name, methods);
+        if (!methodCollection.isEmpty()) {
+            return new StaticMethodExpression(new MethodOwner.UnitOwner(this), methodCollection);
         }
         return null;
     }
@@ -116,30 +135,9 @@ public final class Unit implements CompileRoot, PathElement {
     }
 
     public @Nullable AticClass locateAticClass(ObjectPath path, Context context) {
-
-        CompileRoot prev = context.root();
-        var iterator = path.names().iterator();
-        while (iterator.hasNext()) {
-            var name = iterator.next();
-            var located = prev.locate(name);
-            switch (located) {
-                case Unit unit -> {
-                    prev = unit;
-                }
-                case Package aPackage -> {
-                    prev = aPackage;
-                }
-                case AticClass aticClass -> {
-                    if (iterator.hasNext()) {
-                        return null;
-                    }
-                    return aticClass;
-                }
-                case null -> {
-                    return null;
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + located);
-            }
+        var element = context.root().toPathElement().get(path);
+        if (element instanceof PathElement.AticClassElement(var aticClass)) {
+            return aticClass;
         }
         return null;
     }
@@ -147,5 +145,9 @@ public final class Unit implements CompileRoot, PathElement {
 
     public void addImport(String name, Class aticClass) {
         imports.add(new Import(name, aticClass));
+    }
+
+    public String getJVMDestination() {
+        return this.toObjectPath().asSlashString();
     }
 }

@@ -27,7 +27,7 @@ public class ClassDebugger {
         ClassWriter cw = new ClassWriter(COMPUTE_FRAMES | COMPUTE_MAXS);
         cr.accept(cw, 0);
         byte[] b = cw.toByteArray();
-        var outFile = new File("resources/test/TestInterface.class");
+        var outFile = new File("resources/Child.class");
         JsonUtil.makeFile(outFile);
         FileUtils.writeByteArrayToFile(outFile, b);
     }

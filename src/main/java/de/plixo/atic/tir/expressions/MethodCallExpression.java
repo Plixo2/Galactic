@@ -14,6 +14,7 @@ public final class MethodCallExpression extends Expression{
 
     private final MethodSource source;
     private final Method method;
+    private final Type calledType;
     private final List<Expression> arguments;
 
     @Override

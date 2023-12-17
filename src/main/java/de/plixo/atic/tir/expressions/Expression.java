@@ -33,7 +33,7 @@ public sealed abstract class Expression
     public Expression standartDotExpression(Type type, String id, Context context) {
         var aField = type.getField(id, context);
         if (aField != null) {
-            return new FieldExpression(this, aField);
+            return new FieldExpression(this, type, aField);
         } else {
             var methods = type.getMethods(id, context);
             if (methods.isEmpty()) {

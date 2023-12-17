@@ -2,6 +2,8 @@ import Some Other.Some
 import * Core
 import IntList Core.IList
 
+
+import @java String java.lang.String
 import @java Consumer java.util.function.Consumer
 import @java Function java.util.function.Function
 import @java Boolean java.lang.Boolean
@@ -10,6 +12,7 @@ import @java Object java.lang.Object
 import @java ArrayList java.util.ArrayList
 import @java List java.util.List
 import @java TestObj test.TestObj
+import @java Arrays java.util.Arrays
 
 class Test extends Some {
     field: java.lang.String
@@ -41,6 +44,48 @@ class Mapper implements Function {
     fn apply(o: Object) -> Object = {
         o.toString()
     }
+}
+
+
+fn main(args: [String]) -> void = {
+    System.out.println("Hello World")
+    var hello = System.getProperty("hello")
+    System.setProperty("hello", "bye")
+    var hello2: boolean = true
+    hello = System.getProperty("hello")
+
+    other(args)
+
+    var first = getArg(0, args)
+    System.out.println(first.equals("some"))
+    System.out.println(getArgLength(args))
+    System.out.println(first)
+    System.out.println("some")
+
+    System.out.println(hello.contains("hello"))
+    System.out.println(hello.contains("bye"))
+    System.out.println(hello)
+
+    var state = if hello.contains("100") {
+        100
+    } else {
+        500
+    }
+    System.out.println(state)
+
+}
+
+fn other(args: [String]) -> boolean = {
+    System.out.println(Arrays.toString(args))
+    false
+}
+
+fn getArg(index: int, args: [String]) -> Object = {
+    Arrays.asList(args).get(index)
+}
+
+fn getArgLength(args: [String]) -> int = {
+    Arrays.asList(args).size()
 }
 
 {

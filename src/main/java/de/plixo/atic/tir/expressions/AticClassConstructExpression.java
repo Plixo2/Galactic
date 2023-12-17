@@ -20,7 +20,6 @@ public final class AticClassConstructExpression extends Expression {
 
     @Override
     public Type getType(Context context) {
-        //TODO generics?
         return constructType;
     }
 }

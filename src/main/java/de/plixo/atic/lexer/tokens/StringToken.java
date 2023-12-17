@@ -31,8 +31,7 @@ public final class StringToken extends Token {
             }
         }
 
-        throw new NullPointerException("not impl");
-        //TODO
+        return -1;
     }
 
 }

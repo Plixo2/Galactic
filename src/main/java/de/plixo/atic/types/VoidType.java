@@ -27,4 +27,9 @@ public class VoidType extends Type {
     public char getKind() {
         return 'V';
     }
+
+    @Override
+    public String getDescriptor() {
+        return String.valueOf(getKind());
+    }
 }

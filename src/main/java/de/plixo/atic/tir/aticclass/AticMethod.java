@@ -2,6 +2,7 @@ package de.plixo.atic.tir.aticclass;
 
 import de.plixo.atic.hir.items.HIRMethod;
 import de.plixo.atic.tir.expressions.Expression;
+import de.plixo.atic.tir.path.PathElement;
 import de.plixo.atic.types.Class;
 import de.plixo.atic.types.Type;
 import de.plixo.atic.types.Method;
@@ -17,8 +18,6 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 public class AticMethod {
-
-
 
     @Getter
     private final int access;
@@ -36,7 +35,7 @@ public class AticMethod {
     private final @Nullable HIRMethod hirMethod;
 
     @Getter
-    private final Class owner;
+    private final MethodOwner owner;
 
     public @Nullable Expression body = null;
 
