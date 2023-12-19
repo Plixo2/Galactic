@@ -48,7 +48,7 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
         attributes(
-                     'Main-Class': 'de.plixo.atic.Main'
+                     'Main-Class': 'de.plixo.galactic.Main'
         )
     }
 

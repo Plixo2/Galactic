@@ -99,18 +99,18 @@ Symbol Stage:
 - true/false
 
 ```
-ConstructExpression -> AticClassConstructExpression
+ConstructExpression -> StellaClassConstructExpression
 StringExpression
 NumberExpression
 DotNotation -> DotNotation, StaticFieldExpression, StaticMethodExpression,
-               (AticPackageExpression, AticClassExpression, UnitExpression -> StaticMethodExpression, StaticFieldExpression)
-AticClassExpression -> StaticMethodExpression, StaticFieldExpression
+               (StellaPackageExpression, StellaClassExpression, UnitExpression -> StaticMethodExpression, StaticFieldExpression)
+StellaClassExpression -> StaticMethodExpression, StaticFieldExpression
 CallNotation
 BranchExpression
 BlockExpression
 VarDefExpression
 SymbolExpression-> BooleanExpression, VarExpression, 
-                    (AticClassExpression, AticPackageExpression, UnitExpression -> StaticMethodExpression, StaticFieldExpression)
+                    (StellaClassExpression, StellaPackageExpression, UnitExpression -> StaticMethodExpression, StaticFieldExpression)
 AssignExpression -> LocalVariableAssign
 ```
 
@@ -137,7 +137,7 @@ BooleanExpression
 VarExpression 
 StaticFieldExpression
 StaticMethodExpression
-AticClassConstructExpression -> InstanceCreationExpression
+StellaClassConstructExpression -> InstanceCreationExpression
 ```
 
 

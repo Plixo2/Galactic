@@ -1,6 +1,6 @@
 package test;
 
-import de.plixo.atic.common.JsonUtil;
+import de.plixo.galactic.common.JsonUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.ClassReader;

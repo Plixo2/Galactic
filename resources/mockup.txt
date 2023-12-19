@@ -95,7 +95,7 @@ main = fn (string.. args) -> void {
 interface List<T> {
     get: fn() -> void
 }
-
+      hngfhghghhg
 interface Default<T> {
     get: fn () -> T
 }
