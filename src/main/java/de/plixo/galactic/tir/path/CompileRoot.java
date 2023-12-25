@@ -10,8 +10,12 @@ import java.util.List;
  */
 public sealed interface CompileRoot permits Package, Unit {
     String localName();
+
     String name();
+
     ObjectPath toObjectPath();
+
     List<Unit> getUnits();
+
     PathElement toPathElement();
 }

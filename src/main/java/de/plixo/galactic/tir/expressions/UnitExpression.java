@@ -1,5 +1,6 @@
 package de.plixo.galactic.tir.expressions;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.path.Unit;
 import de.plixo.galactic.types.Type;
@@ -9,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public final class UnitExpression extends Expression{
+public final class UnitExpression extends Expression {
+    private final Region region;
     private final Unit unit;
 
     @Override

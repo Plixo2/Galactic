@@ -6,6 +6,7 @@ import de.plixo.galactic.types.Class;
 public sealed interface MethodOwner {
     record UnitOwner(Unit unit) implements MethodOwner {
     }
+
     record ClassOwner(Class aClass) implements MethodOwner {
     }
 }

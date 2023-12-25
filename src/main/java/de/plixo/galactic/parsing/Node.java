@@ -99,6 +99,7 @@ public class Node {
         final Node id = get("string");
         return Objects.requireNonNull(id.child().record).literal();
     }
+
     public Node child() {
         return children.get(0);
     }

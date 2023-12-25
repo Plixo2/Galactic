@@ -1,5 +1,6 @@
 package de.plixo.galactic.tir.expressions;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.Type;
@@ -9,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public final class StaticClassExpression extends Expression{
+public final class StaticClassExpression extends Expression {
+    private final Region region;
     private final Class theClass;
 
     @Override

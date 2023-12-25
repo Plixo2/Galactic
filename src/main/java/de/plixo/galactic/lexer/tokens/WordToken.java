@@ -27,8 +27,10 @@ public final class WordToken extends Token {
     private boolean isInAlphabet(char point) {
         return (point >= 'A' && point <= 'Z') || (point >= 'a' && point <= 'z') || point == '_';
     }
+
     private boolean isInWord(char point) {
-        return (point >= 'A' && point <= 'Z') || (point >= 'a' && point <= 'z') || point == '_'  || (point >= '0' && point <= '9');
+        return (point >= 'A' && point <= 'Z') || (point >= 'a' && point <= 'z') || point == '_' ||
+                (point >= '0' && point <= '9');
     }
 
 }

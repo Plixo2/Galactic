@@ -8,6 +8,7 @@ public final class UnknownToken extends Token {
     UnknownToken() {
         super("???");
     }
+
     @Override
     public boolean startsWith(char str) {
         return false;

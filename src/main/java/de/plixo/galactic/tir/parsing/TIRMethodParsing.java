@@ -1,6 +1,6 @@
 package de.plixo.galactic.tir.parsing;
 
-import de.plixo.galactic.Language;
+import de.plixo.galactic.Universe;
 import de.plixo.galactic.tir.TypeContext;
 import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Type;
@@ -8,7 +8,7 @@ import de.plixo.galactic.types.VoidType;
 
 public class TIRMethodParsing {
 
-    public static void parse(StellaMethod ref, TypeContext context, Language language) {
+    public static void parse(StellaMethod ref, TypeContext context, Universe language) {
         if (ref.hirMethod() != null) {
             var expression = ref.hirMethod().expression();
             ref.body = TIRExpressionParsing.parse(expression, context);

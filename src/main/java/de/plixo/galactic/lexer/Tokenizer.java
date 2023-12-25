@@ -18,8 +18,9 @@ public class Tokenizer {
     /**
      * Creates tokens from a string from a file, by splitting all the lines.
      * This can be made parallel in the future.
+     *
      * @param sourceFile source file for insights (can be null)
-     * @param src file source
+     * @param src        file source
      * @return generated tokens
      */
     public List<TokenRecord> fromFile(@Nullable File sourceFile, String src) {
@@ -39,9 +40,10 @@ public class Tokenizer {
      * Then test everything again to see if it fits the rest of the text.
      * Then the function creates a record of the first fitting token and
      * continues to match the rest of the string.
+     *
      * @param string the string to make tokens out of
-     * @param file to source file (can be null)
-     * @param line source line
+     * @param file   to source file (can be null)
+     * @param line   source line
      * @return generated records
      */
     public List<TokenRecord> tokenize(String string, @Nullable File file, int line) {

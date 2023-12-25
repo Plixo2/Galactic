@@ -9,5 +9,6 @@ import de.plixo.galactic.types.Method;
  */
 public sealed interface MethodImplementation permits AbstractMethod, ImplementedMethod, NewMethod {
     Method asMethod();
+
     StellaMethod aticMethod();
 }

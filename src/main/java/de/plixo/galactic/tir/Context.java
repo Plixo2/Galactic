@@ -1,12 +1,13 @@
 package de.plixo.galactic.tir;
 
 import de.plixo.galactic.boundary.LoadedBytecode;
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.expressions.*;
 import de.plixo.galactic.tir.path.CompileRoot;
 import de.plixo.galactic.tir.path.Package;
 import de.plixo.galactic.tir.path.Unit;
+import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -59,28 +60,29 @@ public class Context {
      * @param name name of the Symbol
      * @return
      */
-    public @Nullable Expression getSymbolExpression(String symbol, Context context) {
+    public @Nullable Expression getSymbolExpression(Region region, String symbol, Context context) {
         var variable = scope().getVariable(symbol);
         if (variable != null) {
-            return new VarExpression(variable);
+            return new VarExpression(region, variable);
         }
         var aClass = unit.getImportedClass(symbol);
         if (aClass != null) {
-            return new StaticClassExpression(aClass);
+            return new StaticClassExpression(region, aClass);
         }
         var methods = unit.staticMethods().stream().map(StellaMethod::asMethod)
                 .filter(ref -> ref.name().equals(symbol)).toList();
         var methodCollection = new MethodCollection(symbol, methods);
         if (!methodCollection.isEmpty()) {
-            return new StaticMethodExpression(new MethodOwner.UnitOwner(unit), methodCollection);
+            return new StaticMethodExpression(region, new MethodOwner.UnitOwner(unit),
+                    methodCollection);
         }
         if (context.root().name().equals(symbol)) {
             switch (context.root()) {
                 case Package aPackage -> {
-                    return new StellaPackageExpression(aPackage);
+                    return new StellaPackageExpression(region, aPackage);
                 }
                 case Unit unit1 -> {
-                    return new UnitExpression(unit1);
+                    return new UnitExpression(region, unit1);
                 }
             }
         }

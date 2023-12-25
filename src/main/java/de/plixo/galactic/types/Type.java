@@ -47,7 +47,8 @@ public abstract class Type {
             }
             return isAssignableFrom(a, superType, context);
         }
-        if ((b instanceof ArrayType bClass && bClass.elementType() instanceof Class clazz) && (a instanceof ArrayType arrayType)) {
+        if ((b instanceof ArrayType bClass && bClass.elementType() instanceof Class clazz) &&
+                (a instanceof ArrayType arrayType)) {
             var superType = clazz.getSuperClass();
             if (superType == null) {
                 return false;

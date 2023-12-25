@@ -4,17 +4,18 @@ import de.plixo.galactic.boundary.JVMLoader;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.hir.items.HIRItem;
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.Import;
 import de.plixo.galactic.tir.MethodCollection;
 import de.plixo.galactic.tir.ObjectPath;
-import de.plixo.galactic.tir.stellaclass.StellaBlock;
-import de.plixo.galactic.tir.stellaclass.StellaClass;
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
 import de.plixo.galactic.tir.expressions.Expression;
 import de.plixo.galactic.tir.expressions.StaticClassExpression;
 import de.plixo.galactic.tir.expressions.StaticMethodExpression;
+import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.tir.stellaclass.StellaBlock;
+import de.plixo.galactic.tir.stellaclass.StellaClass;
+import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -49,10 +50,10 @@ public final class Unit implements CompileRoot {
     public void addItem(HIRItem item) {
         hirItems.add(item);
     }
+
     public void addStaticMethod(StellaMethod method) {
         staticMethods.add(method);
     }
-
 
 
     public void addClass(StellaClass stellaClass) {
@@ -98,17 +99,18 @@ public final class Unit implements CompileRoot {
         return null;
     }
 
-    public @Nullable Expression getDotNotation(String name) {
+    public @Nullable Expression getDotNotation(Region region, String name) {
         for (var aClass : classes) {
             if (aClass.localName().equals(name)) {
-                return new StaticClassExpression(aClass);
+                return new StaticClassExpression(region, aClass);
             }
         }
         var methods = staticMethods.stream().map(StellaMethod::asMethod)
                 .filter(ref -> ref.name().equals(name)).toList();
         var methodCollection = new MethodCollection(name, methods);
         if (!methodCollection.isEmpty()) {
-            return new StaticMethodExpression(new MethodOwner.UnitOwner(this), methodCollection);
+            return new StaticMethodExpression(region, new MethodOwner.UnitOwner(this),
+                    methodCollection);
         }
         return null;
     }

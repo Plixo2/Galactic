@@ -13,7 +13,8 @@ public class FileTree {
 
     /**
      * Generates a FileTreeEntry from a given File recursively
-     * @param file root file of the tree
+     *
+     * @param file        root file of the tree
      * @param filePattern regex pattern for files to include
      * @return root of the FileTree
      */
@@ -21,7 +22,8 @@ public class FileTree {
         return get(null, file, filePattern);
     }
 
-    private static @Nullable FileTreeEntry get(@Nullable String path, File file, String filePattern) {
+    private static @Nullable FileTreeEntry get(@Nullable String path, File file,
+                                               String filePattern) {
         var absolutePath = file.getAbsolutePath();
         var localName = FilenameUtils.getBaseName(absolutePath);
         String name;

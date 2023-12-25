@@ -1,21 +1,17 @@
-package de.plixo.galactic.compiler;
+package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.boundary.JVMLoadedClass;
-import de.plixo.galactic.common.JsonUtil;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.Scope;
-import de.plixo.galactic.tir.stellaclass.StellaClass;
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
 import de.plixo.galactic.tir.expressions.*;
 import de.plixo.galactic.tir.path.Unit;
+import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.tir.stellaclass.StellaClass;
+import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.VoidType;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.*;
 
@@ -24,18 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
 
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.*;
 
-public class Compiler {
+public class Codegen {
+    private final List<JarOutput> jarOutputs = new ArrayList<>();
 
-    public void compile(Unit unit, Context context) throws IOException {
+    public GeneratedCode getOutput() {
+        return new GeneratedCode(jarOutputs);
+    }
+
+    public void addUnit(Unit unit, Context context) {
         var classNode = new ClassNode();
         for (var methods : unit.staticMethods()) {
             classNode.methods.add(createStaticMethod(methods, context));
@@ -44,56 +41,56 @@ public class Compiler {
         classNode.name = unit.getJVMDestination();
         classNode.version = 52;
         classNode.superName = "java/lang/Object";
-        writeClass(classNode, new File("resources/out/" + classNode.name + ".class"));
+        var out = getJarOutput(classNode, classNode.name + ".class");
+        this.jarOutputs.add(out);
     }
 
-    private void writeClass(ClassNode classNode, File file) throws IOException {
+    private JarOutput getJarOutput(ClassNode classNode, String name) {
         ClassWriter cw = new ClassWriter(COMPUTE_FRAMES | COMPUTE_MAXS);
         classNode.accept(cw);
         byte[] b = cw.toByteArray();
-        JsonUtil.makeFile(file);
-        FileUtils.writeByteArrayToFile(file, b);
+        return new JarOutput(name, b);
     }
 
-    public void makeJarFile(@Nullable String main) throws IOException {
-        var file = "resources/out.jar";
-        Manifest manifest = new Manifest();
-        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        if (main != null) manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, main);
-        JarOutputStream target = new JarOutputStream(new FileOutputStream(file), manifest);
-        addJar(new File("resources/out/project"), target, "");
-        target.close();
-        System.out.println("JAR file created: " + file);
-    }
-
-
-    private void addJar(File source, JarOutputStream target, String subName) throws IOException {
-        if (source.isDirectory()) {
-            var folderName = subName + source.getName();
-            JarEntry entry = new JarEntry(folderName + "/");
-            entry.setTime(source.lastModified());
-            target.putNextEntry(entry);
-            target.closeEntry();
-            for (File nestedFile : Objects.requireNonNull(source.listFiles())) {
-                addJar(nestedFile, target, folderName + "/");
-            }
-        } else {
-            var name = FilenameUtils.getBaseName(source.getAbsolutePath());
-            var fileName = subName + name + ".class";
-            JarEntry entry = new JarEntry(fileName);
-            entry.setTime(source.lastModified());
-            target.putNextEntry(entry);
-            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source))) {
-                byte[] buffer = new byte[1024];
-                while (true) {
-                    int count = in.read(buffer);
-                    if (count == -1) break;
-                    target.write(buffer, 0, count);
-                }
-                target.closeEntry();
-            }
-        }
-    }
+//    public void makeJarFile(@Nullable String main) throws IOException {
+//        var file = "resources/out.jar";
+//        Manifest manifest = new Manifest();
+//        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+//        if (main != null) manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, main);
+//        JarOutputStream target = new JarOutputStream(new FileOutputStream(file), manifest);
+//      //  addJar(new File("resources/out/project"), target, "");
+//        target.close();
+//        System.out.println("JAR file created: " + file);
+//    }
+//
+//
+//    private void addJar(File source, JarOutputStream target, String subName) throws IOException {
+//        if (source.isDirectory()) {
+//            var folderName = subName + source.getName();
+//            JarEntry entry = new JarEntry(folderName + "/");
+//            entry.setTime(source.lastModified());
+//            target.putNextEntry(entry);
+//            target.closeEntry();
+//            for (File nestedFile : Objects.requireNonNull(source.listFiles())) {
+//                addJar(nestedFile, target, folderName + "/");
+//            }
+//        } else {
+//            var name = FilenameUtils.getBaseName(source.getAbsolutePath());
+//            var fileName = subName + name + ".class";
+//            JarEntry entry = new JarEntry(fileName);
+//            entry.setTime(source.lastModified());
+//            target.putNextEntry(entry);
+//            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source))) {
+//                byte[] buffer = new byte[1024];
+//                while (true) {
+//                    int count = in.read(buffer);
+//                    if (count == -1) break;
+//                    target.write(buffer, 0, count);
+//                }
+//                target.closeEntry();
+//            }
+//        }
+//    }
 
     private MethodNode createStaticMethod(StellaMethod method, Context normalContext) {
         var methodNode = new MethodNode();
@@ -305,18 +302,6 @@ public class Compiler {
                 throw new NullPointerException("expression is null");
             }
         }
-
-//        if (context.node().name.endsWith("other")) {
-//            context.add(new InsnNode(ICONST_0));
-//            context.add(new InsnNode(IRETURN));
-//        } else {
-//            context.add(new FieldInsnNode(GETSTATIC, "java/lang/System", "out",
-//                    "Ljava/io/PrintStream;"));
-//            context.add(new LdcInsnNode("Hello World!"));
-//            context.add(new MethodInsnNode(INVOKEVIRTUAL, "java/io/PrintStream", "println",
-//                    "(Ljava/lang/String;)V", false));
-//            context.add(new InsnNode(RETURN));
-//        }
     }
 
     private static List<LocalVariableNode> getLocalVariableNodes(CompileContext context,
@@ -334,5 +319,6 @@ public class Compiler {
         }
         return variables;
     }
+
 
 }

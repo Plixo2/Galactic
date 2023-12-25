@@ -1,7 +1,7 @@
 package de.plixo.galactic.tir.stellaclass.method;
 
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.tir.stellaclass.Parameter;
+import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +17,10 @@ public final class ImplementedMethod implements MethodImplementation {
     @Override
     public Method asMethod() {
         var types = implementation.parameters().stream().map(Parameter::type).toList();
-        return new Method(ACC_PUBLIC,implementation.localName(), implementation.returnType(), types,implementation.owner());
+        return new Method(ACC_PUBLIC, implementation.localName(), implementation.returnType(),
+                types, implementation.owner());
     }
+
     @Override
     public StellaMethod aticMethod() {
         return implementation;

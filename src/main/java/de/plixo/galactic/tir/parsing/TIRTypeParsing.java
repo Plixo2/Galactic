@@ -1,16 +1,17 @@
 package de.plixo.galactic.tir.parsing;
 
-import de.plixo.galactic.types.ArrayType;
-import de.plixo.galactic.types.PrimitiveType;
-import de.plixo.galactic.types.Type;
-import de.plixo.galactic.types.VoidType;
+import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.hir.types.HIRArrayType;
 import de.plixo.galactic.hir.types.HIRClassType;
 import de.plixo.galactic.hir.types.HIRPrimitive;
 import de.plixo.galactic.hir.types.HIRType;
 import de.plixo.galactic.tir.Context;
+import de.plixo.galactic.types.ArrayType;
+import de.plixo.galactic.types.PrimitiveType;
+import de.plixo.galactic.types.Type;
+import de.plixo.galactic.types.VoidType;
 
-import java.util.Objects;
+import static de.plixo.galactic.exception.FlairKind.UNKNOWN_TYPE;
 
 /**
  * Parses a {@link HIRType} to a {@link Type}
@@ -26,7 +27,7 @@ public class TIRTypeParsing {
 
     public static Type parsePrimitive(HIRPrimitive hirPrimitive, Context context) {
         var primitiveType = hirPrimitive.primitiveType();
-        var aPrimitiveType = PrimitiveType.APrimitiveType.fromHIR(primitiveType);
+        var aPrimitiveType = PrimitiveType.StellaPrimitiveType.fromHIR(primitiveType);
         if (aPrimitiveType == null) {
             return new VoidType();
         }
@@ -39,7 +40,12 @@ public class TIRTypeParsing {
 
     private static Type parseClassType(HIRClassType classType, Context context) {
         var className = classType.path();
-        return Objects.requireNonNull(context.getClass(className), "cant find type " + className);
+        var foundClass = context.getClass(className);
+        if (foundClass == null) {
+            throw new FlairCheckException(classType.region(), UNKNOWN_TYPE,
+                    "cant find type " + className);
+        }
+        return foundClass;
     }
 }
 

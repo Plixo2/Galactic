@@ -55,17 +55,15 @@ public interface Tree<C extends Context> {
                     parseInstanceCreationExpression(instanceCreationExpression, context);
             case LocalVariableAssign localVariableAssign ->
                     parseLocalVariableAssign(localVariableAssign, context);
-            case AssignExpression assignExpression ->
-                    parseAssign(assignExpression, context);
+            case AssignExpression assignExpression -> parseAssign(assignExpression, context);
         }, expression.getClass().getSimpleName());
     }
-    default Expression parseAssign(AssignExpression expression,
-                                                C context) {
+
+    default Expression parseAssign(AssignExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseLocalVariableAssign(LocalVariableAssign expression,
-                                                       C context) {
+    default Expression parseLocalVariableAssign(LocalVariableAssign expression, C context) {
         return defaultBehavior(expression);
     }
 
@@ -78,8 +76,7 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStellaPackageExpression(StellaPackageExpression expression,
-                                                    C context) {
+    default Expression parseStellaPackageExpression(StellaPackageExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
@@ -87,8 +84,8 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStellaClassConstructExpression(StellaClassConstructExpression expression,
-                                                           C context) {
+    default Expression parseStellaClassConstructExpression(
+            StellaClassConstructExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
@@ -149,13 +146,11 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStaticFieldExpression(StaticFieldExpression expression,
-                                                  C context) {
+    default Expression parseStaticFieldExpression(StaticFieldExpression expression, C context) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStaticMethodExpression(StaticMethodExpression expression,
-                                                   C context) {
+    default Expression parseStaticMethodExpression(StaticMethodExpression expression, C context) {
         return defaultBehavior(expression);
     }
 

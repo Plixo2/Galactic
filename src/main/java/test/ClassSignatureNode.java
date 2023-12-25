@@ -20,6 +20,7 @@ public class ClassSignatureNode extends SignatureVisitor {
     public @Nullable ClassSignatureNode superClass;
 
     private ClassSignatureNode nextClassBoundNode;
+
     @Override
     public void visitFormalTypeParameter(String name) {
         genericTypes.add(new GenericType(name, nextClassBoundNode = new ClassSignatureNode()));
@@ -43,6 +44,7 @@ public class ClassSignatureNode extends SignatureVisitor {
         superClass = new ClassSignatureNode();
         return superClass;
     }
+
     @Override
     public void visitClassType(String name) {
         classType = name;

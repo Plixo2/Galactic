@@ -6,8 +6,9 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a import statement
+ *
  * @param region
- * @param name alias of the import. Can be "*" to import all. "*" doesn't work with java yet
+ * @param name       alias of the import. Can be "*" to import all. "*" doesn't work with java yet
  * @param importType
  * @param path
  */

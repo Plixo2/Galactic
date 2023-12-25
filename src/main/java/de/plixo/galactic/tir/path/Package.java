@@ -1,8 +1,9 @@
 package de.plixo.galactic.tir.path;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.ObjectPath;
-import de.plixo.galactic.tir.expressions.StellaPackageExpression;
 import de.plixo.galactic.tir.expressions.Expression;
+import de.plixo.galactic.tir.expressions.StellaPackageExpression;
 import de.plixo.galactic.tir.expressions.UnitExpression;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,8 @@ public final class Package implements CompileRoot {
     @Getter
     private final String localName;
 
-    private @Nullable final Package parent;
+    private @Nullable
+    final Package parent;
 
     @Getter
     private final List<Unit> units = new ArrayList<>();
@@ -63,15 +65,15 @@ public final class Package implements CompileRoot {
         units.add(unit);
     }
 
-    public @Nullable Expression getDotNotation(String name) {
+    public @Nullable Expression getDotNotation(Region region, String name) {
         for (Package aPackage : packages) {
             if (aPackage.localName().equals(name)) {
-                return new StellaPackageExpression(aPackage);
+                return new StellaPackageExpression(region, aPackage);
             }
         }
         for (Unit unit : units) {
             if (unit.localName().equals(name)) {
-               return new UnitExpression(unit);
+                return new UnitExpression(region, unit);
             }
         }
         return null;

@@ -1,4 +1,4 @@
-package de.plixo.galactic.compiler;
+package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.Scope;
@@ -20,7 +20,7 @@ public class CompileContext {
     private final MethodNode node;
     private final Context normalContext;
     private final Map<Scope.Variable, Integer> variables = new HashMap<>();
-//    @Getter(AccessLevel.NONE)
+    //    @Getter(AccessLevel.NONE)
     private int variablesCount = 0;
 
 
@@ -35,6 +35,7 @@ public class CompileContext {
             variablesCount++;
         }
     }
+
     public int getVariablesIndex(Scope.Variable variable) {
         if (!variables.containsKey(variable)) {
             throw new NullPointerException("Variable not found");

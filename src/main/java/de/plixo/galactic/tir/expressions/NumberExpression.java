@@ -1,5 +1,6 @@
 package de.plixo.galactic.tir.expressions;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
@@ -10,10 +11,11 @@ import java.math.BigDecimal;
 
 @RequiredArgsConstructor
 @Getter
-public final class NumberExpression extends Expression{
+public final class NumberExpression extends Expression {
 
+    private final Region region;
     private final BigDecimal value;
-    private final PrimitiveType.APrimitiveType type;
+    private final PrimitiveType.StellaPrimitiveType type;
 
     @Override
     public Type getType(Context context) {

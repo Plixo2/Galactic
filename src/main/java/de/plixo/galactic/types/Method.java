@@ -19,8 +19,7 @@ public class Method {
 
     @Override
     public String toString() {
-        return "Method{" + "modifier=" + modifier + ", name='" + name + '\'' + ", returnType=" +
-                returnType + ", arguments=" + arguments + ", owner=" + owner + '}';
+        return "Method " + name + "(" + getDescriptor() + ")";
     }
 
     public boolean isCallable(List<Type> typeList, Context context) {
@@ -50,6 +49,7 @@ public class Method {
     public boolean isStatic() {
         return Modifier.isStatic(modifier);
     }
+
     public boolean isAbstract() {
         return Modifier.isAbstract(modifier);
     }

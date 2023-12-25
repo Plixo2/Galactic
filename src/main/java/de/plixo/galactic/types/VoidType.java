@@ -7,7 +7,7 @@ public class VoidType extends Type {
 
     @Override
     public String toString() {
-        return "AVoid";
+        return "void";
     }
 
     @Override

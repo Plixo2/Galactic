@@ -1,4 +1,4 @@
-import Some Other.Some
+import Some deep.Other.Some
 import * Core
 import IntList Core.IList
 
@@ -51,7 +51,11 @@ fn main(args: [String]) -> void = {
     System.out.println("Hello World")
     var hello = System.getProperty("hello")
     System.setProperty("hello", "01100")
-    var hello2: boolean = true
+    var hello2: boolean = if true {
+        false
+    } else {
+        true
+    }
     hello = System.getProperty("hello")
 
     other(args)
@@ -99,9 +103,9 @@ fn getArgLength(args: [String]) -> int = {
 
 {
     var testOBJ = new TestObj { new TestObj { 0d }, 1.0 }
+    testOBJ
 
-
-    var list: List = new ArrayList
+    var list: List = new ArrayList {}
 
     var IEEE = 0f
     var parser: Transform = new Transform {}

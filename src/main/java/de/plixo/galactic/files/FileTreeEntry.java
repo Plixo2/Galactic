@@ -1,5 +1,6 @@
 package de.plixo.galactic.files;
 
+import de.plixo.galactic.exception.TokenFlairHandler;
 import de.plixo.galactic.lexer.Position;
 import de.plixo.galactic.lexer.TokenRecord;
 import de.plixo.galactic.lexer.Tokenizer;
@@ -29,9 +30,10 @@ public sealed abstract class FileTreeEntry {
 
     /**
      * Reads the File, turns it into tokens, then stores the tokens in the unit
+     *
      * @param tokenizer the tokenizer to use
      */
-    public void readAndLex(Tokenizer tokenizer) {
+    public void readAndLex(Tokenizer tokenizer, TokenFlairHandler errorHandler) {
         switch (this) {
             case FileTreeUnit unit -> {
                 String src;
@@ -43,8 +45,8 @@ public sealed abstract class FileTreeEntry {
                 var recordList = tokenizer.fromFile(unit.file, src);
                 var filteredTokens = recordList.stream().filter(ref -> switch (ref.token()) {
                     case UnknownToken ignored -> {
-                        throw ref.createException();
-                        //TODO Error reporting
+                        errorHandler.add(ref);
+                        yield false;
                     }
                     case WhiteSpaceToken ignored -> false;
                     case CommentToken ignored -> false;
@@ -60,8 +62,8 @@ public sealed abstract class FileTreeEntry {
                 unit.tokens = tokens;
             }
             case FileTreePackage treePackage -> {
-                treePackage.children().parallelStream().forEach(ref -> {
-                    ref.readAndLex(tokenizer);
+                treePackage.children().forEach(ref -> {
+                    ref.readAndLex(tokenizer, errorHandler);
                 });
             }
         }
@@ -70,6 +72,7 @@ public sealed abstract class FileTreeEntry {
 
     /**
      * Creates a CFG from the tokens
+     *
      * @param rule the grammar rule to apply
      */
     public void parse(Grammar.Rule rule) {
@@ -79,7 +82,7 @@ public sealed abstract class FileTreeEntry {
                 unit.tokens = new ArrayList<>();
             }
             case FileTreePackage treePackage -> {
-                treePackage.children().parallelStream().forEach(ref -> {
+                treePackage.children().forEach(ref -> {
                     ref.parse(rule);
                 });
             }

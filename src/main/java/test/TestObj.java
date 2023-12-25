@@ -9,6 +9,7 @@ public class TestObj {
         this.testObj = null;
         this.integer = (int) integer;
     }
+
     public TestObj(TestObj testObj, double integer) {
         this.testObj = testObj;
         this.integer = (int) integer;

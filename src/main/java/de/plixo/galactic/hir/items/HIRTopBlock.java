@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public final class HIRTopBlock implements HIRItem {
-
     private final Region region;
     private final List<HIRExpression> expressions;
 }

@@ -52,9 +52,9 @@ Tokens for Tokenizer
 "return"
 "var"
 "import"
-"word"
-"string"
-"number"
+<word>
+<string>
+<number>
 ```
 Grammar for Parser inside resources/cfg.txt
 

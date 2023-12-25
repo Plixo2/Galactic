@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.ClassNode;
 public sealed interface ClassSource {
     record AticSource(StellaClass stellaClass) implements ClassSource {
     }
+
     record JVMSource(ClassNode classNode) implements ClassSource {
     }
 }

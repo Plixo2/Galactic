@@ -1,5 +1,6 @@
 package de.plixo.galactic.tir.expressions;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.Type;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 public final class StellaClassConstructExpression extends Expression {
 
+    private final Region region;
     private final Class constructType;
 
     @Getter

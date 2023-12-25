@@ -1,5 +1,9 @@
 package de.plixo.galactic.tir.stages;
 
+import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairException;
+import de.plixo.galactic.exception.FlairKind;
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.expressions.*;
 import de.plixo.galactic.types.PrimitiveType;
@@ -10,9 +14,8 @@ import java.lang.reflect.Modifier;
 public class Check implements Tree<Context> {
     @Override
     public Expression defaultBehavior(Expression expression) {
-        throw new NullPointerException(
-                "Expression of type " + expression.getClass().getSimpleName() +
-                        " not implemented for CheckTypes stage");
+        throw new FlairException("Expression of type " + expression.getClass().getSimpleName() +
+                " not implemented for Check stage");
     }
 
     @Override
@@ -22,7 +25,8 @@ public class Check implements Tree<Context> {
         var variable = expression.variable();
         assert variable != null;
         if (!Type.isAssignableFrom(variable.getType(), parsed.getType(context), context)) {
-            throw new NullPointerException("variable type does not match expression type");
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "variable type does not match expression type");
         }
         return expression;
     }
@@ -47,7 +51,8 @@ public class Check implements Tree<Context> {
         parse(expression.object(), context);
         var modifier = expression.field().modifier();
         if (!Modifier.isPublic(modifier)) {
-            throw new NullPointerException("cant access non public fields");
+            throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
+                    "cant access non public methods");
         }
 
         return expression;
@@ -57,20 +62,24 @@ public class Check implements Tree<Context> {
     public Expression parseMethodCallExpression(MethodCallExpression expression, Context context) {
         var method = expression.method();
         var modifier = method.modifier();
+        var region = expression.region();
         if (!Modifier.isPublic(modifier)) {
-            throw new NullPointerException("cant access non public methods");
+            throw new FlairCheckException(region, FlairKind.SECURITY,
+                    "cant access non public methods");
         }
         var expected = method.arguments();
         var found = expression.arguments();
 
         if (expected.size() != found.size()) {
-            throw new NullPointerException("method call arguments dont match");
+            throw new FlairCheckException(region, FlairKind.SIGNATURE,
+                    "method call arguments dont match");
         }
         for (int i = 0; i < expected.size(); i++) {
             var expectedType = expected.get(i);
             var foundType = found.get(i).getType(context);
             if (!Type.isAssignableFrom(expectedType, foundType, context)) {
-                throw new NullPointerException("method call arguments dont match");
+                throw new FlairCheckException(region, FlairKind.SIGNATURE,
+                        "method call arguments dont match");
             }
         }
         found.forEach(ref -> parse(ref, context));
@@ -89,7 +98,8 @@ public class Check implements Tree<Context> {
 
         var found = expression.condition().getType(context);
         if (!Type.isAssignableFrom(PrimitiveType.BOOLEAN, found, context)) {
-            throw new NullPointerException("condition is not boolean, its " + found);
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "condition is not boolean, its " + found);
         }
         if (expression.elseExpression() != null) {
             parse(expression.elseExpression(), context);
@@ -112,7 +122,7 @@ public class Check implements Tree<Context> {
             var expected = expression.hint();
             var found = expression.expression().getType(context);
             if (!Type.isAssignableFrom(expected, found, context)) {
-                throw new NullPointerException(
+                throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                         "hint does not match expression, expected " + expected + " found " + found);
             }
         }
@@ -130,7 +140,8 @@ public class Check implements Tree<Context> {
                                                  Context context) {
         var modifier = expression.field().modifier();
         if (!Modifier.isPublic(modifier)) {
-            throw new NullPointerException("cant access non public fields");
+            throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
+                    "cant access non public fields");
         }
         return expression;
     }
@@ -140,20 +151,24 @@ public class Check implements Tree<Context> {
                                                       Context context) {
 
         var constructor = expression.constructor();
+        var region = expression.region();
         if (!Modifier.isPublic(constructor.modifier())) {
-            throw new NullPointerException("cant access non public constructor");
+            throw new FlairCheckException(region, FlairKind.SECURITY,
+                    "cant access non public constructor");
         }
         var expected = constructor.arguments();
         var found = expression.expressions();
 
         if (expected.size() != found.size()) {
-            throw new NullPointerException("constructor call arguments dont match");
+            throw new FlairCheckException(region, FlairKind.SIGNATURE,
+                    "constructor call arguments dont match");
         }
         for (int i = 0; i < expected.size(); i++) {
             var expectedType = expected.get(i);
             var foundType = found.get(i).getType(context);
             if (!Type.isAssignableFrom(expectedType, foundType, context)) {
-                throw new NullPointerException("constructor call arguments dont match");
+                throw new FlairCheckException(region, FlairKind.SIGNATURE,
+                        "constructor call arguments dont match");
             }
         }
         found.forEach(ref -> parse(ref, context));

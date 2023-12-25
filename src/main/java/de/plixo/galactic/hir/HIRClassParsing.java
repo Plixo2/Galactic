@@ -3,10 +3,8 @@ package de.plixo.galactic.hir;
 import de.plixo.galactic.hir.items.HIRClass;
 import de.plixo.galactic.hir.items.HIRField;
 import de.plixo.galactic.hir.items.HIRMethod;
-import de.plixo.galactic.hir.types.HIRClassType;
 import de.plixo.galactic.hir.types.HIRType;
 import de.plixo.galactic.parsing.Node;
-import de.plixo.galactic.tir.ObjectPath;
 
 import java.util.ArrayList;
 
@@ -20,7 +18,7 @@ public class HIRClassParsing {
         var name = node.getID();
         var extendsNode = node.get("extends");
         var implementsNode = node.get("implements");
-        HIRType superClass = new HIRClassType(new ObjectPath("java", "lang", "Object"));
+        HIRType superClass = null;
         if (extendsNode.has("type")) {
             superClass = HIRTypeParsing.parse(extendsNode.get("type"));
         }

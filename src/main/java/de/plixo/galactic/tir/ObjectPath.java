@@ -36,6 +36,7 @@ public class ObjectPath {
         strings.add(name);
         return new ObjectPath(strings);
     }
+
     public ObjectPath join(ObjectPath path) {
         var strings = new ArrayList<>(names);
         strings.addAll(path.names);

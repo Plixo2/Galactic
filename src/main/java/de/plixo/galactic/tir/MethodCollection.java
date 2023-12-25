@@ -1,7 +1,7 @@
 package de.plixo.galactic.tir;
 
-import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.Method;
+import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.Nullable;

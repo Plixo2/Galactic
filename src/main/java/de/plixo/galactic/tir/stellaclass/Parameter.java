@@ -4,8 +4,6 @@ import de.plixo.galactic.tir.Scope;
 import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 
 import static de.plixo.galactic.tir.Scope.INPUT;
 

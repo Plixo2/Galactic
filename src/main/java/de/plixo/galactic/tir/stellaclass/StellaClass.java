@@ -4,13 +4,13 @@ import de.plixo.galactic.hir.items.HIRClass;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.MethodCollection;
 import de.plixo.galactic.tir.ObjectPath;
+import de.plixo.galactic.tir.path.Unit;
 import de.plixo.galactic.tir.stellaclass.method.AbstractMethod;
 import de.plixo.galactic.tir.stellaclass.method.ImplementedMethod;
 import de.plixo.galactic.tir.stellaclass.method.MethodImplementation;
 import de.plixo.galactic.tir.stellaclass.method.NewMethod;
-import de.plixo.galactic.tir.path.Unit;
-import de.plixo.galactic.types.*;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.*;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -130,8 +130,7 @@ public class StellaClass extends Class {
     @Override
     public MethodCollection getMethods(String name, Context context) {
         var aMethods = methods.stream().map(MethodImplementation::asMethod)
-                .filter(ref -> ref.name().equals(name))
-                .toList();
+                .filter(ref -> ref.name().equals(name)).toList();
         var methods = new MethodCollection(name, aMethods);
         if (superClass != null) {
             methods = methods.join(superClass.getMethods(name, context));
@@ -157,7 +156,8 @@ public class StellaClass extends Class {
             params.add(new Parameter(field.name(), field.type()));
         }
         var owner = new MethodOwner.ClassOwner(this);
-        addMethod(new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, owner), context);
+        addMethod(new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, owner),
+                context);
     }
 
     public Set<Method> implementationLeft() {

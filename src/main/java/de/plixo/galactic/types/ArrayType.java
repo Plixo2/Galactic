@@ -9,9 +9,10 @@ import java.util.Objects;
 @Getter
 public class ArrayType extends Type {
     private final Type elementType;
+
     @Override
     public String toString() {
-        return "AArray{" + "elementType=" + elementType + '}';
+        return "Array[" + elementType + ']';
     }
 
     @Override

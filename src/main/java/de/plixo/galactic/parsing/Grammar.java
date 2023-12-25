@@ -116,8 +116,8 @@ public class Grammar {
                     }
 
                     var literal = record.literal();
-                    yield new LiteralEntry(literal.substring(1, literal.length() - 1),
-                            !ignoreToken, throwError);
+                    yield new LiteralEntry(literal.substring(1, literal.length() - 1), !ignoreToken,
+                            throwError);
                 }
                 case WordToken ignored -> {
                     var rule = record.literal();
@@ -182,10 +182,7 @@ public class Grammar {
 
         @Override
         public String toString() {
-            return "Rule{" +
-                    "name='" + name + '\'' +
-                    ", sentences=" + sentences +
-                    '}';
+            return "Rule{" + "name='" + name + '\'' + ", sentences=" + sentences + '}';
         }
     }
 
@@ -195,9 +192,7 @@ public class Grammar {
 
         @Override
         public String toString() {
-            return "Sentence{" +
-                    "entries=" + entries +
-                    '}';
+            return "Sentence{" + "entries=" + entries + '}';
         }
     }
 
@@ -212,10 +207,7 @@ public class Grammar {
 
         @Override
         public String toString() {
-            return "RuleEntry{" +
-                    "rule=" + rule.name +
-                    ", throwError=" + throwError +
-                    '}';
+            return "RuleEntry{" + "rule=" + rule.name + ", throwError=" + throwError + '}';
         }
     }
 
@@ -228,11 +220,8 @@ public class Grammar {
 
         @Override
         public String toString() {
-            return "LiteralEntry{" +
-                    "name='" + name + '\'' +
-                    ", capture=" + capture +
-                    ", throwError=" + throwError +
-                    '}';
+            return "LiteralEntry{" + "name='" + name + '\'' + ", capture=" + capture +
+                    ", throwError=" + throwError + '}';
         }
     }
 

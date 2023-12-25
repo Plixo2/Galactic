@@ -2,11 +2,11 @@ package de.plixo.galactic.hir;
 
 import de.plixo.galactic.common.PrimitiveType;
 import de.plixo.galactic.hir.types.HIRArrayType;
+import de.plixo.galactic.hir.types.HIRClassType;
 import de.plixo.galactic.hir.types.HIRPrimitive;
+import de.plixo.galactic.hir.types.HIRType;
 import de.plixo.galactic.hir.utils.DotWordChain;
 import de.plixo.galactic.parsing.Node;
-import de.plixo.galactic.hir.types.HIRClassType;
-import de.plixo.galactic.hir.types.HIRType;
 
 import java.util.Objects;
 
@@ -39,8 +39,7 @@ public class HIRTypeParsing {
             case "boolean" -> PrimitiveType.BOOLEAN;
             case "char" -> PrimitiveType.CHAR;
             case "void" -> PrimitiveType.VOID;
-            case null, default ->
-                    throw new IllegalStateException("Unexpected value: " + name);
+            case null, default -> throw new IllegalStateException("Unexpected value: " + name);
         };
         return new HIRPrimitive(node.region(), primitive);
     }
@@ -54,6 +53,6 @@ public class HIRTypeParsing {
     private static HIRClassType parseClassType(Node node) {
         node.assertType("classType");
         var dotWordChain = new DotWordChain(node.get("dotWordChain"));
-        return new HIRClassType(dotWordChain.asObjectPath());
+        return new HIRClassType(node.region(), dotWordChain.asObjectPath());
     }
 }

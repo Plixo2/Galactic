@@ -2,8 +2,8 @@ package de.plixo.galactic.tir.stellaclass;
 
 import de.plixo.galactic.hir.items.HIRMethod;
 import de.plixo.galactic.tir.expressions.Expression;
-import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.Method;
+import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;

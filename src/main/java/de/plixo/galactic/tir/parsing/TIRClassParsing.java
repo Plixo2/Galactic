@@ -1,13 +1,15 @@
 package de.plixo.galactic.tir.parsing;
 
-import de.plixo.galactic.Language;
+import de.plixo.galactic.Universe;
+import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.Scope;
 import de.plixo.galactic.tir.TypeContext;
-import de.plixo.galactic.tir.stellaclass.StellaClass;
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.tir.stellaclass.MethodOwner;
 import de.plixo.galactic.tir.stellaclass.Parameter;
+import de.plixo.galactic.tir.stellaclass.StellaClass;
+import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.Field;
 
@@ -20,21 +22,28 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 public class TIRClassParsing {
 
 
-    public static void fillSuperclasses(StellaClass stellaClass, Context context) {
+    public static void fillSuperclasses(StellaClass stellaClass, Context context,
+                                        Class defaultSuperClass) {
         var hirClass = stellaClass.hirClass();
         var hirType = hirClass.superClass();
-        var superClass = TIRTypeParsing.parse(hirType, context);
-        if (!(superClass instanceof Class aClass)) {
-            throw new NullPointerException("not a class");
+        Class superClass;
+        if (hirType != null) {
+            var parsed = TIRTypeParsing.parse(hirType, context);
+            if (!(parsed instanceof Class aClass)) {
+                throw new FlairCheckException(hirType.region(), FlairKind.UNEXPECTED_TYPE, "not a class");
+            }
+            superClass = aClass;
+        } else {
+            superClass = defaultSuperClass;
         }
         var interfaces = hirClass.interfaces().stream().map(ref -> {
             var parse = TIRTypeParsing.parse(ref, context);
-            if (!(parse instanceof Class interfaceClass)) {
-                throw new NullPointerException("not a class");
+            if (!(parse instanceof Class interfaceClass) || !interfaceClass.isInterface()) {
+                throw new FlairCheckException(ref.region(), FlairKind.UNEXPECTED_TYPE, "not a interface class");
             }
             return interfaceClass;
         }).toList();
-        stellaClass.superClass = aClass;
+        stellaClass.superClass = superClass;
         stellaClass.interfaces = interfaces;
     }
 
@@ -56,14 +65,14 @@ public class TIRClassParsing {
             }).toList();
             var returnType = TIRTypeParsing.parse(method.returnType(), context);
             var aticMethod =
-                    new StellaMethod(ACC_PUBLIC, method.methodName(), parameters, returnType, method,
-                            new MethodOwner.ClassOwner(stellaClass));
+                    new StellaMethod(ACC_PUBLIC, method.methodName(), parameters, returnType,
+                            method, new MethodOwner.ClassOwner(stellaClass));
             stellaClass.addMethod(aticMethod, context);
         }
     }
 
     public static void fillMethodExpressions(StellaClass stellaClass, TypeContext context,
-                                             Language language) {
+                                             Universe language) {
         for (var method : stellaClass.methods()) {
             var aticMethod = method.aticMethod();
             context.pushScope();

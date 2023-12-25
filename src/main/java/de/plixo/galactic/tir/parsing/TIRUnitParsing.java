@@ -1,7 +1,9 @@
 package de.plixo.galactic.tir.parsing;
 
-import de.plixo.galactic.Language;
+import de.plixo.galactic.Universe;
 import de.plixo.galactic.boundary.LoadedBytecode;
+import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.hir.expressions.HIRBlock;
 import de.plixo.galactic.hir.items.HIRClass;
 import de.plixo.galactic.hir.items.HIRImport;
@@ -36,7 +38,7 @@ public class TIRUnitParsing {
                         new StellaClass(hirClass.className(), unit, hirClass, defaultSuperClass);
                 unit.addClass(parsed);
             } else if (hirItem instanceof HIRTopBlock block) {
-                var hirBlock = new HIRBlock(block.expressions());
+                var hirBlock = new HIRBlock(block.region(), block.expressions());
                 var aticBlock = new StellaBlock(unit, hirBlock);
                 unit.addBlock(aticBlock);
             } else if (!(hirItem instanceof HIRImport || hirItem instanceof HIRStaticMethod)) {
@@ -65,30 +67,35 @@ public class TIRUnitParsing {
                                 unit.addImport(ref.localName(), ref);
                             });
                         } else {
-                            throw new NullPointerException(
+                            throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
                                     "could not locate matching atic class " + path);
                         }
                     } else {
-                        throw new NullPointerException(
+                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
                                 "could not locate matching atic class " + path);
                     }
 
                 } else if (importType.equals("java")) {
                     var jvmClass = unit.locateJVMClass(path, bytecode);
                     if (alias.equals("*")) {
-                        throw new NullPointerException("import * not supported on java");
+                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                "import * not supported on java");
                     }
-                    Objects.requireNonNull(jvmClass, "could not locate " + path);
+                    if (jvmClass == null) {
+                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                "could not locate jvm class " + path);
+                    }
                     unit.addImport(alias, jvmClass);
                 } else {
-                    throw new NullPointerException("unknown import type " + importType);
+                    throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                            "unknown import type " + importType);
                 }
             }
         }
     }
 
     public static void fillBlockExpressions(Unit unit, CompileRoot root, StellaBlock block,
-                                            Language language) {
+                                            Universe language) {
         var context = new TypeContext(unit, root, language.loadedBytecode());
         var base = TIRExpressionParsing.parse(block.hirBlock(), context);
         base = language.symbolsStage().parse(base, context);
@@ -115,8 +122,7 @@ public class TIRUnitParsing {
         }
     }
 
-    public static void fillMethodExpressions(Unit unit, TypeContext context, Language language) {
-
+    public static void fillMethodExpressions(Unit unit, TypeContext context, Universe language) {
         unit.staticMethods().forEach(ref -> {
             context.pushScope();
             ref.parameters().forEach(var -> {

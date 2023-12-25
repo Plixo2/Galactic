@@ -1,10 +1,11 @@
 package de.plixo.galactic.types;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.MethodCollection;
 import de.plixo.galactic.tir.ObjectPath;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
 import de.plixo.galactic.tir.expressions.*;
+import de.plixo.galactic.tir.stellaclass.MethodOwner;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -13,17 +14,22 @@ public abstract class Class extends Type {
 
 
     public abstract String name();
+
     public abstract ClassSource getSource();
+
     public abstract ObjectPath path();
 
     @Override
     public String toString() {
-        return "AClass{" + "name='" + path() + "}";
+        return path().toString();
     }
 
     public abstract boolean isInterface();
+
     public abstract List<Method> getAbstractMethods();
+
     public abstract List<Method> getMethods();
+
     public abstract List<Field> getFields();
 
     @Override
@@ -47,25 +53,28 @@ public abstract class Class extends Type {
         return getKind() + path().asSlashString() + ";";
     }
 
-    public @Nullable Expression getStaticDotNotation(String id, Context context) {
+    public @Nullable Expression getStaticDotNotation(Region region, String id, Context context) {
         var possibleField = this.getField(id, context);
         if (possibleField != null) {
-            return new StaticFieldExpression(this, possibleField);
+            return new StaticFieldExpression(region, this, possibleField);
         }
         var possibleMethods = this.getMethods(id, context);
         if (!possibleMethods.isEmpty()) {
-            return new StaticMethodExpression(new MethodOwner.ClassOwner(this), possibleMethods);
+            return new StaticMethodExpression(region, new MethodOwner.ClassOwner(this),
+                    possibleMethods);
         }
         return null;
     }
-    public @Nullable Expression getDotNotation(Expression expression, String id, Context context) {
+
+    public @Nullable Expression getDotNotation(Region region, Expression expression, String id,
+                                               Context context) {
         var possibleField = this.getField(id, context);
         if (possibleField != null) {
-            return new FieldExpression(expression, this, possibleField);
+            return new FieldExpression(region, expression, this, possibleField);
         }
         var possibleMethods = this.getMethods(id, context);
         if (!possibleMethods.isEmpty()) {
-            return new GetMethodExpression(expression, possibleMethods);
+            return new GetMethodExpression(region, expression, possibleMethods);
         }
         return null;
     }

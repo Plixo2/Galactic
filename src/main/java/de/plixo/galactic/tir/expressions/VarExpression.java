@@ -1,5 +1,6 @@
 package de.plixo.galactic.tir.expressions;
 
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.Scope;
 import de.plixo.galactic.types.Type;
@@ -11,7 +12,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Getter
 public final class VarExpression extends Expression {
-
+    private final Region region;
     private final Scope.Variable variable;
 
     @Override

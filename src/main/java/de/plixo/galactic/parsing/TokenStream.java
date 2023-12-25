@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Simple stream structure with resetting
+ *
  * @param <T>
  */
 public class TokenStream<T> {
@@ -44,6 +45,7 @@ public class TokenStream<T> {
 
     /**
      * Creates a list of leftover tokens
+     *
      * @return list of tokens left in the stream
      */
     public List<T> left() {

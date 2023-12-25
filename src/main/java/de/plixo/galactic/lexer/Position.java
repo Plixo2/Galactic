@@ -6,6 +6,7 @@ import java.io.File;
 
 /**
  * Location of a Token
+ *
  * @param file source file (can be null)
  * @param line source line
  */

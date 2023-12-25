@@ -1,5 +1,6 @@
 package de.plixo.galactic.tir;
 
+import de.plixo.galactic.exception.SyntaxFlairHandler;
 import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.hir.HIRUnitParsing;
 import de.plixo.galactic.parsing.Parser;
@@ -20,44 +21,44 @@ public class TreeBuilding {
      * @param root file tree root
      * @return root of the compiler
      */
-    public static CompileRoot convertRoot(FileTreeEntry root) {
+    public static CompileRoot convertRoot(FileTreeEntry root, SyntaxFlairHandler errorHandler) {
         return switch (root) {
-            case FileTreeEntry.FileTreeUnit unit -> createUnit(null, unit);
-            case FileTreeEntry.FileTreePackage treePackage -> createPackage(null, treePackage);
+            case FileTreeEntry.FileTreeUnit unit -> createUnit(null, unit, errorHandler);
+            case FileTreeEntry.FileTreePackage treePackage ->
+                    createPackage(null, treePackage, errorHandler);
         };
     }
 
     private static Package createPackage(@Nullable Package parent,
-                                         FileTreeEntry.FileTreePackage treePackage) {
+                                         FileTreeEntry.FileTreePackage treePackage,
+                                         SyntaxFlairHandler errorHandler) {
         var thePackage = new Package(treePackage.localName(), parent);
 
         treePackage.children().forEach(ref -> {
             switch (ref) {
                 case FileTreeEntry.FileTreeUnit unit -> {
-                    thePackage.addUnit(createUnit(thePackage, unit));
+                    thePackage.addUnit(createUnit(thePackage, unit, errorHandler));
                 }
                 case FileTreeEntry.FileTreePackage subPackage -> {
-                    thePackage.addPackage(createPackage(thePackage, subPackage));
+                    thePackage.addPackage(createPackage(thePackage, subPackage, errorHandler));
                 }
             }
         });
         return thePackage;
     }
 
-    private static Unit createUnit(@Nullable Package parent, FileTreeEntry.FileTreeUnit unit) {
+    private static Unit createUnit(@Nullable Package parent, FileTreeEntry.FileTreeUnit unit,
+                                   SyntaxFlairHandler errorHandler) {
         var createdUnit = new Unit(parent, unit.localName(), unit);
         switch (unit.syntaxResult()) {
             case Parser.FailedRule failedRule -> {
-                failedRule.records().forEach(System.out::println);
-                throw new NullPointerException("Failed rule " + failedRule.failedRule() + " in " +
-                        failedRule.parentRule());
-                //TODO error reporting
+                errorHandler.add(new SyntaxFlairHandler.FailedRule(failedRule.records(),
+                        failedRule.failedRule(), failedRule.parentRule()));
             }
             case Parser.FailedLiteral failedLiteral -> {
-                failedLiteral.records().forEach(System.out::println);
-                throw failedLiteral.consumedLiteral()
-                        .createException("expected " + failedLiteral.expectedLiteral());
-                //TODO error reporting
+                errorHandler.add(new SyntaxFlairHandler.FailedLiteral(failedLiteral.records(),
+                        failedLiteral.parentRule(), failedLiteral.expectedLiteral(),
+                        failedLiteral.consumedLiteral()));
             }
             case Parser.SyntaxMatch syntaxMatch -> {
                 HIRUnitParsing.parse(createdUnit, syntaxMatch.node());

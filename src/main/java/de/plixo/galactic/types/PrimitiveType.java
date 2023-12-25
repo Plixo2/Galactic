@@ -9,16 +9,16 @@ import java.util.Objects;
 
 @AllArgsConstructor
 public class PrimitiveType extends Type {
-    public APrimitiveType typeOfPrimitive;
+    public StellaPrimitiveType typeOfPrimitive;
 
-    public static final PrimitiveType INT = new PrimitiveType(APrimitiveType.INT);
-    public static final PrimitiveType BYTE = new PrimitiveType(APrimitiveType.BYTE);
-    public static final PrimitiveType SHORT = new PrimitiveType(APrimitiveType.SHORT);
-    public static final PrimitiveType LONG = new PrimitiveType(APrimitiveType.LONG);
-    public static final PrimitiveType FLOAT = new PrimitiveType(APrimitiveType.FLOAT);
-    public static final PrimitiveType DOUBLE = new PrimitiveType(APrimitiveType.DOUBLE);
-    public static final PrimitiveType BOOLEAN = new PrimitiveType(APrimitiveType.BOOLEAN);
-    public static final PrimitiveType CHAR = new PrimitiveType(APrimitiveType.CHAR);
+    public static final PrimitiveType INT = new PrimitiveType(StellaPrimitiveType.INT);
+    public static final PrimitiveType BYTE = new PrimitiveType(StellaPrimitiveType.BYTE);
+    public static final PrimitiveType SHORT = new PrimitiveType(StellaPrimitiveType.SHORT);
+    public static final PrimitiveType LONG = new PrimitiveType(StellaPrimitiveType.LONG);
+    public static final PrimitiveType FLOAT = new PrimitiveType(StellaPrimitiveType.FLOAT);
+    public static final PrimitiveType DOUBLE = new PrimitiveType(StellaPrimitiveType.DOUBLE);
+    public static final PrimitiveType BOOLEAN = new PrimitiveType(StellaPrimitiveType.BOOLEAN);
+    public static final PrimitiveType CHAR = new PrimitiveType(StellaPrimitiveType.CHAR);
 
     @Override
     public boolean equals(Object o) {
@@ -28,7 +28,7 @@ public class PrimitiveType extends Type {
         return typeOfPrimitive == that.typeOfPrimitive;
     }
 
-    public boolean equals(APrimitiveType primitiveType) {
+    public boolean equals(StellaPrimitiveType primitiveType) {
         return this.typeOfPrimitive == primitiveType;
     }
 
@@ -39,7 +39,7 @@ public class PrimitiveType extends Type {
 
     @Override
     public String toString() {
-        return "APrimitive{" + typeOfPrimitive + '}';
+        return typeOfPrimitive.name();
     }
 
     @Override
@@ -66,8 +66,9 @@ public class PrimitiveType extends Type {
         return String.valueOf(getKind());
     }
 
+    @Getter
     @RequiredArgsConstructor
-    public enum APrimitiveType {
+    public enum StellaPrimitiveType {
         INT(true),
         BYTE(true),
         SHORT(true),
@@ -77,10 +78,9 @@ public class PrimitiveType extends Type {
         BOOLEAN(false),
         CHAR(true);
 
-        @Getter
         private final boolean isNumeric;
 
-        public static @Nullable APrimitiveType fromHIR(
+        public static @Nullable PrimitiveType.StellaPrimitiveType fromHIR(
                 de.plixo.galactic.common.PrimitiveType primitiveType) {
             return switch (primitiveType) {
                 case VOID -> null;

@@ -13,7 +13,7 @@ public class Field {
 
     @Override
     public String toString() {
-        return "AField{" + "name='" + name + '\'' + ", type=" + type + '}';
+        return "Field " + name + "(" + getDescriptor() + ")";
     }
 
     public String getDescriptor() {

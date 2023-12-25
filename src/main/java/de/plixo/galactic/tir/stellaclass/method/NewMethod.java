@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public final class NewMethod implements MethodImplementation {
 
     private final StellaMethod method;
+
     @Override
     public Method asMethod() {
         return method.asMethod();

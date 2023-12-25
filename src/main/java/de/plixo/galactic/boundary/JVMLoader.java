@@ -1,5 +1,6 @@
 package de.plixo.galactic.boundary;
 
+import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.tir.ObjectPath;
 import de.plixo.galactic.tir.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
@@ -31,7 +32,7 @@ public class JVMLoader {
     }
 
     private static JVMLoadedClass generate(ObjectPath path, InputStream stream,
-                                        LoadedBytecode bytecode) {
+                                           LoadedBytecode bytecode) {
         var loadedClass = bytecode.getClass(path);
         if (loadedClass != null) {
             return loadedClass;
@@ -41,12 +42,11 @@ public class JVMLoader {
         try {
             classReader = new ClassReader(stream);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FlairException("Trouble loading JVM class", e);
         }
         classReader.accept(classNode, 0);
 
-        var jvmLoadedClass =
-                new JVMLoadedClass(classNode, path, classNode.name);
+        var jvmLoadedClass = new JVMLoadedClass(classNode, path, classNode.name);
         bytecode.putClass(path, jvmLoadedClass);
         generate(jvmLoadedClass, classNode, bytecode);
 
@@ -66,7 +66,7 @@ public class JVMLoader {
         if (classNode.superName != null) {
             var type = getType(org.objectweb.asm.Type.getObjectType(classNode.superName), bytecode);
             if (!(type instanceof Class classType)) {
-                throw new RuntimeException("superType is not a class");
+                throw new FlairException("super class is not a class of " + loadedClass.name());
             }
             superType = classType;
         } else {
@@ -90,8 +90,8 @@ public class JVMLoader {
             var returnType =
                     getType(org.objectweb.asm.Type.getReturnType(methodNode.desc), bytecode);
             var args = Arrays.stream(argumentTypes).map(ref -> getType(ref, bytecode)).toList();
-            methods.add(
-                    new Method(methodNode.access, methodNode.name, returnType, args, new MethodOwner.ClassOwner(loadedClass)));
+            methods.add(new Method(methodNode.access, methodNode.name, returnType, args,
+                    new MethodOwner.ClassOwner(loadedClass)));
         }
 
         loadedClass.setInterfaces(interfaces);
@@ -111,26 +111,26 @@ public class JVMLoader {
         return switch (type.getSort()) {
             case org.objectweb.asm.Type.VOID -> new VoidType();
             case org.objectweb.asm.Type.BOOLEAN ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.BOOLEAN);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.BOOLEAN);
             case org.objectweb.asm.Type.CHAR ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.CHAR);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.CHAR);
             case org.objectweb.asm.Type.BYTE ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.BYTE);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.BYTE);
             case org.objectweb.asm.Type.SHORT ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.SHORT);
-            case org.objectweb.asm.Type.INT -> new PrimitiveType(PrimitiveType.APrimitiveType.INT);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.SHORT);
+            case org.objectweb.asm.Type.INT -> new PrimitiveType(PrimitiveType.StellaPrimitiveType.INT);
             case org.objectweb.asm.Type.FLOAT ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.FLOAT);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.FLOAT);
             case org.objectweb.asm.Type.LONG ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.LONG);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.LONG);
             case org.objectweb.asm.Type.DOUBLE ->
-                    new PrimitiveType(PrimitiveType.APrimitiveType.DOUBLE);
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.DOUBLE);
             case org.objectweb.asm.Type.ARRAY ->
                     new ArrayType(getType(type.getElementType(), bytecode));
             case org.objectweb.asm.Type.OBJECT ->
                     asJVMClass(new ObjectPath(type.getClassName(), "."), bytecode);
             default -> {
-                throw new NullPointerException("cant fetch type");
+                throw new NullPointerException("Cant fetch type");
             }
         };
     }

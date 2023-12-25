@@ -7,6 +7,7 @@ public class TypeSignatureNode extends SignatureVisitor {
 
     public String classType;
     boolean parseArguments = false;
+
     protected TypeSignatureNode() {
         super(Opcodes.ASM9);
     }

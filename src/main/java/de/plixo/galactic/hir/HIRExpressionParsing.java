@@ -34,7 +34,7 @@ public class HIRExpressionParsing {
             elsePart = HIRExpressionParsing.parse(branchOpt.get("expression"));
         }
 
-        return new HIRBranch(expression, bodyExpression, elsePart);
+        return new HIRBranch(node.region(), expression, bodyExpression, elsePart);
     }
 
     private static HIRExpression parseFactor(Node node) {
@@ -51,7 +51,7 @@ public class HIRExpressionParsing {
         if (assignOpt.has("expression")) {
             var expression = assignOpt.get("expression");
             var value = HIRExpressionParsing.parse(expression);
-            return new HIRAssign(currentExpression, value);
+            return new HIRAssign(node.region(), currentExpression, value);
         }
 
         return currentExpression;
@@ -60,7 +60,7 @@ public class HIRExpressionParsing {
     private static HIRExpression parseMember(HIRExpression previous, Node node) {
         node.assertType("memberAccess");
         if (node.has("id")) {
-            return new HIRDotNotation(previous, node.getID());
+            return new HIRDotNotation(node.region(), previous, node.getID());
         } else if (node.has("callAccess")) {
             var callAccess = node.get("callAccess");
             List<HIRExpression> list;
@@ -72,7 +72,7 @@ public class HIRExpressionParsing {
             } else {
                 list = ExpressionCommaList.toList(callAccess);
             }
-            return new HIRCallNotation(previous, list);
+            return new HIRCallNotation(node.region(), previous, list);
         }
         throw new NullPointerException("Unknown member");
     }
@@ -82,17 +82,17 @@ public class HIRExpressionParsing {
         if (node.has("blockExpr")) {
             var list = node.get("blockExpr").list("blockExprList", "expression").stream()
                     .map(HIRExpressionParsing::parse).toList();
-            return new HIRBlock(list);
+            return new HIRBlock(node.region(), list);
         } else if (node.has("number")) {
             var nodeNumber = node.getNumber();
-            return new HIRNumber(nodeNumber);
+            return new HIRNumber(node.region(), nodeNumber);
         } else if (node.has("string")) {
             var nodeNumber = node.getString();
             var literal = nodeNumber.substring(1, nodeNumber.length() - 1);
-            return new HIRString(literal);
+            return new HIRString(node.region(), literal);
         } else if (node.has("id")) {
             var id = node.getID();
-            return new HIRIdentifier(id);
+            return new HIRIdentifier(node.region(), id);
         } else if (node.has("expression")) {
             return HIRExpressionParsing.parse(node.get("expression"));
         } else if (node.has("initialisation")) {
@@ -110,9 +110,9 @@ public class HIRExpressionParsing {
         var list = initialisationList.list("initialisationFieldList", "initialisationFieldListOpt",
                 "initialisationField").stream().map(ref -> {
             var hirExpression = HIRExpressionParsing.parse(ref.get("expression"));
-            return new HIRConstruct.ConstructParam("expr", hirExpression);
+            return new HIRConstruct.ConstructParam(ref.region(), "expr", hirExpression);
         }).toList();
-        return new HIRConstruct(type, list);
+        return new HIRConstruct(node.region(), type, list);
     }
 
     private static HIRVarDefinition parseVarDefinition(Node node) {
@@ -127,6 +127,6 @@ public class HIRExpressionParsing {
         }
 
         var values = HIRExpressionParsing.parse(node.get("expression"));
-        return new HIRVarDefinition(name, type, values);
+        return new HIRVarDefinition(node.region(), name, type, values);
     }
 }
