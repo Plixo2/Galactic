@@ -1,11 +1,13 @@
 package de.plixo.galactic.tir.stellaclass;
 
 import de.plixo.galactic.hir.items.HIRMethod;
+import de.plixo.galactic.tir.Scope;
 import de.plixo.galactic.tir.expressions.Expression;
 import de.plixo.galactic.types.Method;
 import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
@@ -15,27 +17,17 @@ import java.util.List;
  * Represents a method, either of a class or a Unit.
  */
 @RequiredArgsConstructor
+@Getter
 public class StellaMethod {
-
-    @Getter
     private final int access;
-
-    @Getter
     private final String localName;
-
-    @Getter
     private final List<Parameter> parameters;
-
-    @Getter
     private final Type returnType;
-
-    @Getter
     private final @Nullable HIRMethod hirMethod;
-
-    @Getter
     private final MethodOwner owner;
-
     public @Nullable Expression body = null;
+    @Setter
+    private @Nullable Scope.Variable thisVariable = null;
 
 
     public Method asMethod() {
@@ -45,14 +37,15 @@ public class StellaMethod {
 
     @Override
     public String toString() {
-        return "AticMethod{" + "access=" + access + ", localName='" + localName + '\'' +
-                ", parameters=" + parameters + ", returnType=" + returnType + ", hirMethod=" +
-                hirMethod + ", body=" + body + '}';
+        return STR."AticMethod{access=\{access}, localName='\{localName}\{'\''}, parameters=\{
+                parameters}, returnType=\{returnType}, hirMethod=\{hirMethod}, body=\{body}\{'}'}";
     }
 
     public boolean isAbstract() {
         return Modifier.isAbstract(access);
     }
 
-
+    public boolean isStatic() {
+        return Modifier.isStatic(access);
+    }
 }

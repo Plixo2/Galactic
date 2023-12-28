@@ -10,14 +10,36 @@ import de.plixo.galactic.types.VoidType;
 
 import java.util.Objects;
 
-import static de.plixo.galactic.exception.FlairKind.UNEXPECTED_TYPE;
-import static de.plixo.galactic.exception.FlairKind.SIGNATURE;
+import static de.plixo.galactic.exception.FlairKind.*;
 
 public class Infer implements Tree<TypeContext> {
     @Override
     public Expression defaultBehavior(Expression expression) {
-        throw new FlairException("Expression of type " + expression.getClass().getSimpleName() +
-                " not implemented for Infer stage");
+        throw new FlairException(STR."Expression of type \{expression.getClass()
+                .getSimpleName()} not implemented for Infer stage");
+    }
+
+    @Override
+    public Expression parseAssign(AssignExpression expression, TypeContext context) {
+        var left = parse(expression.left(), context);
+        var value = parse(expression.right(), context);
+        if (left instanceof FieldExpression fieldExpression) {
+            if (fieldExpression.field().isStatic()) {
+                throw new FlairCheckException(left.region(), FORMAT,
+                        STR."Cannot access a static field \{fieldExpression.field().name()} on an object");
+            }
+            return new PutFieldExpression(expression.region(), fieldExpression.field(), fieldExpression.object(), value);
+        } else {
+            throw new FlairCheckException(left.region(), FORMAT,
+                    STR."Cannot assign to \{left.getClass().getSimpleName()}");
+        }
+    }
+
+    @Override
+    public Expression parsePutStaticExpression(PutStaticFieldExpression expression,
+                                               TypeContext context) {
+        return new PutStaticFieldExpression(expression.region(), expression.field(),
+                expression.value());
     }
 
     @Override
@@ -155,12 +177,7 @@ public class Infer implements Tree<TypeContext> {
 
         var id = expression.id();
         if (parsed.getType(context) instanceof Class aClass) {
-            var methodOrField = aClass.getDotNotation(expression.region(), parsed, id, context);
-            if (methodOrField == null) {
-                throw new FlairCheckException(expression.region(), UNEXPECTED_TYPE,
-                        "Symbol " + id + " not found on Object " + aClass.name());
-            }
-            return methodOrField;
+            return aClass.getDotNotation(expression.region(), parsed, id, context);
 
         } else {
             throw new FlairCheckException(expression.region(), UNEXPECTED_TYPE,

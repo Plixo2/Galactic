@@ -1,17 +1,36 @@
 package test;
 
 public class Child {
+    public static int TEST = 0;
+    public String msg;
+
+    public Child() {
+        msg = "";
+    }
+
+    public Child(String msg) {
+        this.msg = msg;
+    }
 
     public void test() {
-        System.out.println("test");
-        var s = "test";
+        msg = "Hello World";
+    }
 
-        if (s.contains("t")) {
-            System.out.println("contains t");
-        } else {
-            System.out.println("does not contain t");
+    public void t2(String[] args) {
+        var c = get();
+        if (c.msg.isEmpty()) {
+            System.out.println("Hello World");
+        }
+    }
+    public static void t2S(String[] args) {
+        var c = get();
+        if (c.msg.isEmpty()) {
+            System.out.println("Hello World");
         }
     }
 
+    public static Child get() {
+        return new Child();
+    }
 
 }

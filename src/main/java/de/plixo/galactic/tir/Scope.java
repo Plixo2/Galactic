@@ -63,5 +63,6 @@ public class Scope {
     public static int INPUT = 1;
     public static int FINAL = 1 << 1;
     public static int CLOSURE_CAPTURE = 1 << 2;
+    public static int THIS = 1 << 3;
 
 }

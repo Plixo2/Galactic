@@ -10,6 +10,7 @@ import de.plixo.galactic.types.Class;
 import java.util.Objects;
 
 import static de.plixo.galactic.exception.FlairKind.NAME;
+import static de.plixo.galactic.exception.FlairKind.UNKNOWN_TYPE;
 
 public class Symbols implements Tree<Context> {
 
@@ -19,7 +20,6 @@ public class Symbols implements Tree<Context> {
         throw new FlairException("Expression of type " + expression.getClass().getSimpleName() +
                 " not implemented for Symbol stage");
     }
-
     @Override
     public Expression parseAssign(AssignExpression expression, Context context) {
         var left = parse(expression.left(), context);
@@ -27,7 +27,10 @@ public class Symbols implements Tree<Context> {
         if (left instanceof VarExpression varExpression) {
             return new LocalVariableAssign(expression.region(), varExpression.variable(), value);
         } else {
-            throw new NullPointerException("not supported yet");
+            if (left instanceof StaticFieldExpression staticFieldExpression) {
+                return new PutStaticFieldExpression(expression.region(), staticFieldExpression.field(), value);
+            }
+            return new AssignExpression(expression.region(), left, value);
         }
     }
 
@@ -75,18 +78,26 @@ public class Symbols implements Tree<Context> {
         return switch (parsed) {
             case UnitExpression unitExpression -> {
                 var unit = unitExpression.unit();
-                yield Objects.requireNonNull(unit.getDotNotation(region, id),
-                        "Symbol " + id + " not found in unit " + unit.name());
+                var dotNotation = unit.getDotNotation(region, id);
+                var message = STR."Symbol \{id} not found in unit \{unit.name()}";
+                if (dotNotation == null) {
+                    throw new FlairCheckException(region, NAME, message);
+                }
+                yield dotNotation;
             }
             case StellaPackageExpression packageExpression -> {
                 var thePackage = packageExpression.thePackage();
-                yield Objects.requireNonNull(thePackage.getDotNotation(region, id),
-                        "Symbol " + id + " not found in package " + thePackage.name());
+                var dotNotation = thePackage.getDotNotation(region, id);
+                var message = STR."Symbol \{id} not found in package \{thePackage.name()}";
+                if (dotNotation == null) {
+                    throw new FlairCheckException(region, NAME, message);
+                }
+                yield dotNotation;
             }
             case StaticClassExpression staticClassExpression -> {
                 var stellaClass = staticClassExpression.theClass();
-                yield Objects.requireNonNull(stellaClass.getStaticDotNotation(region, id, context),
-                        "Symbol " + id + " not found in class " + stellaClass.name());
+
+                yield stellaClass.getStaticDotNotation(region, id, context);
             }
             default -> new DotNotation(region, parsed, id);
         };

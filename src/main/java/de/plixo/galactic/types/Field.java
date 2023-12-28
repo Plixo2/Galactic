@@ -3,6 +3,8 @@ package de.plixo.galactic.types;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.lang.reflect.Modifier;
+
 @AllArgsConstructor
 @Getter
 public class Field {
@@ -18,5 +20,17 @@ public class Field {
 
     public String getDescriptor() {
         return type.getDescriptor();
+    }
+
+
+    public boolean isStatic() {
+        return Modifier.isStatic(modifier);
+    }
+    public boolean isPublic() {
+        return Modifier.isPublic(modifier);
+    }
+
+    public boolean isFinal() {
+        return Modifier.isFinal(modifier);
     }
 }

@@ -48,7 +48,7 @@ public class PrimitiveType extends Type {
     }
 
     @Override
-    public char getKind() {
+    public char getJVMKind() {
         return switch (typeOfPrimitive) {
             case INT -> 'I';
             case BYTE -> 'B';
@@ -63,7 +63,7 @@ public class PrimitiveType extends Type {
 
     @Override
     public String getDescriptor() {
-        return String.valueOf(getKind());
+        return String.valueOf(getJVMKind());
     }
 
     @Getter

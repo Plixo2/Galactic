@@ -42,12 +42,15 @@ public class Method {
         for (var argument : arguments) {
             builder.append(argument.getDescriptor());
         }
-        return "(" + builder + ")" + returnType.getDescriptor();
+        return STR."(\{builder.toString()})\{returnType.getDescriptor()}";
     }
 
 
     public boolean isStatic() {
         return Modifier.isStatic(modifier);
+    }
+    public boolean isPublic() {
+        return Modifier.isPublic(modifier);
     }
 
     public boolean isAbstract() {

@@ -11,15 +11,12 @@ public interface Tree<C extends Context> {
 
     default Expression parse(Expression expression, C context) {
         return Objects.requireNonNull(switch (expression) {
-            case ArrayConstructExpression arrayConstructExpression ->
-                    parseArrayConstructExpression(arrayConstructExpression, context);
             case BlockExpression blockExpression -> parseBlockExpression(blockExpression, context);
             case BooleanExpression booleanExpression ->
                     parseBooleanExpression(booleanExpression, context);
             case BranchExpression branchExpression ->
                     parseBranchExpression(branchExpression, context);
             case CallNotation callNotation -> parseCallNotation(callNotation, context);
-            case ClassExpression classExpression -> parseClassExpression(classExpression, context);
             case ConstructExpression constructExpression ->
                     parseConstructExpression(constructExpression, context);
             case DotNotation dotNotation -> parseDotNotation(dotNotation, context);
@@ -31,7 +28,6 @@ public interface Tree<C extends Context> {
                     parseObjectFieldExpression(fieldExpression, context);
             case GetMethodExpression methodExpression ->
                     parseObjectMethodExpression(methodExpression, context);
-            case Path path -> parsePath(path, context);
             case StaticFieldExpression staticFieldExpression ->
                     parseStaticFieldExpression(staticFieldExpression, context);
             case StaticMethodExpression staticMethodExpression ->
@@ -40,7 +36,6 @@ public interface Tree<C extends Context> {
                     parseStringExpression(stringExpression, context);
             case SymbolExpression symbolExpression ->
                     parseSymbolExpression(symbolExpression, context);
-            case UnaryExpression unaryExpression -> parseUnaryExpression(unaryExpression, context);
             case VarDefExpression varDefExpression ->
                     parseVarDefExpression(varDefExpression, context);
             case VarExpression varExpression -> parseVarExpression(varExpression, context);
@@ -56,7 +51,16 @@ public interface Tree<C extends Context> {
             case LocalVariableAssign localVariableAssign ->
                     parseLocalVariableAssign(localVariableAssign, context);
             case AssignExpression assignExpression -> parseAssign(assignExpression, context);
+            case PutFieldExpression putFieldExpression ->
+                    parsePutFieldExpression(putFieldExpression, context);
+            case PutStaticFieldExpression putStaticFieldExpression -> parsePutStaticExpression(putStaticFieldExpression, context);
         }, expression.getClass().getSimpleName());
+    }
+    default Expression parsePutStaticExpression(PutStaticFieldExpression expression, C context) {
+        return defaultBehavior(expression);
+    }
+    default Expression parsePutFieldExpression(PutFieldExpression expression, C context) {
+        return defaultBehavior(expression);
     }
 
     default Expression parseAssign(AssignExpression expression, C context) {
@@ -93,10 +97,6 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseArrayConstructExpression(ArrayConstructExpression expression,
-                                                     C context) {
-        return defaultBehavior(expression);
-    }
 
     default Expression parseBlockExpression(BlockExpression expression, C context) {
         return defaultBehavior(expression);
@@ -114,9 +114,6 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseClassExpression(ClassExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
 
     default Expression parseConstructExpression(ConstructExpression expression, C context) {
         return defaultBehavior(expression);
@@ -142,9 +139,6 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parsePath(Path expression, C context) {
-        return defaultBehavior(expression);
-    }
 
     default Expression parseStaticFieldExpression(StaticFieldExpression expression, C context) {
         return defaultBehavior(expression);
@@ -162,9 +156,6 @@ public interface Tree<C extends Context> {
         return defaultBehavior(expression);
     }
 
-    default Expression parseUnaryExpression(UnaryExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
 
     default Expression parseVarDefExpression(VarDefExpression expression, C context) {
         return defaultBehavior(expression);

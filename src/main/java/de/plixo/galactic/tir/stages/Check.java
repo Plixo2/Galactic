@@ -3,7 +3,6 @@ package de.plixo.galactic.tir.stages;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.FlairKind;
-import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.expressions.*;
 import de.plixo.galactic.types.PrimitiveType;
@@ -16,6 +15,42 @@ public class Check implements Tree<Context> {
     public Expression defaultBehavior(Expression expression) {
         throw new FlairException("Expression of type " + expression.getClass().getSimpleName() +
                 " not implemented for Check stage");
+    }
+
+    @Override
+    public Expression parsePutFieldExpression(PutFieldExpression expression, Context context) {
+        parse(expression.object(), context);
+        var value = parse(expression.value(), context);
+
+        var field = expression.field();
+        if (!field.isPublic() || field.isFinal()) {
+            throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
+                    "cant reassign non public/final field");
+        }
+
+        if (!Type.isAssignableFrom(field.type(), value.getType(context), context)) {
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "field type does not match expression type");
+        }
+
+        return expression;
+    }
+
+    @Override
+    public Expression parsePutStaticExpression(PutStaticFieldExpression expression,
+                                               Context context) {
+        var value = parse(expression.value(), context);
+        var field = expression.field();
+        if (!field.isPublic() || field.isFinal()) {
+            throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
+                    "cant reassign non public/final field");
+        }
+
+        if (!Type.isAssignableFrom(field.type(), value.getType(context), context)) {
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "field type does not match expression type");
+        }
+        return expression;
     }
 
     @Override
@@ -49,8 +84,7 @@ public class Check implements Tree<Context> {
     @Override
     public Expression parseObjectFieldExpression(FieldExpression expression, Context context) {
         parse(expression.object(), context);
-        var modifier = expression.field().modifier();
-        if (!Modifier.isPublic(modifier)) {
+        if (!expression.field().isPublic()) {
             throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
                     "cant access non public methods");
         }
@@ -61,9 +95,8 @@ public class Check implements Tree<Context> {
     @Override
     public Expression parseMethodCallExpression(MethodCallExpression expression, Context context) {
         var method = expression.method();
-        var modifier = method.modifier();
         var region = expression.region();
-        if (!Modifier.isPublic(modifier)) {
+        if (!method.isPublic()) {
             throw new FlairCheckException(region, FlairKind.SECURITY,
                     "cant access non public methods");
         }
@@ -138,8 +171,7 @@ public class Check implements Tree<Context> {
     @Override
     public Expression parseStaticFieldExpression(StaticFieldExpression expression,
                                                  Context context) {
-        var modifier = expression.field().modifier();
-        if (!Modifier.isPublic(modifier)) {
+        if (!expression.field().isPublic()) {
             throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
                     "cant access non public fields");
         }

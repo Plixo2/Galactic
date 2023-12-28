@@ -35,7 +35,7 @@ public class HIRItemParsing {
         var parameterList = parameters.stream().map(param -> {
             var paramID = param.getID();
             var type = HIRTypeParsing.parse(param.get("type"));
-            return new HIRMethod.HIRParameter(paramID, type);
+            return new HIRParameter(paramID, type);
         }).toList();
 
         return new HIRStaticMethod(new HIRMethod(name, parameterList, returnType, blockExpr));

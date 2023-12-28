@@ -2,6 +2,7 @@ package de.plixo.galactic.tir.path;
 
 import de.plixo.galactic.tir.ObjectPath;
 import de.plixo.galactic.tir.stellaclass.StellaClass;
+import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -27,9 +28,14 @@ public sealed interface PathElement {
 
         @Override
         public @Nullable PathElement next(String name) {
-            for (StellaClass aClass : unit.classes()) {
+            for (var aClass : unit.classes()) {
                 if (aClass.localName().equals(name)) {
                     return new StellaClassElement(aClass);
+                }
+            }
+            for (var method : unit.staticMethods()) {
+                if (method.localName().equals(name)) {
+                    return new StellaMethodElement(method);
                 }
             }
             return null;
@@ -55,6 +61,13 @@ public sealed interface PathElement {
     }
 
     record StellaClassElement(StellaClass stellaClass) implements PathElement {
+
+        @Override
+        public @Nullable PathElement next(String name) {
+            return null;
+        }
+    }
+    record StellaMethodElement(StellaMethod method) implements PathElement {
 
         @Override
         public @Nullable PathElement next(String name) {

@@ -4,6 +4,7 @@ import de.plixo.galactic.hir.items.HIRClass;
 import de.plixo.galactic.tir.Context;
 import de.plixo.galactic.tir.MethodCollection;
 import de.plixo.galactic.tir.ObjectPath;
+import de.plixo.galactic.tir.Scope;
 import de.plixo.galactic.tir.path.Unit;
 import de.plixo.galactic.tir.stellaclass.method.AbstractMethod;
 import de.plixo.galactic.tir.stellaclass.method.ImplementedMethod;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static de.plixo.galactic.tir.Scope.INPUT;
+import static de.plixo.galactic.tir.Scope.THIS;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
@@ -118,28 +121,6 @@ public class StellaClass extends Class {
     }
 
     @Override
-    public @Nullable Field getField(String name, Context context) {
-        for (var field : fields) {
-            if (field.name().equals(name)) {
-                return field;
-            }
-        }
-        return superClass.getField(name, context);
-    }
-
-    @Override
-    public MethodCollection getMethods(String name, Context context) {
-        var aMethods = methods.stream().map(MethodImplementation::asMethod)
-                .filter(ref -> ref.name().equals(name)).toList();
-        var methods = new MethodCollection(name, aMethods);
-        if (superClass != null) {
-            methods = methods.join(superClass.getMethods(name, context));
-        }
-
-        return methods;
-    }
-
-    @Override
     public @Nullable Class getSuperClass() {
         return superClass;
     }
@@ -156,8 +137,10 @@ public class StellaClass extends Class {
             params.add(new Parameter(field.name(), field.type()));
         }
         var owner = new MethodOwner.ClassOwner(this);
-        addMethod(new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, owner),
-                context);
+
+        var method = new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, owner);
+        method.thisVariable(new Scope.Variable("this", INPUT | THIS, this, null));
+        addMethod(method, context);
     }
 
     public Set<Method> implementationLeft() {

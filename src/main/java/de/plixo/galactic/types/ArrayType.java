@@ -24,14 +24,14 @@ public class ArrayType extends Type {
     }
 
     @Override
-    public char getKind() {
+    public char getJVMKind() {
         return '[';
     }
 
 
     @Override
     public String getDescriptor() {
-        return getKind() + elementType.getDescriptor();
+        return getJVMKind() + elementType.getDescriptor();
     }
 
     @Override

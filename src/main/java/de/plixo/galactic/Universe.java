@@ -1,6 +1,7 @@
 package de.plixo.galactic;
 
 import com.google.common.io.Resources;
+import de.plixo.galactic.boundary.InstrumentHook;
 import de.plixo.galactic.boundary.JVMLoader;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.codegen.Codegen;
@@ -34,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -59,6 +61,7 @@ public class Universe {
 
     public CompileResult parse(File file) throws FlairException {
         var startTime = System.currentTimeMillis();
+
 
         var grammar = generateGrammar();
         var rule = Objects.requireNonNull(grammar.get(entryRule), "missing entry rule");
@@ -91,22 +94,22 @@ public class Universe {
         return new Success(root);
     }
 
-    public void write(CompileRoot root, @Nullable String mainClass) throws FlairException {
+    public void write(FileOutputStream stream, CompileRoot root, @Nullable String mainClass)
+            throws IOException {
         var startTime = System.currentTimeMillis();
         var units = root.getUnits();
-        var compiler = new Codegen();
+        var compiler = new Codegen(52);
         for (var unit : units) {
             var context = new Context(unit, root, loadedBytecode);
             compiler.addUnit(unit, context);
+            for (var aClass : unit.classes()) {
+                compiler.addClass(aClass, context);
+            }
         }
         var output = compiler.getOutput();
         var manifest = new GeneratedCode.Manifest(mainClass, manifestVersion);
-        try {
-            var out = new FileOutputStream("resources/out.jar");
-            output.write(out, manifest);
-        } catch (IOException e) {
-            throw new FlairException("Trouble writing to file", e);
-        }
+        output.write(stream, manifest, loadedBytecode);
+        output.dump(new File("resources/out"));
 
         var endTime = System.currentTimeMillis();
         System.out.println("Writing Took " + (endTime - startTime) + " ms");
@@ -122,7 +125,7 @@ public class Universe {
             TIRUnitParsing.parse(unit, defaultSuperClass);
         }
         for (var unit : units) {
-            TIRUnitParsing.parseImports(unit, root, loadedBytecode);
+            TIRUnitParsing.parseImports(unit, root, loadedBytecode, false);
         }
 
         var classes = new ArrayList<StellaClass>();
@@ -144,6 +147,10 @@ public class Universe {
             var context = new Context(unit, root, loadedBytecode);
             TIRUnitParsing.fillMethodShells(unit, context);
         });
+        //rerun import for static method imports
+        for (var unit : units) {
+            TIRUnitParsing.parseImports(unit, root, loadedBytecode, true);
+        }
         classes.forEach(aClass -> {
             var context = new Context(aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillFields(aClass, context);

@@ -1,5 +1,7 @@
 package de.plixo.galactic.boundary;
 
+import com.google.common.collect.Streams;
+import com.google.common.io.ByteStreams;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.tir.ObjectPath;
 import de.plixo.galactic.tir.stellaclass.MethodOwner;
@@ -39,14 +41,16 @@ public class JVMLoader {
         }
         var classNode = new ClassNode();
         ClassReader classReader;
+        byte[] bytes;
         try {
-            classReader = new ClassReader(stream);
+            bytes = ByteStreams.toByteArray(stream);
+            classReader = new ClassReader(bytes);
         } catch (IOException e) {
             throw new FlairException("Trouble loading JVM class", e);
         }
         classReader.accept(classNode, 0);
 
-        var jvmLoadedClass = new JVMLoadedClass(classNode, path, classNode.name);
+        var jvmLoadedClass = new JVMLoadedClass(classNode,bytes, path, classNode.name);
         bytecode.putClass(path, jvmLoadedClass);
         generate(jvmLoadedClass, classNode, bytecode);
 
@@ -66,7 +70,7 @@ public class JVMLoader {
         if (classNode.superName != null) {
             var type = getType(org.objectweb.asm.Type.getObjectType(classNode.superName), bytecode);
             if (!(type instanceof Class classType)) {
-                throw new FlairException("super class is not a class of " + loadedClass.name());
+                throw new FlairException(STR."super class is not a class of \{loadedClass.name()}");
             }
             superType = classType;
         } else {

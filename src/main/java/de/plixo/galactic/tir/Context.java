@@ -69,13 +69,19 @@ public class Context {
         if (aClass != null) {
             return new StaticClassExpression(region, aClass);
         }
-        var methods = unit.staticMethods().stream().map(StellaMethod::asMethod)
-                .filter(ref -> ref.name().equals(symbol)).toList();
-        var methodCollection = new MethodCollection(symbol, methods);
-        if (!methodCollection.isEmpty()) {
-            return new StaticMethodExpression(region, new MethodOwner.UnitOwner(unit),
-                    methodCollection);
+        var staticMethod = unit.getImportedStaticMethod(symbol);
+        if (staticMethod != null) {
+            var collection = new MethodCollection(symbol, staticMethod.asMethod());
+            return new StaticMethodExpression(region, staticMethod.owner(), collection);
         }
+
+//        var methods = unit.staticMethods().stream().map(StellaMethod::asMethod)
+//                .filter(ref -> ref.name().equals(symbol)).toList();
+//        var methodCollection = new MethodCollection(symbol, methods);
+//        if (!methodCollection.isEmpty()) {
+//            return new StaticMethodExpression(region, new MethodOwner.UnitOwner(unit),
+//                    methodCollection);
+//        }
         if (context.root().name().equals(symbol)) {
             switch (context.root()) {
                 case Package aPackage -> {

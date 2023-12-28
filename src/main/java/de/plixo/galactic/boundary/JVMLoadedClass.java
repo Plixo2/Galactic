@@ -30,6 +30,8 @@ public class JVMLoadedClass extends Class {
 
     @Getter
     private final ClassNode node;
+    @Getter
+    private final byte[] data;
     private final ObjectPath path;
     private final String name;
     private int access = 0;
@@ -91,16 +93,6 @@ public class JVMLoadedClass extends Class {
         return list;
     }
 
-    @Override
-    public @Nullable Field getField(String name, Context context) {
-        return getFields().stream().filter(ref -> ref.name().equals(name)).findFirst().orElse(null);
-    }
-
-    @Override
-    public MethodCollection getMethods(String name, Context context) {
-        var list = getMethods().stream().filter(ref -> ref.name().equals(name)).toList();
-        return new MethodCollection(name, list);
-    }
 
     @Override
     public @Nullable Class getSuperClass() {

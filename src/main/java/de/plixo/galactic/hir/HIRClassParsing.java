@@ -3,6 +3,7 @@ package de.plixo.galactic.hir;
 import de.plixo.galactic.hir.items.HIRClass;
 import de.plixo.galactic.hir.items.HIRField;
 import de.plixo.galactic.hir.items.HIRMethod;
+import de.plixo.galactic.hir.items.HIRParameter;
 import de.plixo.galactic.hir.types.HIRType;
 import de.plixo.galactic.parsing.Node;
 
@@ -53,7 +54,7 @@ public class HIRClassParsing {
         var parameterList = parameters.stream().map(param -> {
             var paramID = param.getID();
             var type = HIRTypeParsing.parse(param.get("type"));
-            return new HIRMethod.HIRParameter(paramID, type);
+            return new HIRParameter(paramID, type);
         }).toList();
 
         return new HIRMethod(name, parameterList, returnType, blockExpr);

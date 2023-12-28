@@ -13,6 +13,7 @@ import @java ArrayList java.util.ArrayList
 import @java List java.util.List
 import @java TestObj test.TestObj
 import @java Arrays java.util.Arrays
+import @java InternalTest test.Child
 
 class Test extends Some {
     field: java.lang.String
@@ -46,9 +47,9 @@ class Mapper implements Function {
     }
 }
 
-
 fn main(args: [String]) -> void = {
     System.out.println("Hello World")
+    System.out.println("Hello World?")
     var hello = System.getProperty("hello")
     System.setProperty("hello", "01100")
     var hello2: boolean = if true {
@@ -69,6 +70,20 @@ fn main(args: [String]) -> void = {
     System.out.println(hello.contains("hello"))
     System.out.println(hello.contains("bye"))
     System.out.println(hello)
+
+    var test: InternalTest = new InternalTest { "hello" }
+    System.out.println(test.msg)
+    test.msg = "bye"
+    System.out.println(test.msg)
+    test.test()
+    System.out.println(test.msg)
+    System.out.println(InternalTest.TEST)
+    InternalTest.TEST = 10
+    System.out.println(InternalTest.TEST)
+    test.t2(args)
+    InternalTest.t2S(args)
+    print("Hello World")
+
 
     var state = if hello.contains("100") {
         100

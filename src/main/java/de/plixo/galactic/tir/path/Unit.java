@@ -6,7 +6,6 @@ import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.hir.items.HIRItem;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.Import;
 import de.plixo.galactic.tir.MethodCollection;
 import de.plixo.galactic.tir.ObjectPath;
 import de.plixo.galactic.tir.expressions.Expression;
@@ -17,6 +16,7 @@ import de.plixo.galactic.tir.stellaclass.StellaBlock;
 import de.plixo.galactic.tir.stellaclass.StellaClass;
 import de.plixo.galactic.tir.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.Method;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -69,7 +69,7 @@ public final class Unit implements CompileRoot {
         if (parent == null) {
             return localName;
         }
-        return parent.name() + "." + localName;
+        return STR."\{parent.name()}.\{localName}";
     }
 
     @Override
@@ -93,7 +93,20 @@ public final class Unit implements CompileRoot {
     public @Nullable Class getImportedClass(String name) {
         for (var anImport : imports) {
             if (anImport.alias().equals(name)) {
-                return anImport.importedClass();
+                if (anImport instanceof Import.ClassImport classImport) {
+                    return classImport.importedClass();
+                }
+            }
+        }
+        return null;
+    }
+
+    public @Nullable StellaMethod getImportedStaticMethod(String name) {
+        for (var anImport : imports) {
+            if (anImport.alias().equals(name)) {
+                if (anImport instanceof Import.StaticMethodImport methodImport) {
+                    return methodImport.method();
+                }
             }
         }
         return null;
@@ -108,6 +121,7 @@ public final class Unit implements CompileRoot {
         var methods = staticMethods.stream().map(StellaMethod::asMethod)
                 .filter(ref -> ref.name().equals(name)).toList();
         var methodCollection = new MethodCollection(name, methods);
+        methodCollection = methodCollection.filter(Method::isStatic);
         if (!methodCollection.isEmpty()) {
             return new StaticMethodExpression(region, new MethodOwner.UnitOwner(this),
                     methodCollection);
@@ -117,10 +131,12 @@ public final class Unit implements CompileRoot {
 
     public @Nullable Class locateClass(ObjectPath path, Context context, boolean useImports) {
         if (path.names().size() == 1 && useImports) {
-            var name = path.names().get(0);
+            var name = path.names().getFirst();
             for (var anImport : imports) {
                 if (anImport.alias().equals(name)) {
-                    return anImport.importedClass();
+                    if (anImport instanceof Import.ClassImport classImport) {
+                        return classImport.importedClass();
+                    }
                 }
             }
         }
@@ -146,10 +162,19 @@ public final class Unit implements CompileRoot {
 
 
     public void addImport(String name, Class aClass) {
-        imports.add(new Import(name, aClass));
+        imports.add(new Import.ClassImport(name, aClass));
+    }
+
+    public void addImport(String name, StellaMethod method) {
+        assert method.isStatic();
+        imports.add(new Import.StaticMethodImport(name, method));
     }
 
     public String getJVMDestination() {
         return this.toObjectPath().asSlashString();
+    }
+
+    public void clearImports() {
+        imports.clear();
     }
 }

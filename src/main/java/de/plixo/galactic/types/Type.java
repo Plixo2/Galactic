@@ -2,21 +2,11 @@ package de.plixo.galactic.types;
 
 
 import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.MethodCollection;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class Type {
 
 
-    public @Nullable Field getField(String id, Context context) {
-        return null;
-    }
-
-    public MethodCollection getMethods(String id, Context context) {
-        return null;
-    }
-
-    public abstract char getKind();
+    public abstract char getJVMKind();
 
     public abstract String getDescriptor();
 

@@ -3,8 +3,10 @@ package de.plixo.galactic.boundary;
 import de.plixo.galactic.tir.ObjectPath;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Remembers all loaded classes from the classpath
@@ -24,6 +26,10 @@ public class LoadedBytecode {
 
     public boolean containsClass(ObjectPath path) {
         return classes.containsKey(path);
+    }
+
+    public Collection<JVMLoadedClass> getClasses() {
+        return classes.values();
     }
 
 }

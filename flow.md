@@ -147,6 +147,7 @@ Check Stage:
 - TODO tests if fields, methods and classes are accessible
 - TODO check duplicate fields, methods and classes
 - TODO check duplicate imports 
+- TODO check if `void` is used as a non-returning type
 
 ```
 StringExpression

@@ -3,7 +3,7 @@ unit := itemList! "EOF"?
 itemList := item itemList ||
 item := import | class | block | method
 
-import := "import"? importType! importName!  dotWordChain!
+import := "import"? importType! importName! dotWordChain!
 importName := id | "*"?
 importType := "@"? id! ||
 
@@ -28,7 +28,7 @@ parameter := id ":"?! type!
 blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
 
-expression := variableDefinition | factor
+expression := variableDefinition | factor | function
 variableDefinition := "var" id! typeHint! "="! expression! |
 typeHint := ":"? type! ||
 branch := "if"? expression! body! branchOpt!
@@ -70,6 +70,8 @@ dotWordChainOpt := "."? dotWordChain ||
 id := "word"
 number := "number"
 string := "string"
+
+function := "fn"? "("?! parameterList! ")"?! "->"?! type! "=" expression!
 
 
 //unit := topList! "EOF"!

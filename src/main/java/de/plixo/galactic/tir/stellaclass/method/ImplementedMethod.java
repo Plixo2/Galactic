@@ -22,7 +22,7 @@ public final class ImplementedMethod implements MethodImplementation {
     }
 
     @Override
-    public StellaMethod aticMethod() {
+    public StellaMethod stellaMethod() {
         return implementation;
     }
 

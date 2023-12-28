@@ -25,6 +25,7 @@ public class TIRExpressionParsing {
             case HIRString hirString -> parseStringExpression(hirString, context);
             case HIRVarDefinition hirVarDefinition -> parseVarDefinition(hirVarDefinition, context);
             case HIRAssign hirAssign -> parseConstructExpression(hirAssign, context);
+            case HIRFunction hirFunction -> throw new NullPointerException("not implemented");
         }, expression.getClass().getName());
     }
 

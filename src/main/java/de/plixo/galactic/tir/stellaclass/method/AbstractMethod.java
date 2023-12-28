@@ -20,7 +20,7 @@ public final class AbstractMethod implements MethodImplementation {
     }
 
     @Override
-    public StellaMethod aticMethod() {
+    public StellaMethod stellaMethod() {
         return method;
     }
 

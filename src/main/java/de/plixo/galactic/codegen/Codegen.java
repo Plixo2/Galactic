@@ -12,10 +12,10 @@ import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.VoidType;
+import lombok.RequiredArgsConstructor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.*;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,9 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.*;
 
+@RequiredArgsConstructor
 public class Codegen {
+    private final int version;
     private final List<JarOutput> jarOutputs = new ArrayList<>();
 
     public GeneratedCode getOutput() {
@@ -35,13 +37,29 @@ public class Codegen {
     public void addUnit(Unit unit, Context context) {
         var classNode = new ClassNode();
         for (var methods : unit.staticMethods()) {
-            classNode.methods.add(createStaticMethod(methods, context));
+            var method = createMethod(methods, context);
+            method.access = method.access | ACC_STATIC;
+            classNode.methods.add(method);
         }
         classNode.access = ACC_PUBLIC;
         classNode.name = unit.getJVMDestination();
-        classNode.version = 52;
+        classNode.version = version;
         classNode.superName = "java/lang/Object";
         var out = getJarOutput(classNode, classNode.name + ".class");
+        this.jarOutputs.add(out);
+    }
+
+    public void addClass(StellaClass stellaClass, Context context) {
+        var classNode = new ClassNode();
+        for (var methodImpl : stellaClass.methods()) {
+            var method = methodImpl.stellaMethod();
+            classNode.methods.add(createMethod(method, context));
+        }
+        classNode.access = ACC_PUBLIC | ACC_STATIC;
+        classNode.name = stellaClass.getJVMDestination();
+        classNode.version = version;
+        classNode.superName = stellaClass.superClass.getJVMDestination();
+        var out = getJarOutput(classNode, STR."\{classNode.name}.class");
         this.jarOutputs.add(out);
     }
 
@@ -52,49 +70,9 @@ public class Codegen {
         return new JarOutput(name, b);
     }
 
-//    public void makeJarFile(@Nullable String main) throws IOException {
-//        var file = "resources/out.jar";
-//        Manifest manifest = new Manifest();
-//        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-//        if (main != null) manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, main);
-//        JarOutputStream target = new JarOutputStream(new FileOutputStream(file), manifest);
-//      //  addJar(new File("resources/out/project"), target, "");
-//        target.close();
-//        System.out.println("JAR file created: " + file);
-//    }
-//
-//
-//    private void addJar(File source, JarOutputStream target, String subName) throws IOException {
-//        if (source.isDirectory()) {
-//            var folderName = subName + source.getName();
-//            JarEntry entry = new JarEntry(folderName + "/");
-//            entry.setTime(source.lastModified());
-//            target.putNextEntry(entry);
-//            target.closeEntry();
-//            for (File nestedFile : Objects.requireNonNull(source.listFiles())) {
-//                addJar(nestedFile, target, folderName + "/");
-//            }
-//        } else {
-//            var name = FilenameUtils.getBaseName(source.getAbsolutePath());
-//            var fileName = subName + name + ".class";
-//            JarEntry entry = new JarEntry(fileName);
-//            entry.setTime(source.lastModified());
-//            target.putNextEntry(entry);
-//            try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source))) {
-//                byte[] buffer = new byte[1024];
-//                while (true) {
-//                    int count = in.read(buffer);
-//                    if (count == -1) break;
-//                    target.write(buffer, 0, count);
-//                }
-//                target.closeEntry();
-//            }
-//        }
-//    }
-
-    private MethodNode createStaticMethod(StellaMethod method, Context normalContext) {
+    private MethodNode createMethod(StellaMethod method, Context normalContext) {
         var methodNode = new MethodNode();
-        methodNode.access = ACC_PUBLIC | ACC_STATIC;
+        methodNode.access = ACC_PUBLIC;
         methodNode.name = method.localName();
         methodNode.desc = method.asMethod().getDescriptor();
         methodNode.signature = null;
@@ -103,9 +81,24 @@ public class Codegen {
         LabelNode start;
         context.add(start = new LabelNode());
 
+        if (method.thisVariable() != null) {
+            context.putVariable(method.thisVariable());
+        }
         method.parameters().forEach(ref -> context.putVariable(ref.variable()));
 
-        parseExpression(Objects.requireNonNull(method.body, "require expression"), context);
+        if (method.body == null && method.localName().equals("<init>")) {
+            //TODO
+             context.add(new VarInsnNode(ALOAD, 0));
+              var superCall =
+                     new MethodInsnNode(INVOKESTATIC, "java/lang/Object", "<init>", "()V", false);
+              context.add(superCall);
+              context.add(new InsnNode(RETURN));
+        } else {
+            parseExpression(
+                    Objects.requireNonNull(method.body,
+                            STR."require expression \{method.localName()}"),
+                    context);
+        }
 
         var returned = method.returnType();
         if (Type.isSame(returned, new VoidType())) {
@@ -245,7 +238,6 @@ public class Codegen {
                     parseExpression(branchExpression.elseExpression(), context);
                 }
                 context.add(endTarget);
-
             }
             case BlockExpression blockExpression -> {
                 var iterator = blockExpression.expressions().iterator();
@@ -257,7 +249,6 @@ public class Codegen {
                         context.add(new InsnNode(POP));
                     }
                 }
-                // blockExpression.expressions().forEach(e -> parseExpression(e, context));
             }
             case VarDefExpression varDefExpression -> {
                 context.putVariable(varDefExpression.variable());
@@ -296,11 +287,32 @@ public class Codegen {
                         new FieldInsnNode(GETSTATIC, owner, field.name(), field.getDescriptor()));
             }
             case InstanceCreationExpression instanceCreationExpression -> {
-                throw new NullPointerException("not implemented");
+                var src = instanceCreationExpression.type().getJVMDestination();
+                var descriptor = instanceCreationExpression.constructor().getDescriptor();
+                context.add(new TypeInsnNode(NEW, src));
+                context.add(new InsnNode(DUP));
+                instanceCreationExpression.expressions().forEach(e -> parseExpression(e, context));
+                context.add(new MethodInsnNode(INVOKESPECIAL, src, "<init>", descriptor, false));
             }
-            case null, default -> {
+            case PutFieldExpression putFieldExpression -> {
+                parseExpression(putFieldExpression.object(), context);
+                parseExpression(putFieldExpression.value(), context);
+                var field = putFieldExpression.field();
+                var owner = field.owner();
+                context.add(new FieldInsnNode(PUTFIELD, owner.getJVMDestination(), field.name(),
+                        field.getDescriptor()));
+            }
+            case PutStaticFieldExpression putStaticFieldExpression -> {
+                parseExpression(putStaticFieldExpression.value(), context);
+                var field = putStaticFieldExpression.field();
+                var owner = field.owner();
+                context.add(new FieldInsnNode(PUTSTATIC, owner.getJVMDestination(), field.name(),
+                        field.getDescriptor()));
+            }
+            case null -> {
                 throw new NullPointerException("expression is null");
             }
+            default -> throw new IllegalStateException("Unexpected value: " + expression);
         }
     }
 

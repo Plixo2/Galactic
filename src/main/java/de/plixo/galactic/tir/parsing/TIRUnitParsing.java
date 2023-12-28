@@ -14,13 +14,8 @@ import de.plixo.galactic.tir.TypeContext;
 import de.plixo.galactic.tir.path.CompileRoot;
 import de.plixo.galactic.tir.path.PathElement;
 import de.plixo.galactic.tir.path.Unit;
-import de.plixo.galactic.tir.stellaclass.Parameter;
-import de.plixo.galactic.tir.stellaclass.StellaBlock;
-import de.plixo.galactic.tir.stellaclass.StellaClass;
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
+import de.plixo.galactic.tir.stellaclass.*;
 import de.plixo.galactic.types.Class;
-
-import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -42,13 +37,26 @@ public class TIRUnitParsing {
                 var aticBlock = new StellaBlock(unit, hirBlock);
                 unit.addBlock(aticBlock);
             } else if (!(hirItem instanceof HIRImport || hirItem instanceof HIRStaticMethod)) {
-                throw new NullPointerException("unknown hir item " + hirItem);
+                throw new NullPointerException(STR."unknown hir item \{hirItem}");
             }
         }
     }
 
-    public static void parseImports(Unit unit, CompileRoot root, LoadedBytecode bytecode) {
+    /**
+     * parses High level imports to imports. This method will get run twice, once for types, once for static methods
+     *
+     * @param unit     the unit to add the imports to
+     * @param root     the root of the project, to start the search
+     * @param bytecode the loaded bytecode, to locate java imports
+     */
+    public static void parseImports(Unit unit, CompileRoot root, LoadedBytecode bytecode,
+                                    boolean throwErrors) {
+        // clear imports, from previous run
+        unit.clearImports();
         unit.classes().forEach(ref -> {
+            unit.addImport(ref.localName(), ref);
+        });
+        unit.staticMethods().forEach(ref -> {
             unit.addImport(ref.localName(), ref);
         });
 
@@ -59,36 +67,71 @@ public class TIRUnitParsing {
                 var alias = hirImport.name();
                 if (importType == null) {
                     var located = root.toPathElement().get(path);
-                    if (located instanceof PathElement.StellaClassElement(var aticClass)) {
-                        unit.addImport(alias, aticClass);
-                    } else if (located instanceof PathElement.UnitElement(var unitElement)) {
-                        if (alias.equals("*")) {
-                            unitElement.classes().forEach(ref -> {
-                                unit.addImport(ref.localName(), ref);
-                            });
-                        } else {
-                            throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
-                                    "could not locate matching atic class " + path);
+                    switch (located) {
+                        case PathElement.StellaClassElement(var aticClass) -> {
+                            if (alias.equals("*")) {
+                                if (throwErrors) {
+                                    throw new FlairCheckException(hirImport.region(),
+                                            FlairKind.IMPORT,
+                                            STR."Cant import inner parts of a class \{aticClass.name()}");
+                                }
+                            }
+                            unit.addImport(alias, aticClass);
                         }
-                    } else {
-                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
-                                "could not locate matching atic class " + path);
+                        case PathElement.UnitElement(var unitElement) -> {
+                            if (alias.equals("*")) {
+                                unitElement.classes().forEach(ref -> {
+                                    unit.addImport(ref.localName(), ref);
+                                });
+                                unitElement.staticMethods().forEach(ref -> {
+                                    unit.addImport(ref.localName(), ref);
+                                });
+                            } else {
+                                if (throwErrors) {
+                                    throw new FlairCheckException(hirImport.region(),
+                                            FlairKind.IMPORT,
+                                            STR."could not locate matching atic class \{path}");
+                                }
+                            }
+                        }
+                        case PathElement.StellaMethodElement(var method) -> {
+                            if (alias.equals("*")) {
+                                if (throwErrors) {
+                                    throw new FlairCheckException(hirImport.region(),
+                                            FlairKind.IMPORT,
+                                            STR."Cant import inner parts of a method \{method.localName()}");
+                                }
+                            }
+                            unit.addImport(alias, method);
+                        }
+                        case null, default -> {
+                            if (throwErrors) {
+                                throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                        STR."could not locate matching atic class, or method \{path}");
+                            }
+                        }
                     }
 
                 } else if (importType.equals("java")) {
                     var jvmClass = unit.locateJVMClass(path, bytecode);
                     if (alias.equals("*")) {
-                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
-                                "import * not supported on java");
+                        if (throwErrors) {
+                            throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                    "import * not supported on java");
+                        }
                     }
                     if (jvmClass == null) {
-                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
-                                "could not locate jvm class " + path);
+                        if (throwErrors) {
+                            throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                    STR."could not locate jvm class \{path}");
+                        }
                     }
                     unit.addImport(alias, jvmClass);
                 } else {
-                    throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
-                            "unknown import type " + importType);
+                    if (throwErrors) {
+                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                STR."unknown import type \{importType}");
+                    }
                 }
             }
         }
@@ -115,8 +158,9 @@ public class TIRUnitParsing {
                     return new Parameter(ref.name(), parse);
                 }).toList();
                 var returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
+                var owner = new MethodOwner.UnitOwner(unit);
                 var aticMethod =
-                        new StellaMethod(flags, name, parameters, returnType, hirMethod, null);
+                        new StellaMethod(flags, name, parameters, returnType, hirMethod, owner);
                 unit.addStaticMethod(aticMethod);
             }
         }

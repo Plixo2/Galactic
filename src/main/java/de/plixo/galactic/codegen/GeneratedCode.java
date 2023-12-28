@@ -1,7 +1,12 @@
 package de.plixo.galactic.codegen;
 
+import de.plixo.galactic.boundary.JVMLoadedClass;
+import de.plixo.galactic.boundary.LoadedBytecode;
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -12,7 +17,17 @@ import java.util.jar.JarOutputStream;
 public record GeneratedCode(List<JarOutput> output) {
 
 
-    public void write(OutputStream out, Manifest manifest) throws IOException {
+    @SneakyThrows
+    public void dump(File file) {
+        var absolutePath = file.getAbsolutePath();
+        for (var jarOutput : output) {
+            var path = STR."\{absolutePath}/\{jarOutput.path()}";
+            FileUtils.writeByteArrayToFile(new File(path), jarOutput.data());
+        }
+    }
+
+    public void write(OutputStream out, Manifest manifest, @Nullable LoadedBytecode loadedClasses)
+            throws IOException {
         var jvmManifest = manifest.getJVMManifest();
         JarOutputStream target = new JarOutputStream(out, jvmManifest);
         var now = System.currentTimeMillis();
@@ -24,6 +39,20 @@ public record GeneratedCode(List<JarOutput> output) {
             entry.setTime(now);
             target.closeEntry();
         }
+
+        if (loadedClasses != null) {
+            var classes = loadedClasses.getClasses().stream().toList();
+            for (JVMLoadedClass loadedClass : classes) {
+                var jvmDestination = loadedClass.getJVMDestination();
+                var entry = new JarEntry(STR."\{jvmDestination}.class");
+                target.putNextEntry(entry);
+                var data = loadedClass.getData();
+                target.write(data, 0, data.length);
+                entry.setTime(now);
+                target.closeEntry();
+            }
+        }
+
         target.close();
     }
 

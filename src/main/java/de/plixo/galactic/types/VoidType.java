@@ -24,12 +24,12 @@ public class VoidType extends Type {
     }
 
     @Override
-    public char getKind() {
+    public char getJVMKind() {
         return 'V';
     }
 
     @Override
     public String getDescriptor() {
-        return String.valueOf(getKind());
+        return String.valueOf(getJVMKind());
     }
 }

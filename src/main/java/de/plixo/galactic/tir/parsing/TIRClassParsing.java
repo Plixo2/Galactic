@@ -14,6 +14,7 @@ import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.Field;
 
 import static de.plixo.galactic.tir.Scope.INPUT;
+import static de.plixo.galactic.tir.Scope.THIS;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
@@ -49,11 +50,11 @@ public class TIRClassParsing {
 
     public static void fillFields(StellaClass stellaClass, Context context) {
         var hirClass = stellaClass.hirClass();
-        for (var field : hirClass.fields()) {
-            var name = field.name();
-            var type = TIRTypeParsing.parse(field.type(), context);
-            var e = new Field(ACC_PUBLIC, name, type, stellaClass);
-            stellaClass.fields.add(e);
+        for (var hirField : hirClass.fields()) {
+            var name = hirField.name();
+            var type = TIRTypeParsing.parse(hirField.type(), context);
+            var field = new Field(ACC_PUBLIC, name, type, stellaClass);
+            stellaClass.fields.add(field);
         }
     }
 
@@ -74,12 +75,14 @@ public class TIRClassParsing {
     public static void fillMethodExpressions(StellaClass stellaClass, TypeContext context,
                                              Universe language) {
         for (var method : stellaClass.methods()) {
-            var aticMethod = method.aticMethod();
+            var aticMethod = method.stellaMethod();
             context.pushScope();
             aticMethod.parameters().forEach(ref -> {
                 context.scope().addVariable(ref.variable());
             });
-            context.scope().addVariable(new Scope.Variable("this", INPUT, stellaClass, null));
+            var variable = new Scope.Variable("this", INPUT | THIS, stellaClass, null);
+            aticMethod.thisVariable(variable);
+            context.scope().addVariable(variable);
             TIRMethodParsing.parse(aticMethod, context, language);
             context.popScope();
         }
