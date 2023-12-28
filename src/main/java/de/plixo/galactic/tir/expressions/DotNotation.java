@@ -7,14 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-@RequiredArgsConstructor
-@Getter
-@ToString
-public final class DotNotation extends Expression {
-    private final Region region;
-    private final Expression object;
-    private final String id;
-
+public record DotNotation(Region region, Expression object, String id) implements Expression {
     @Override
     public Type getType(Context context) {
         throw new NullPointerException("not computed yet");

@@ -8,15 +8,8 @@ import de.plixo.galactic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class GetMethodExpression extends Expression
-        implements MethodCallExpression.MethodSource {
-    private final Region region;
-    private final Expression object;
-    private final MethodCollection methods;
-
-
+public record GetMethodExpression(Region region, Expression object, MethodCollection methods)
+        implements Expression, MethodCallExpression.MethodSource {
     @Override
     public Type getType(Context context) {
         return new VoidType();

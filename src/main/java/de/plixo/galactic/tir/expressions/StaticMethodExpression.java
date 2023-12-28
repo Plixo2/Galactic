@@ -9,14 +9,8 @@ import de.plixo.galactic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class StaticMethodExpression extends Expression
-        implements MethodCallExpression.MethodSource {
-    private final Region region;
-    private final MethodOwner owner;
-    private final MethodCollection methods;
-
+public record StaticMethodExpression(Region region, MethodOwner owner, MethodCollection methods)
+        implements Expression, MethodCallExpression.MethodSource {
     @Override
     public Type getType(Context context) {
         return new VoidType();

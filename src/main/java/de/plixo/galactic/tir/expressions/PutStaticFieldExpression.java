@@ -9,13 +9,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
-@Getter
-@RequiredArgsConstructor
-public final class PutStaticFieldExpression extends Expression {
-
-    private final Region region;
-    private final Field field;
-    private final Expression value;
+public record PutStaticFieldExpression(Region region, Field field, Expression value) implements Expression {
 
     @Override
     public Type getType(Context context) {

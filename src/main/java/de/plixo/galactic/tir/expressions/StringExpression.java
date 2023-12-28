@@ -9,12 +9,7 @@ import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class StringExpression extends Expression {
-    private final Region region;
-    private final String value;
-
+public record StringExpression(Region region, String value) implements Expression {
     @Override
     public Type getType(Context context) {
         var objectPath = new ObjectPath("java", "lang", "String");

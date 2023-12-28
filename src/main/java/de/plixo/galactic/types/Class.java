@@ -76,15 +76,10 @@ public abstract class Class extends Type {
 
     public Expression getStaticDotNotation(Region region, String id, Context context) {
         var possibleField = this.getField(id, context);
-        if (possibleField != null) {
-            if (!possibleField.isStatic()) {
-                throw new FlairCheckException(region, FORMAT,
-                        STR."Cannot access a non static field \{possibleField.name()} on class");
-            }
+        if (possibleField != null && possibleField.isStatic()) {
             return new StaticFieldExpression(region, this, possibleField);
         }
-        var possibleMethods = this.getMethods(id, context);
-        possibleMethods = possibleMethods.filter(Method::isStatic);
+        var possibleMethods = this.getMethods(id, context).filter(Method::isStatic);
         if (!possibleMethods.isEmpty()) {
             return new StaticMethodExpression(region, new MethodOwner.ClassOwner(this),
                     possibleMethods);
@@ -93,23 +88,18 @@ public abstract class Class extends Type {
                 STR."Symbol \{id} not found in class \{this.name()}");
     }
 
-    public @Nullable Expression getDotNotation(Region region, Expression expression, String id,
+    public Expression getDotNotation(Region region, Expression expression, String id,
                                                Context context) {
         var possibleField = this.getField(id, context);
         if (possibleField != null) {
-            if (possibleField.isStatic()) {
-                throw new FlairCheckException(region, FORMAT,
-                        STR."Cannot access a static field \{possibleField.name()} on an object");
-            }
             return new FieldExpression(region, expression, this, possibleField);
         }
-        var possibleMethods = this.getMethods(id, context);
-        possibleMethods = possibleMethods.filter(ref -> !ref.isStatic());
+        var possibleMethods = this.getMethods(id, context).filter(ref -> !ref.isStatic());
         if (!possibleMethods.isEmpty()) {
             return new GetMethodExpression(region, expression, possibleMethods);
         }
         throw new FlairCheckException(expression.region(), UNEXPECTED_TYPE,
-                STR."Symbol \{id} not found on Object \{this.name()}");
+                STR."Symbol \{id} not found on Object from class \{this.name()}");
     }
 
     public final String getJVMDestination() {

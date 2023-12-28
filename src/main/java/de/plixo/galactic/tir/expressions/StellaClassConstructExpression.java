@@ -9,15 +9,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public final class StellaClassConstructExpression extends Expression {
-
-    private final Region region;
-    private final Class constructType;
-
-    @Getter
-    private final List<Expression> arguments;
+public record StellaClassConstructExpression(Region region, Class constructType,
+                                             @Getter List<Expression> arguments) implements Expression {
 
     @Override
     public Type getType(Context context) {

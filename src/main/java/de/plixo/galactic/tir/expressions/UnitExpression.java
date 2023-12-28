@@ -8,12 +8,7 @@ import de.plixo.galactic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class UnitExpression extends Expression {
-    private final Region region;
-    private final Unit unit;
-
+public record UnitExpression(Region region, Unit unit) implements Expression {
     @Override
     public Type getType(Context context) {
         return new VoidType();

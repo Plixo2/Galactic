@@ -7,12 +7,6 @@ import lombok.Getter;
 import java.util.List;
 
 
-@Getter
-@AllArgsConstructor
-public final class HIRCallNotation implements HIRExpression {
-    private final Region region;
-    private final HIRExpression object;
-    private final List<HIRExpression> arguments;
-
-
+public record HIRCallNotation(Region region, HIRExpression object, List<HIRExpression> arguments)
+        implements HIRExpression {
 }

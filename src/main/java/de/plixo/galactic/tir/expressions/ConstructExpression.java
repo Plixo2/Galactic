@@ -8,14 +8,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public final class ConstructExpression extends Expression {
-
-    private final Region region;
-    private final Type constructType;
-
-    private final List<Expression> arguments;
+public record ConstructExpression(Region region, Type constructType, List<Expression> arguments)
+        implements Expression {
 
     @Override
     public Type getType(Context context) {

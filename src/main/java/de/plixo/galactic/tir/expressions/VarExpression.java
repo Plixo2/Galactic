@@ -9,12 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
-@RequiredArgsConstructor
-@Getter
-public final class VarExpression extends Expression {
-    private final Region region;
-    private final Scope.Variable variable;
-
+public record VarExpression(Region region, Scope.Variable variable) implements Expression {
     @Override
     public Type getType(Context context) {
         return Objects.requireNonNull(variable.getType(),

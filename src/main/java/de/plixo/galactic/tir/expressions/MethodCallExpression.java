@@ -9,22 +9,18 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public final class MethodCallExpression extends Expression {
-
-    private final Region region;
-    private final MethodSource source;
-    private final Method method;
-    private final Type calledType;
-    private final List<Expression> arguments;
+public record MethodCallExpression(Region region, de.plixo.galactic.tir.expressions.MethodCallExpression.MethodSource source,
+                                   Method method, Type calledType, List<Expression> arguments)
+        implements Expression {
 
     @Override
     public Type getType(Context context) {
         return method.returnType();
     }
 
-    public sealed interface MethodSource permits StaticMethodExpression, GetMethodExpression {
+    public sealed
+
+    interface MethodSource permits StaticMethodExpression, GetMethodExpression {
 
     }
 }

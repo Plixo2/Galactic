@@ -2,18 +2,23 @@ package de.plixo.galactic.hir.items;
 
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.tir.ObjectPath;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a import statement
- *
- * @param region
- * @param name       alias of the import. Can be "*" to import all. "*" doesn't work with java yet
- * @param importType
- * @param path
  */
-public record HIRImport(Region region, String name, @Nullable String importType, ObjectPath path)
-        implements HIRItem {
 
-
+@RequiredArgsConstructor
+@Getter
+public final class HIRImport implements HIRItem {
+    private final Region region;
+    /**
+     * Alias of the import. Can be "*" to import all. "*" doesn't work with java yet
+     */
+    private final String name;
+    private final @Nullable String importType;
+    private final ObjectPath path;
 }
+

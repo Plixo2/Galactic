@@ -7,15 +7,7 @@ import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class FieldExpression extends Expression {
-    private final Region region;
-    private final Expression object;
-    private final Type owner;
-    private final Field field;
-
-
+public record FieldExpression(Region region, Expression object, Type owner, Field field) implements Expression {
     @Override
     public Type getType(Context context) {
         return field.type();

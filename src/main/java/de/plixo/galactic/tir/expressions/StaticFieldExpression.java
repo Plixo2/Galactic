@@ -8,14 +8,7 @@ import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class StaticFieldExpression extends Expression {
-    private final Region region;
-    private final Class aClass;
-    private final Field field;
-
-
+public record StaticFieldExpression(Region region, Class aClass, Field field) implements Expression {
     @Override
     public Type getType(Context context) {
         return field.type();

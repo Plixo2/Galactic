@@ -9,13 +9,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
-@RequiredArgsConstructor
-@Getter
-public final class LocalVariableAssign extends Expression {
-
-    private final Region region;
-    private final @Nullable Scope.Variable variable;
-    private final Expression expression;
+public record LocalVariableAssign(Region region, @Nullable Scope.Variable variable, Expression expression) implements Expression {
 
     @Override
     public Type getType(Context context) {

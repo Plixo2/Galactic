@@ -9,7 +9,7 @@ import de.plixo.galactic.types.Type;
  * Not all Expressions are used in all stages
  * see flow.md
  */
-public sealed abstract class Expression
+public sealed interface Expression
         permits AssignExpression, BlockExpression, BooleanExpression, BranchExpression,
         CallNotation, ConstructExpression, DotNotation, FieldExpression, GetMethodExpression,
         InstanceCreationExpression, LocalVariableAssign, MethodCallExpression, NumberExpression,
@@ -18,6 +18,6 @@ public sealed abstract class Expression
         StringExpression, SymbolExpression, UnitExpression, VarDefExpression, VarExpression {
 
 
-    public abstract Type getType(Context context);
-    public abstract Region region();
+    Type getType(Context context);
+    Region region();
 }

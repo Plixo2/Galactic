@@ -4,11 +4,5 @@ import de.plixo.galactic.lexer.Region;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
-@Getter
-public final class HIRDotNotation implements HIRExpression {
-    private final Region region;
-    private final HIRExpression object;
-    private final String id;
-
+public record HIRDotNotation(Region region, HIRExpression object, String id) implements HIRExpression {
 }

@@ -6,13 +6,7 @@ import de.plixo.galactic.types.Type;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class SymbolExpression extends Expression {
-    private final Region region;
-    private final String id;
-
-
+public record SymbolExpression(Region region, String id) implements Expression {
     @Override
     public Type getType(Context context) {
         throw new NullPointerException("Not implemented");

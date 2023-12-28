@@ -9,18 +9,13 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public final class BlockExpression extends Expression {
-
-    private final Region region;
-    private final List<Expression> expressions;
+public record BlockExpression(Region region, List<Expression> expressions) implements Expression {
 
     @Override
     public Type getType(Context context) {
         if (expressions.isEmpty()) {
             return new VoidType();
         }
-        return expressions.get(expressions.size() - 1).getType(context);
+        return expressions.getLast().getType(context);
     }
 }

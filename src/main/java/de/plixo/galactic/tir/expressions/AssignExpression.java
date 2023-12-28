@@ -7,13 +7,7 @@ import de.plixo.galactic.types.VoidType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public final class AssignExpression extends Expression {
-    private final Region region;
-    private final Expression left;
-    private final Expression right;
-
+public record AssignExpression(Region region, Expression left, Expression right) implements Expression {
     @Override
     public Type getType(Context context) {
         return new VoidType();

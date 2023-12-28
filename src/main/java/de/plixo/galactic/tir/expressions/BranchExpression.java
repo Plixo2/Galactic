@@ -8,15 +8,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
-@Getter
-@RequiredArgsConstructor
-public final class BranchExpression extends Expression {
-    private final Region region;
-    private final Expression condition;
-    private final Expression then;
-    private final @Nullable Expression elseExpression;
-
-
+public record BranchExpression(Region region, Expression condition, Expression then,
+                               @Nullable Expression elseExpression) implements Expression {
     @Override
     public Type getType(Context context) {
         if (elseExpression == null) {

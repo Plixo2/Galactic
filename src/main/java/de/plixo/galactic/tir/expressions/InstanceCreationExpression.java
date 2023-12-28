@@ -10,14 +10,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public final class InstanceCreationExpression extends Expression {
-
-    private final Region region;
-    private final Method constructor;
-    private final Class type;
-    private final List<Expression> expressions;
+public record InstanceCreationExpression(Region region, Method constructor, Class type,
+                                         List<Expression> expressions) implements Expression {
 
     @Override
     public Type getType(Context context) {

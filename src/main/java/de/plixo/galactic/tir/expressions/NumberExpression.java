@@ -9,13 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 
-@RequiredArgsConstructor
-@Getter
-public final class NumberExpression extends Expression {
-
-    private final Region region;
-    private final BigDecimal value;
-    private final PrimitiveType.StellaPrimitiveType type;
+public record NumberExpression(Region region, BigDecimal value, PrimitiveType.StellaPrimitiveType type) implements Expression {
 
     @Override
     public Type getType(Context context) {

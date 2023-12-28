@@ -6,10 +6,5 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public final class HIRBlock implements HIRExpression {
-    private final Region region;
-    private final List<HIRExpression> expressions;
-
+public record HIRBlock(Region region, List<HIRExpression> expressions) implements HIRExpression {
 }
