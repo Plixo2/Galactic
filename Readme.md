@@ -15,12 +15,12 @@
 
 ## Quick Start
 
-This Project requires Java 21 (Preview) or higher to run.
+This project requires Java 21 (preview) or higher to run.
 
-Open the Project as a Gradle project and run the [Main](src/main/java/de/plixo/galactic/Main.java) 
+Open the project as a Gradle project and run the [Main](src/main/java/de/plixo/galactic/Main.java) 
 class with `--enable-preview` as vm flag.
 
-The Main class opens the Project in `/resource/project` and builds it to `/resource/build.jar`.
+The main class opens the Project in `/resource/project` and builds it to `/resource/build.jar`.
 This jar can be executed with `java -jar build.jar` and will print `Hello World!` to the console.
 
 
