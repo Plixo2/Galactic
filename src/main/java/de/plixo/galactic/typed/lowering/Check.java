@@ -5,6 +5,7 @@ import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.expressions.*;
+import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
 
@@ -15,6 +16,21 @@ public class Check implements Tree<Context> {
     public Expression defaultBehavior(Expression expression) {
         throw new FlairException(STR."Expression of type \{expression.getClass()
                 .getSimpleName()} not implemented for Check stage");
+    }
+
+    @Override
+    public Expression parseCastExpression(CastExpression expression, Context context) {
+        var parsed = parse(expression.object(), context);
+        var type = expression.type();
+        if (!(type instanceof Class)) {
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "Cant cast to primitive type or array");
+        }
+        if (!Type.isAssignableFrom(parsed.getType(context), type, context)) {
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "Cant cast across inheritance hierarchy");
+        }
+        return new CastExpression(expression.region(), parsed, type);
     }
 
     @Override
@@ -179,9 +195,8 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseInstanceCreationExpression(
-            InstanceCreationExpression expression,
-            Context context) {
+    public Expression parseInstanceCreationExpression(InstanceCreationExpression expression,
+                                                      Context context) {
 
         var constructor = expression.constructor();
         var region = expression.region();

@@ -13,6 +13,7 @@
 
 # Examples:
 
+## Hello World
 `Core.stella`
 ```
 import @java System java.lang.System
@@ -38,9 +39,40 @@ fn main(args: [String]) -> void = {
     list.add("Hello")
     list.add("World!")
     list.forEach(fn(obj: Object) -> void implements Consumer = {
-        println(String.valueOf(obj))
+        println(obj as String)
     })
 }
-
+```
+### Output
+```cmd
+Hello
+World!
 ```
 
+## Class Example:
+```
+import * Core
+
+import @java Consumer java.util.function.Consumer
+import @java Object java.lang.Object
+import @java Integer java.lang.Integer
+import @java String java.lang.String
+
+fn test() -> void = {
+    var c = new StringLengthComparator { 100 }
+    println(String.valueOf(c.compare("Hell0", "World")))
+}
+
+class StringLengthComparator implements java.util.Comparator {
+    someField: int
+    fn compare(s1: Object, s2: Object) -> int = {
+        var s1String = s1 as String
+        var s2String = s2 as String
+        Integer.compare(s1String.length(), s2String.length())
+    }
+}
+```
+### Output
+```cmd
+-1
+```

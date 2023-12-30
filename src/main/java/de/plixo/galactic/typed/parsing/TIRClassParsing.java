@@ -97,14 +97,14 @@ public class TIRClassParsing {
         }
     }
 
-    public static void assertMethodsImplemented(StellaClass stellaClass) {
-        var aMethods = stellaClass.implementationLeft();
+    public static void assertMethodsImplemented(StellaClass stellaClass, Context context) {
+        var aMethods = stellaClass.implementationLeft(context);
         if (!aMethods.isEmpty()) {
             var builder = new StringBuilder();
             aMethods.forEach(ref -> {
                 builder.append(ref).append("\n");
             });
-            var msg = STR."functions to implement left \{builder}";
+            var msg = STR."functions to implement left: \{builder}";
             throw new FlairCheckException(stellaClass.region(), FlairKind.SIGNATURE, msg);
         }
     }

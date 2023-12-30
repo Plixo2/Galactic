@@ -19,12 +19,9 @@ fn main(args: [String]) -> void = {
     var list = new ArrayList
     list.add("Hello")
     list.add("World!")
-   // var names = list.stream().map(fn(n: Object) -> String implements Function = {
-    //    var asString = String.valueOf(n)
-    //    asString.toUpperCase()
-   // }).toList()
     list.forEach(fn(obj: Object) -> void implements Consumer = {
-        println(String.valueOf(obj))
+        println(obj as String)
     })
+    project.func.functions.test()
 }
 

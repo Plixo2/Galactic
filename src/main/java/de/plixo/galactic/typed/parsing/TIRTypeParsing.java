@@ -43,7 +43,7 @@ public class TIRTypeParsing {
         var foundClass = context.getClass(className);
         if (foundClass == null) {
             throw new FlairCheckException(classType.region(), UNKNOWN_TYPE,
-                    "cant find type " + className);
+                    STR."cant find type \{className}");
         }
         return foundClass;
     }

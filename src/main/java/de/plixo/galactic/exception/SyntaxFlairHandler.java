@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Getter
@@ -21,20 +22,20 @@ public class SyntaxFlairHandler {
         if (records.isEmpty()) {
             return;
         }
+
         var strings = records.stream().map(ref -> switch (ref) {
             case FailedRule failedRule -> {
                 if (failedRule.records.isEmpty()) {
-                    yield "Failed to parse " + failedRule.failedRule.name();
+                    yield STR."Failed to parse \{failedRule.failedRule.name()}";
                 } else {
                     var failedRecord = failedRule.records.get(0);
-                    yield "Failed " + failedRule.failedRule.name() + ": " +
-                            failedRecord.errorMessage();
+                    yield STR."Failed \{failedRule.failedRule.name()}: \{failedRecord.errorMessage()}";
                 }
             }
             case FailedLiteral failedLiteral -> failedLiteral.consumedLiteral.errorMessage();
         }).toList();
         var msg = String.join("\n", strings);
-        throw new FlairException("\n" + msg);
+        throw new FlairException(STR."\n\{msg}");
     }
 
 

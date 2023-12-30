@@ -150,6 +150,16 @@ public class Infer implements Tree<Context> {
     public Expression parseNumberExpression(NumberExpression expression, Context context) {
         return expression;
     }
+    @Override
+    public Expression parseVarExpression(VarExpression expression, Context context) {
+        return expression;
+    }
+
+    @Override
+    public Expression parseCastExpression(CastExpression expression, Context context) {
+        var parsed = parse(expression.object(), context);
+        return new CastExpression(expression.region(), parsed, expression.type());
+    }
 
     @Override
     public Expression parseVarDefExpression(VarDefExpression expression, Context context) {
@@ -167,10 +177,6 @@ public class Infer implements Tree<Context> {
                 parsed, variable);
     }
 
-    @Override
-    public Expression parseVarExpression(VarExpression expression, Context context) {
-        return expression;
-    }
 
     @Override
     public Expression parseDotNotation(DotNotation expression, Context context) {

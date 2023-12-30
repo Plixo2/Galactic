@@ -11,7 +11,7 @@ class := "class"? id! extends! implements! classBlock!
 extends := "extends"? type ||
 implements := "implements"? typeList ||
 
-classBlock := "{"? classItemList "}"?!
+classBlock := "{"? classItemList! "}"?!
 
 classItemList := classItem classItemList! ||
 classItem := method | field
@@ -47,9 +47,9 @@ initialisationFieldListOpt := ","? initialisationFieldList! ||
 initialisationField := expression
 
 memberList := memberAccess memberList! ||
-memberAccess := "."? id! | callAccess
+memberAccess := "."? id! | callAccess | cast
 callAccess := "("? expressionList! ")"?! | ":"? expression!
-//dotNotationValues := id | number | string
+cast := "as"? type!
 
 expressionList := expression expressionListOpt! ||
 expressionListOpt := ","? expressionList! ||

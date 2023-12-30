@@ -22,7 +22,7 @@ public final class LiteralToken extends Token {
 
     @Override
     public int matches(String str, int index) {
-        if (index + literal.length() >= str.length()) {
+        if (index + literal.length() > str.length()) {
             return -1;
         }
         for (int i = 0; i < literal.length(); i++) {

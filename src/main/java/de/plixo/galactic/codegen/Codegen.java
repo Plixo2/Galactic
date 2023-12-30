@@ -312,10 +312,18 @@ public class Codegen {
                 context.add(new FieldInsnNode(PUTSTATIC, owner.getJVMDestination(), field.name(),
                         field.getDescriptor()));
             }
+            case CastExpression castExpression -> {
+                parseExpression(castExpression.object(), context);
+                var type = castExpression.type();
+                if (!(type instanceof Class aClass)) {
+                    throw new NullPointerException(type.getDescriptor());
+                }
+                context.add(new TypeInsnNode(CHECKCAST, aClass.getJVMDestination()));
+            }
             case null -> {
                 throw new NullPointerException("expression is null");
             }
-            default -> throw new IllegalStateException("Unexpected value: " + expression);
+            default -> throw new IllegalStateException(STR."Unexpected value: \{expression}");
         }
     }
 

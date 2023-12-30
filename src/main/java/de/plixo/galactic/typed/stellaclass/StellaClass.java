@@ -1,9 +1,9 @@
 package de.plixo.galactic.typed.stellaclass;
 
+import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
-import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.method.AbstractMethod;
@@ -32,10 +32,12 @@ public class StellaClass extends Class {
     @Getter
     private final Unit unit;
     @Getter
-    private @Nullable final HIRClass hirClass;
+    private @Nullable
+    final HIRClass hirClass;
     public Class superClass;
 
-    public StellaClass(Region region, String localName, Unit unit, @Nullable HIRClass hirClass, Class defaultSuperClass) {
+    public StellaClass(Region region, String localName, Unit unit, @Nullable HIRClass hirClass,
+                       Class defaultSuperClass) {
         this.region = region;
         this.localName = localName;
         this.unit = unit;
@@ -146,22 +148,34 @@ public class StellaClass extends Class {
         addMethod(method, context);
     }
 
-    public Set<Method> implementationLeft() {
+    public Set<Method> implementationLeft(Context context) {
         var set = new HashSet<>(superClass.getAbstractMethods());
         for (var anInterface : interfaces) {
             set.addAll(anInterface.getAbstractMethods());
         }
-        for (MethodImplementation method : methods) {
-            if (method instanceof ImplementedMethod implemented) {
-                set.remove(implemented.toImplement());
+        set.removeIf(ref -> {
+            var methodList = getMethods();
+            var impls = methodList.stream().filter(me -> !me.isAbstract()).toList();
+            for (var impl : impls) {
+                if (impl.name().equals(ref.name()) && signatureMatch(ref, impl, context)) {
+                    return true;
+                }
             }
-        }
+            return false;
+//            ref.matchSignature(context);
+        });
+
+//        for (MethodImplementation method : methods) {
+//            if (method instanceof ImplementedMethod implemented) {
+//                set.remove(implemented.toImplement());
+//            }
+//        }
 
         return set;
     }
 
     public String name() {
-        return unit().name() + "." + localName();
+        return STR."\{unit().name()}.\{localName()}";
     }
 
     @Override

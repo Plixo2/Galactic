@@ -176,7 +176,8 @@ public class Universe {
         });
 
         for (var aClass : classes) {
-            TIRClassParsing.assertMethodsImplemented(aClass);
+            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            TIRClassParsing.assertMethodsImplemented(aClass, context);
         }
     }
 

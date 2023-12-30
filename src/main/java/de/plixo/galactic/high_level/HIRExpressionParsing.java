@@ -91,7 +91,12 @@ public class HIRExpressionParsing {
                 list = ExpressionCommaList.toList(callAccess);
             }
             return new HIRCallNotation(node.region(), previous, list);
+        } else if (node.has("cast")) {
+            var cast = node.get("cast");
+            var type = HIRTypeParsing.parse(cast.get("type"));
+            return new HIRCast(node.region(), previous, type);
         }
+
         throw new NullPointerException("Unknown member");
     }
 

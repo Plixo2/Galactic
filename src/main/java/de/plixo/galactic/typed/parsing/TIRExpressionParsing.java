@@ -44,7 +44,13 @@ public class TIRExpressionParsing {
             case HIRVarDefinition hirVarDefinition -> parseVarDefinition(hirVarDefinition, context);
             case HIRAssign hirAssign -> parseConstructExpression(hirAssign, context);
             case HIRFunction hirFunction -> parseFunction(hirFunction, context);
+            case HIRCast hirCast -> parseCast(hirCast, context);
         }, expression.getClass().getName());
+    }
+    private static CastExpression parseCast(HIRCast cast, Context context) {
+        var type = TIRTypeParsing.parse(cast.type(), context);
+        var parsed = parse(cast.object(), context);
+        return new CastExpression(cast.region(), parsed, type);
     }
 
     //de-sugar function to class
@@ -62,7 +68,7 @@ public class TIRExpressionParsing {
         var defaultSuperClass = JVMLoader.asJVMClass(context.language().defaultSuperClass(), context.loadedBytecode());
         var stellaClass = new StellaClass(region, localName, owningUnit, null, defaultSuperClass);
         stellaClass.interfaces.add(superInterfaceClass);
-        var methodsToImplement = stellaClass.implementationLeft();
+        var methodsToImplement = stellaClass.implementationLeft(context);
         if (methodsToImplement.size() != 1) {
             throw new FlairCheckException(region, FlairKind.SIGNATURE,
                     "interface of function has more than one method to implement");
@@ -109,7 +115,7 @@ public class TIRExpressionParsing {
         TIRMethodParsing.parse(functionMethod, context);
         functionMethod.thisVariable(new Scope.Variable("this", INPUT | THIS, stellaClass, null));
         context.popScope();
-        assert stellaClass.implementationLeft().isEmpty();
+        assert stellaClass.implementationLeft(context).isEmpty();
         return new ConstructExpression(region, stellaClass, new ArrayList<>());
     }
 

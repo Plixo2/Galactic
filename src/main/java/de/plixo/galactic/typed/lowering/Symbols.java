@@ -61,9 +61,15 @@ public class Symbols implements Tree<Context> {
         return expression;
     }
 
+
     @Override
     public Expression parseBooleanExpression(BooleanExpression expression, Context context) {
         return expression;
+    }
+    @Override
+    public Expression parseCastExpression(CastExpression expression, Context context) {
+        var parsed = parse(expression.object(), context);
+        return new CastExpression(expression.region(), parsed, expression.type());
     }
 
     @Override

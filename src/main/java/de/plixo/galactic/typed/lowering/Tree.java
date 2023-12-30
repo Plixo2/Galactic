@@ -54,7 +54,12 @@ public interface Tree<C extends Context> {
             case PutFieldExpression putFieldExpression ->
                     parsePutFieldExpression(putFieldExpression, context);
             case PutStaticFieldExpression putStaticFieldExpression -> parsePutStaticExpression(putStaticFieldExpression, context);
+            case CastExpression castExpression -> parseCastExpression(castExpression, context);
         }, expression.getClass().getSimpleName());
+    }
+
+    default Expression parseCastExpression(CastExpression expression, C context) {
+        return defaultBehavior(expression);
     }
     default Expression parsePutStaticExpression(PutStaticFieldExpression expression, C context) {
         return defaultBehavior(expression);
