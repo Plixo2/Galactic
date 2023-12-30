@@ -72,7 +72,7 @@ number := "number"
 string := "string"
 
 function := "fn"? "("?! parameterList! ")"?! "->"?! type! functionType! "="?! expression!
-functionType := "<"?! type! ">"?!
+functionType := "implements"! type!
 
 //unit := topList! "EOF"!
 //
