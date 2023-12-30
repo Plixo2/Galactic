@@ -59,9 +59,9 @@ public class Context {
 
 
     /**
-     * Make a Expression from a Name, as a top level name
+     * Make an Expression from a Name, as a top level name
      *
-     * @param name name of the Symbol
+     * @param symbol name of the Symbol
      * @return
      */
     public @Nullable Expression getSymbolExpression(Region region, String symbol, Context context) {

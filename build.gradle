@@ -43,6 +43,14 @@ targetCompatibility = JavaVersion.VERSION_21
 tasks.withType(JavaCompile).each {
     it.options.compilerArgs.add('--enable-preview')
 }
+tasks.withType(JavaExec).each {
+    it.options.compilerArgs.add('--enable-preview')
+}
+javadoc.options {
+    addBooleanOption('-enable-preview', true)
+    addStringOption('-release', '21')
+}
+
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
