@@ -7,15 +7,6 @@ import java.lang.management.ManagementFactory;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        var runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-        var arguments = runtimeMxBean.getInputArguments();
-        if (!arguments.contains("--enable-preview")) {
-            System.err.println(
-                    "Please enable preview features with the '--enable-preview' vm argument");
-            System.exit(-1);
-        }
-
-
         String mainClass = "project/Main";
         var language = new Universe();
         var root = language.parse(new File("resources/project"));
