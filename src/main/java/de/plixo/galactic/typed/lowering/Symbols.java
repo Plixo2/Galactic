@@ -9,6 +9,9 @@ import de.plixo.galactic.types.Class;
 
 import static de.plixo.galactic.exception.FlairKind.NAME;
 
+/**
+ * The Symbols stage is responsible for resolving symbols and names. It's the first stage of the Expression parser.
+ */
 public class Symbols implements Tree<Context> {
 
 

@@ -13,6 +13,9 @@ import java.util.List;
 
 import static de.plixo.galactic.exception.FlairKind.*;
 
+/**
+ * Base Class type
+ */
 public abstract class Class extends Type {
 
 

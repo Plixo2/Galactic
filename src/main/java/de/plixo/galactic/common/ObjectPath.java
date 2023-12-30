@@ -53,12 +53,12 @@ public class ObjectPath {
     }
 
     public String asJVMPath() {
-        return String.join("/", names) + ".class";
+        return STR."\{String.join("/", names)}.class";
     }
 
     @Override
     public String toString() {
-        return asDotString() + "[" + names.size() + "]";
+        return STR."\{asDotString()}[\{names.size()}]";
     }
 
     @Override

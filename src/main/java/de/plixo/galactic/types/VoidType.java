@@ -2,6 +2,9 @@ package de.plixo.galactic.types;
 
 import java.util.Objects;
 
+/**
+ * void type (only used for return types)
+ */
 public class VoidType extends Type {
 
 

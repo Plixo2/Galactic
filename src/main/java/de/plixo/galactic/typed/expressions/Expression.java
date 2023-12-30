@@ -7,7 +7,6 @@ import de.plixo.galactic.types.*;
 /**
  * Base class for all expressions,
  * Not all Expressions are used in all stages
- * see flow.md
  */
 public sealed interface Expression
         permits AssignExpression, BlockExpression, BooleanExpression, BranchExpression,

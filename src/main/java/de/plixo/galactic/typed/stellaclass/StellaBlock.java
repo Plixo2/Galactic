@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * Static code block
+ * Static code block (will not be compiled)
  */
 @RequiredArgsConstructor
 @Getter

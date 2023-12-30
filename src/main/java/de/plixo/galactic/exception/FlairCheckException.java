@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+/**
+ * This Error represents a faulty programm. Unlike a FlairException, this (mostly) an internal error.
+ */
 public class FlairCheckException extends FlairException {
     private final Region position;
     private final FlairKind kind;

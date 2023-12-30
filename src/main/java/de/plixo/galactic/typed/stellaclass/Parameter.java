@@ -7,13 +7,14 @@ import lombok.RequiredArgsConstructor;
 
 import static de.plixo.galactic.typed.Scope.INPUT;
 
+/**
+ * Standard Parameter for a method, constructor or lambda
+ */
+@Getter
 @RequiredArgsConstructor
 public class Parameter {
-    @Getter
     private final String name;
-    @Getter
     private final Type type;
-    @Getter
     private final Scope.Variable variable;
 
     public Parameter(String name, Type type) {

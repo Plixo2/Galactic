@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
+/**
+ * Represents an array type.
+ */
 @RequiredArgsConstructor
 @Getter
 public class ArrayType extends Type {

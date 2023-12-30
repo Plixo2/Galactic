@@ -3,6 +3,9 @@ package de.plixo.galactic.types;
 
 import de.plixo.galactic.typed.Context;
 
+/**
+ * Default Type class for the Language
+ */
 public abstract class Type {
 
 

@@ -13,6 +13,9 @@ import java.util.Objects;
 
 import static de.plixo.galactic.exception.FlairKind.*;
 
+/**
+ * The Infer stage is responsible for inferring types, methods and fields. It's the second stage of Expression parsing
+ */
 public class Infer implements Tree<Context> {
     @Override
     public Expression defaultBehavior(Expression expression) {

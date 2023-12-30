@@ -25,6 +25,9 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 import static org.objectweb.asm.Opcodes.*;
 
+/**
+ * Code generator for the JVM.
+ */
 @RequiredArgsConstructor
 public class Codegen {
     private final int version;

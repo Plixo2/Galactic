@@ -5,6 +5,9 @@ import lombok.Getter;
 
 import java.lang.reflect.Modifier;
 
+/**
+ * Represents a field (a variable) in a class.
+ */
 @AllArgsConstructor
 @Getter
 public class Field {

@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Collects different Errors and throws them at the end.
+ * Used in the Parser Stage
+ */
 @Getter
 public class SyntaxFlairHandler {
     private final List<SyntaxFlair> records = new ArrayList<>();

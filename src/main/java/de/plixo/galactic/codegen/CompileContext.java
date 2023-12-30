@@ -13,6 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The CompileContext is used to store information about the current compilation.
+ * It is used to store the instructions and variables.
+ */
 @RequiredArgsConstructor
 @Getter
 public class CompileContext {
@@ -20,7 +24,6 @@ public class CompileContext {
     private final MethodNode node;
     private final Context normalContext;
     private final Map<Scope.Variable, Integer> variables = new HashMap<>();
-    //    @Getter(AccessLevel.NONE)
     private int variablesCount = 0;
 
 
@@ -28,7 +31,6 @@ public class CompileContext {
         this.instructions.add(instruction);
     }
 
-    @Contract(mutates = "this")
     public void putVariable(Scope.Variable variable) {
         if (!variables.containsKey(variable)) {
             variables.put(variable, variablesCount);

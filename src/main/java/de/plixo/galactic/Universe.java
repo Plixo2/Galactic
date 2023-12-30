@@ -45,17 +45,28 @@ public class Universe {
     private final String configFile = "/cfg.txt";
     private final String entryRule = "unit";
     private final String manifestVersion = "1.0";
+    private final String debugOutput = "resources/build/";
     private final ObjectPath defaultSuperClass = new ObjectPath("java", "lang", "Object");
     //java 8
     private final int codeGenVersion = 52;
 
+    /**
+     * Bytecode memoization
+     */
     private final LoadedBytecode loadedBytecode = new LoadedBytecode();
 
+    /**
+     * The stages of the compiler
+     */
     private final Symbols symbolsStage = new Symbols();
     private final Infer inferStage = new Infer();
     private final Check checkStage = new Check();
 
-
+    /**
+     * Entry point for the compiler. Reads the Grammar and generates a Tokenizer.
+     * @param file the project Path (file or directory)
+     * @return result of the compilation
+     */
     public CompileResult parse(File file) throws FlairException {
         var startTime = System.currentTimeMillis();
 
@@ -86,10 +97,15 @@ public class Universe {
             System.out.println(STR."Reading Took \{endTime - startTime} ms");
         }
 
-
         return new Success(root);
     }
 
+    /**
+     * Writes the compiled code into the output stream
+     * @param stream the output stream
+     * @param root the root of the compile tree
+     * @param mainClass the main class, e.g. "de/plixo/Main"
+     */
     public void write(FileOutputStream stream, CompileRoot root, @Nullable String mainClass)
             throws IOException {
         var startTime = System.currentTimeMillis();
@@ -105,12 +121,16 @@ public class Universe {
         var output = compiler.getOutput();
         var manifest = new GeneratedCode.Manifest(mainClass, manifestVersion);
         output.write(stream, manifest, loadedBytecode);
-        output.dump(new File("resources/build/"));
+        output.dump(new File(debugOutput));
 
         var endTime = System.currentTimeMillis();
         System.out.println(STR."Writing Took \{endTime - startTime} ms");
     }
 
+    /**
+     * Main compiler step. read, lex, parse and check
+     * @param root the root of the compile tree
+     */
     private void read(CompileRoot root) {
         var units = root.getUnits();
         var defaultSuperClass = JVMLoader.asJVMClass(this.defaultSuperClass, loadedBytecode);
@@ -198,6 +218,9 @@ public class Universe {
         return grammar.generate(grammarStr.lines().iterator());
     }
 
+    /**
+     * The result of the compilation, can be either an Error or a Success
+     */
     public sealed interface CompileResult {
 
     }

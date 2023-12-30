@@ -1,5 +1,8 @@
 package de.plixo.galactic.exception;
 
+/**
+ * Base exception thrown by the compiler.
+ */
 public class FlairException extends RuntimeException {
 
     public FlairException() {

@@ -11,6 +11,9 @@ import de.plixo.galactic.types.Type;
 
 import java.lang.reflect.Modifier;
 
+/**
+ * Check stage is the final Stage for the Expressions, to test if every expression is valid.
+ */
 public class Check implements Tree<Context> {
     @Override
     public Expression defaultBehavior(Expression expression) {

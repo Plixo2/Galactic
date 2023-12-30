@@ -15,9 +15,16 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
+/**
+ * Output of the code generator
+ * @param output
+ */
 public record GeneratedCode(List<JarOutput> output) {
 
-
+    /**
+     * Dumps the generated code to the given directory
+     * @param file the directory to write to
+     */
     @SneakyThrows
     public void dump(File file) {
         var _ = file.mkdirs();

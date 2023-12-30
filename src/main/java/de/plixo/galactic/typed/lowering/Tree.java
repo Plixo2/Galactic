@@ -5,6 +5,10 @@ import de.plixo.galactic.typed.expressions.*;
 
 import java.util.Objects;
 
+/**
+ * Tree is the interface for the compiler stages.
+ * @param <C> Context to parse with
+ */
 public interface Tree<C extends Context> {
 
     Expression defaultBehavior(Expression expression);

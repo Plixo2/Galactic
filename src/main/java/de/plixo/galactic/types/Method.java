@@ -8,6 +8,9 @@ import lombok.Getter;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+/**
+ * Represents a Method. Can be a static method of a Unit, or a method of a class.
+ */
 @AllArgsConstructor
 @Getter
 public class Method {

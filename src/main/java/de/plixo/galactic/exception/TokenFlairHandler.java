@@ -6,6 +6,10 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Collects different Errors and throws them at the end.
+ * Used in the Lexer Stage
+ */
 @Getter
 public class TokenFlairHandler {
     private final List<TokenRecord> records = new ArrayList<>();

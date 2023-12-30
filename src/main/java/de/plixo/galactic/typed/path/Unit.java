@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a Unit of code (a file)
- * Has code-blocks, classes, imports and static methods
+ * Represents a Unit of code (a file).
+ * Has code-blocks (for debugging only), classes, imports and static methods
  */
 @RequiredArgsConstructor
 @Getter

@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 
+@Deprecated
 public class JsonUtil {
     public static void saveJsonObj(File file, JsonElement json) {
         try {
