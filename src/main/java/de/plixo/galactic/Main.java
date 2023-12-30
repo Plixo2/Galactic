@@ -10,8 +10,9 @@ public class Main {
         var runtimeMxBean = ManagementFactory.getRuntimeMXBean();
         var arguments = runtimeMxBean.getInputArguments();
         if (!arguments.contains("--enable-preview")) {
-            throw new RuntimeException(
+            System.err.println(
                     "Please enable preview features with the '--enable-preview' vm argument");
+            System.exit(-1);
         }
 
 
