@@ -160,6 +160,12 @@ public class Infer implements Tree<Context> {
         var parsed = parse(expression.object(), context);
         return new CastExpression(expression.region(), parsed, expression.type());
     }
+    @Override
+    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context) {
+        var parsed = parse(expression.object(), context);
+        return new CastCheckExpression(expression.region(), parsed, expression.type());
+    }
+
 
     @Override
     public Expression parseVarDefExpression(VarDefExpression expression, Context context) {

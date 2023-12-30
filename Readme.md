@@ -1,7 +1,8 @@
 
 <h1 align="center">Galactic Compiler</h1>
 
-
+<details>
+<summary>Internals</summary>
 
 * Main Entry File [Universe](src/main/java/de/plixo/galactic/Universe.java)
 * [Lexer](src/main/java/de/plixo/galactic/lexer)
@@ -10,10 +11,22 @@
 * [Typed](src/main/java/de/plixo/galactic/typed)
 * [Code Generation](src/main/java/de/plixo/galactic/codegen)
 
+</details>
 
-# Examples:
+## Quick Start
 
-## Hello World
+This Project requires Java 21 (Preview) or higher to run.
+
+Open the Project as a Gradle project and run the [Main](src/main/java/de/plixo/galactic/Main.java) 
+class with `--enable-preview` as vm flag.
+
+The Main class opens the Project in `/resource/project` and builds it to `/resource/build.jar`.
+This jar can be executed with `java -jar build.jar` and will print `Hello World!` to the console.
+
+
+## Examples:
+
+### Hello World
 `Core.stella`
 ```
 import @java System java.lang.System
@@ -43,13 +56,13 @@ fn main(args: [String]) -> void = {
     })
 }
 ```
-### Output
+Output:
 ```cmd
 Hello
 World!
 ```
 
-## Class Example:
+### Class Example:
 ```
 import * Core
 
@@ -72,7 +85,7 @@ class StringLengthComparator implements java.util.Comparator {
     }
 }
 ```
-### Output
+Output:
 ```cmd
 -1
 ```

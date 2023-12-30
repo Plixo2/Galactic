@@ -1,27 +1,8 @@
 import * Core
 
 import @java String java.lang.String
-import @java Consumer java.util.function.Consumer
-import @java Function java.util.function.Function
-import @java Boolean java.lang.Boolean
-import @java System java.lang.System
-import @java Object java.lang.Object
-import @java ArrayList java.util.ArrayList
-import @java List java.util.List
-import @java TestObj test.TestObj
-import @java Arrays java.util.Arrays
-import @java InternalTest test.Child
-import @java String java.lang.String
-
 
 fn main(args: [String]) -> void = {
-    //var list = Arrays.asList(args)
-    var list = new ArrayList
-    list.add("Hello")
-    list.add("World!")
-    list.forEach(fn(obj: Object) -> void implements Consumer = {
-        println(obj as String)
-    })
-    project.func.functions.test()
+    println("Hello World!")
 }
 

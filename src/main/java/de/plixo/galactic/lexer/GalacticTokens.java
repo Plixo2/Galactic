@@ -62,6 +62,7 @@ public class GalacticTokens {
         tokens.add(new LiteralToken("var"));
         tokens.add(new LiteralToken("import"));
         tokens.add(new LiteralToken("as"));
+        tokens.add(new LiteralToken("is"));
         tokens.add(new WordToken());
         tokens.add(new NumberToken());
         tokens.add(new StringToken());

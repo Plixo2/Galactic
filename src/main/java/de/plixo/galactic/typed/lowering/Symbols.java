@@ -73,6 +73,12 @@ public class Symbols implements Tree<Context> {
     }
 
     @Override
+    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context) {
+        var parsed = parse(expression.object(), context);
+        return new CastCheckExpression(expression.region(), parsed, expression.type());
+    }
+
+    @Override
     public Expression parseDotNotation(DotNotation expression, Context context) {
         context.pushScope();
         var parsed = parse(expression.object(), context);

@@ -105,7 +105,7 @@ public class Universe {
         var output = compiler.getOutput();
         var manifest = new GeneratedCode.Manifest(mainClass, manifestVersion);
         output.write(stream, manifest, loadedBytecode);
-        output.dump(new File("resources/out"));
+        output.dump(new File("resources/build/"));
 
         var endTime = System.currentTimeMillis();
         System.out.println(STR."Writing Took \{endTime - startTime} ms");

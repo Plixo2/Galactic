@@ -35,7 +35,7 @@ branch := "if"? expression! body! branchOpt!
 branchOpt := "else"? expression! ||
 body := expression!
 
-factor := object memberList! assignOpt!
+factor := object postfixList! assignOpt!
 assignOpt := "="? expression! ||
 
 object := initialisation | branch | blockExpr | string | number | id | "("? expression! ")"?!
@@ -46,10 +46,11 @@ initialisationFieldList := initialisationField initialisationFieldListOpt! ||
 initialisationFieldListOpt := ","? initialisationFieldList! ||
 initialisationField := expression
 
-memberList := memberAccess memberList! ||
-memberAccess := "."? id! | callAccess | cast
+postfixList := postFix postfixList! ||
+postFix := "."? id! | callAccess | cast | castCheck
 callAccess := "("? expressionList! ")"?! | ":"? expression!
 cast := "as"? type!
+castCheck := "is"? type!
 
 expressionList := expression expressionListOpt! ||
 expressionListOpt := ","? expressionList! ||

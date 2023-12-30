@@ -2,6 +2,7 @@ package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.boundary.JVMLoadedClass;
 import de.plixo.galactic.boundary.LoadedBytecode;
+import de.plixo.galactic.common.JsonUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
@@ -19,10 +20,26 @@ public record GeneratedCode(List<JarOutput> output) {
 
     @SneakyThrows
     public void dump(File file) {
+        var _ = file.mkdirs();
+        if (!file.isDirectory()) {
+            throw new IOException("File is not a directory");
+        }
+        deleteClassFiles(file);
         var absolutePath = file.getAbsolutePath();
         for (var jarOutput : output) {
             var path = STR."\{absolutePath}/\{jarOutput.path()}";
             FileUtils.writeByteArrayToFile(new File(path), jarOutput.data());
+        }
+    }
+    private static void deleteClassFiles(File fileToDelete) {
+        File[] allContents = fileToDelete.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteClassFiles(file);
+            }
+        }
+        if (fileToDelete.getName().endsWith(".class") || fileToDelete.isDirectory()) {
+            var _ = fileToDelete.delete();
         }
     }
 

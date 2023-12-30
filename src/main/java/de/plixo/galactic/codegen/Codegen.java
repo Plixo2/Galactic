@@ -320,6 +320,14 @@ public class Codegen {
                 }
                 context.add(new TypeInsnNode(CHECKCAST, aClass.getJVMDestination()));
             }
+            case CastCheckExpression castCheckExpression -> {
+                parseExpression(castCheckExpression.object(), context);
+                var type = castCheckExpression.type();
+                if (!(type instanceof Class aClass)) {
+                    throw new NullPointerException(type.getDescriptor());
+                }
+                context.add(new TypeInsnNode(INSTANCEOF, aClass.getJVMDestination()));
+            }
             case null -> {
                 throw new NullPointerException("expression is null");
             }

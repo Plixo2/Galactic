@@ -45,7 +45,13 @@ public class TIRExpressionParsing {
             case HIRAssign hirAssign -> parseConstructExpression(hirAssign, context);
             case HIRFunction hirFunction -> parseFunction(hirFunction, context);
             case HIRCast hirCast -> parseCast(hirCast, context);
+            case HIRCastCheck hirCastCheck -> parseCastCheck(hirCastCheck, context);
         }, expression.getClass().getName());
+    }
+    private static CastCheckExpression parseCastCheck(HIRCastCheck cast, Context context) {
+        var type = TIRTypeParsing.parse(cast.type(), context);
+        var parsed = parse(cast.object(), context);
+        return new CastCheckExpression(cast.region(), parsed, type);
     }
     private static CastExpression parseCast(HIRCast cast, Context context) {
         var type = TIRTypeParsing.parse(cast.type(), context);

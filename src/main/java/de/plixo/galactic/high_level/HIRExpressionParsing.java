@@ -57,7 +57,7 @@ public class HIRExpressionParsing {
 
     private static HIRExpression parseFactor(Node node) {
         node.assertType("factor");
-        var memberNodeList = node.list("memberList", "memberAccess");
+        var memberNodeList = node.list("postfixList", "postFix");
 
         var objectNode = node.get("object");
         var currentExpression = parseObject(objectNode);
@@ -76,7 +76,7 @@ public class HIRExpressionParsing {
     }
 
     private static HIRExpression parseMember(HIRExpression previous, Node node) {
-        node.assertType("memberAccess");
+        node.assertType("postFix");
         if (node.has("id")) {
             return new HIRDotNotation(node.region(), previous, node.getID());
         } else if (node.has("callAccess")) {
@@ -95,6 +95,10 @@ public class HIRExpressionParsing {
             var cast = node.get("cast");
             var type = HIRTypeParsing.parse(cast.get("type"));
             return new HIRCast(node.region(), previous, type);
+        } else if (node.has("castCheck")) {
+            var cast = node.get("castCheck");
+            var type = HIRTypeParsing.parse(cast.get("type"));
+            return new HIRCastCheck(node.region(), previous, type);
         }
 
         throw new NullPointerException("Unknown member");

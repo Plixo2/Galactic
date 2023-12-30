@@ -11,12 +11,12 @@ import de.plixo.galactic.types.*;
  */
 public sealed interface Expression
         permits AssignExpression, BlockExpression, BooleanExpression, BranchExpression,
-        CallNotation, CastExpression, ConstructExpression, DotNotation, FieldExpression,
-        GetMethodExpression, InstanceCreationExpression, LocalVariableAssign, MethodCallExpression,
-        NumberExpression, PutFieldExpression, PutStaticFieldExpression, StaticClassExpression,
-        StaticFieldExpression, StaticMethodExpression, StellaClassConstructExpression,
-        StellaPackageExpression, StringExpression, SymbolExpression, UnitExpression,
-        VarDefExpression, VarExpression {
+        CallNotation, CastCheckExpression, CastExpression, ConstructExpression, DotNotation,
+        FieldExpression, GetMethodExpression, InstanceCreationExpression, LocalVariableAssign,
+        MethodCallExpression, NumberExpression, PutFieldExpression, PutStaticFieldExpression,
+        StaticClassExpression, StaticFieldExpression, StaticMethodExpression,
+        StellaClassConstructExpression, StellaPackageExpression, StringExpression, SymbolExpression,
+        UnitExpression, VarDefExpression, VarExpression {
 
 
     Type getType(Context context);

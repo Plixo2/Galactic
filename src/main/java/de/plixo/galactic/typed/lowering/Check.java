@@ -26,11 +26,18 @@ public class Check implements Tree<Context> {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                     "Cant cast to primitive type or array");
         }
-        if (!Type.isAssignableFrom(parsed.getType(context), type, context)) {
-            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
-                    "Cant cast across inheritance hierarchy");
-        }
         return new CastExpression(expression.region(), parsed, type);
+    }
+
+    @Override
+    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context) {
+        var parsed = parse(expression.object(), context);
+        var type = expression.type();
+        if (!(type instanceof Class)) {
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+                    "Cant cast to primitive type or array");
+        }
+        return new CastCheckExpression(expression.region(), parsed, type);
     }
 
     @Override
