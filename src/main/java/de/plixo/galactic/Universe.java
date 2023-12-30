@@ -1,11 +1,11 @@
 package de.plixo.galactic;
 
 import com.google.common.io.Resources;
-import de.plixo.galactic.boundary.InstrumentHook;
 import de.plixo.galactic.boundary.JVMLoader;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.codegen.Codegen;
 import de.plixo.galactic.codegen.GeneratedCode;
+import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.SyntaxFlairHandler;
@@ -14,19 +14,16 @@ import de.plixo.galactic.files.FileTree;
 import de.plixo.galactic.lexer.GalacticTokens;
 import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.parsing.Grammar;
-import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.ObjectPath;
-import de.plixo.galactic.tir.TreeBuilding;
-import de.plixo.galactic.tir.TypeContext;
-import de.plixo.galactic.tir.parsing.TIRClassParsing;
-import de.plixo.galactic.tir.parsing.TIRUnitParsing;
-import de.plixo.galactic.tir.path.CompileRoot;
-import de.plixo.galactic.tir.stages.Check;
-import de.plixo.galactic.tir.stages.CheckFlow;
-import de.plixo.galactic.tir.stages.Infer;
-import de.plixo.galactic.tir.stages.Symbols;
-import de.plixo.galactic.tir.stellaclass.StellaBlock;
-import de.plixo.galactic.tir.stellaclass.StellaClass;
+import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.TreeBuilding;
+import de.plixo.galactic.typed.parsing.TIRClassParsing;
+import de.plixo.galactic.typed.parsing.TIRUnitParsing;
+import de.plixo.galactic.typed.path.CompileRoot;
+import de.plixo.galactic.typed.lowering.Check;
+import de.plixo.galactic.typed.lowering.Infer;
+import de.plixo.galactic.typed.lowering.Symbols;
+import de.plixo.galactic.typed.stellaclass.StellaBlock;
+import de.plixo.galactic.typed.stellaclass.StellaClass;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -50,18 +46,18 @@ public class Universe {
     private final String entryRule = "unit";
     private final String manifestVersion = "1.0";
     private final ObjectPath defaultSuperClass = new ObjectPath("java", "lang", "Object");
+    //java 8
+    private final int codeGenVersion = 52;
 
     private final LoadedBytecode loadedBytecode = new LoadedBytecode();
 
     private final Symbols symbolsStage = new Symbols();
     private final Infer inferStage = new Infer();
     private final Check checkStage = new Check();
-    private final CheckFlow checkFlowStage = new CheckFlow();
 
 
     public CompileResult parse(File file) throws FlairException {
         var startTime = System.currentTimeMillis();
-
 
         var grammar = generateGrammar();
         var rule = Objects.requireNonNull(grammar.get(entryRule), "missing entry rule");
@@ -87,7 +83,7 @@ public class Universe {
             return new Error(e);
         } finally {
             var endTime = System.currentTimeMillis();
-            System.out.println("Reading Took " + (endTime - startTime) + " ms");
+            System.out.println(STR."Reading Took \{endTime - startTime} ms");
         }
 
 
@@ -98,9 +94,9 @@ public class Universe {
             throws IOException {
         var startTime = System.currentTimeMillis();
         var units = root.getUnits();
-        var compiler = new Codegen(52);
+        var compiler = new Codegen(codeGenVersion);
         for (var unit : units) {
-            var context = new Context(unit, root, loadedBytecode);
+            var context = new Context(this,unit, root, loadedBytecode);
             compiler.addUnit(unit, context);
             for (var aClass : unit.classes()) {
                 compiler.addClass(aClass, context);
@@ -112,14 +108,14 @@ public class Universe {
         output.dump(new File("resources/out"));
 
         var endTime = System.currentTimeMillis();
-        System.out.println("Writing Took " + (endTime - startTime) + " ms");
+        System.out.println(STR."Writing Took \{endTime - startTime} ms");
     }
 
     private void read(CompileRoot root) {
         var units = root.getUnits();
         var defaultSuperClass = JVMLoader.asJVMClass(this.defaultSuperClass, loadedBytecode);
         if (defaultSuperClass == null) {
-            throw new FlairException("Cant find super class" + this.defaultSuperClass);
+            throw new FlairException(STR."Cant find default super class\{this.defaultSuperClass}");
         }
         for (var unit : units) {
             TIRUnitParsing.parse(unit, defaultSuperClass);
@@ -138,13 +134,13 @@ public class Universe {
         }
 
         for (var aClass : classes) {
-            var context = new Context(aClass.unit(), root, loadedBytecode);
+            var context = new Context(this,aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillSuperclasses(aClass, context, defaultSuperClass);
         }
 
         //types are known here
         units.forEach(unit -> {
-            var context = new Context(unit, root, loadedBytecode);
+            var context = new Context(this,unit, root, loadedBytecode);
             TIRUnitParsing.fillMethodShells(unit, context);
         });
         //rerun import for static method imports
@@ -152,29 +148,30 @@ public class Universe {
             TIRUnitParsing.parseImports(unit, root, loadedBytecode, true);
         }
         classes.forEach(aClass -> {
-            var context = new Context(aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillFields(aClass, context);
         });
         classes.forEach(aClass -> {
-            var context = new Context(aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillMethodShells(aClass, context);
         });
         classes.forEach(aClass -> {
-            var context = new Context(aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), root, loadedBytecode);
             aClass.addAllFieldsConstructor(context);
         });
 
         //expressions can be evaluated here
         classes.forEach(aClass -> {
-            var context = new TypeContext(aClass.unit(), root, loadedBytecode);
-            TIRClassParsing.fillMethodExpressions(aClass, context, this);
+            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            TIRClassParsing.fillMethodExpressions(aClass, context);
         });
         blocks.forEach(block -> {
-            TIRUnitParsing.fillBlockExpressions(block.unit(), root, block, this);
+            var context = new Context(this, block.unit(), root, loadedBytecode);
+            TIRUnitParsing.fillBlockExpressions(block.unit(), block, context);
         });
 
         units.forEach(unit -> {
-            var context = new TypeContext(unit, root, loadedBytecode);
+            var context = new Context(this, unit, root, loadedBytecode);
             TIRUnitParsing.fillMethodExpressions(unit, context, this);
         });
 

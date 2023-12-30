@@ -2,11 +2,11 @@ package de.plixo.galactic.types;
 
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.lexer.Region;
-import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.MethodCollection;
-import de.plixo.galactic.tir.ObjectPath;
-import de.plixo.galactic.tir.expressions.*;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.MethodCollection;
+import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.typed.expressions.*;
+import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

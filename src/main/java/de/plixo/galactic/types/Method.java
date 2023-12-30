@@ -1,7 +1,7 @@
 package de.plixo.galactic.types;
 
-import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,10 +19,16 @@ public class Method {
 
     @Override
     public String toString() {
-        return "Method " + name + "(" + getDescriptor() + ")";
+        return STR."Method \{name}(\{getDescriptor()})";
     }
 
-    public boolean isCallable(List<Type> typeList, Context context) {
+    public boolean matchSignature(Signature signature, Context context) {
+        if (signature.returnType() != null) {
+            if (!Type.isAssignableFrom(signature.returnType(), this.returnType, context)) {
+                return false;
+            }
+        }
+        var typeList = signature.arguments();
         if (typeList.size() != arguments.size()) {
             return false;
         }
@@ -49,6 +55,7 @@ public class Method {
     public boolean isStatic() {
         return Modifier.isStatic(modifier);
     }
+
     public boolean isPublic() {
         return Modifier.isPublic(modifier);
     }

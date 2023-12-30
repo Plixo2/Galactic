@@ -46,8 +46,8 @@ public class FileTree {
             }
             return treePackage;
         } else if (file.isFile()) {
-            var aticFile = FilenameUtils.getExtension(absolutePath).matches(filePattern);
-            if (aticFile) {
+            var stellaFile = FilenameUtils.getExtension(absolutePath).matches(filePattern);
+            if (stellaFile) {
                 return new FileTreeEntry.FileTreeUnit(localName, name, file);
             }
         }

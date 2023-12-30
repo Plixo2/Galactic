@@ -1,0 +1,8 @@
+import * Core
+
+import @java Consumer java.util.function.Consumer
+import @java Object java.lang.Object
+
+fn staticTest() -> void = {
+
+}

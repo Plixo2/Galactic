@@ -1,7 +1,9 @@
 package de.plixo.galactic.lexer;
 
 
+import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.lexer.tokens.Token;
 
 /**
@@ -14,16 +16,17 @@ import de.plixo.galactic.lexer.tokens.Token;
 public record TokenRecord(Token token, String literal, Position position) {
 
     public RuntimeException createException() {
-        return new FlairException(
-                "Unexpected Token (" + token + ") '" + literal + "' at " + position.toString());
+        var msg = STR."Unexpected Token (\{token}) '\{literal}' at \{position.toString()}";
+        return new FlairCheckException(position.toRegion(), FlairKind.TOKEN, msg);
     }
 
     public RuntimeException createException(String msg) {
-        return new FlairException(msg + " at " + position.toString());
+        var message = STR."\{msg} at \{position.toString()}";
+        return new FlairCheckException(position.toRegion(), FlairKind.TOKEN, message);
     }
 
     public String errorMessage() {
-        return "Unexpected Token (" + token + ") '" + literal + "': \n" + position.toString() + " ";
+        return STR."Unexpected Token (\{token}) '\{literal}': \n\{position.toString()} ";
     }
 
     public boolean ofType(Class<? extends Token> tokenClass) {

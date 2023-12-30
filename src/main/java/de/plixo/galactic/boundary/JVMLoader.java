@@ -1,10 +1,9 @@
 package de.plixo.galactic.boundary;
 
-import com.google.common.collect.Streams;
 import com.google.common.io.ByteStreams;
 import de.plixo.galactic.exception.FlairException;
-import de.plixo.galactic.tir.ObjectPath;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
+import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.*;
 import org.jetbrains.annotations.Nullable;

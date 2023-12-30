@@ -1,7 +1,7 @@
 package de.plixo.galactic.codegen;
 
-import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.Scope;
+import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.Scope;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Contract;

@@ -46,7 +46,7 @@ public class Node {
                 return child;
             }
         }
-        throw record.createException("expected Node " + name + " in " + this.name);
+        throw record.createException(STR."expected Node \{name} in \{this.name}");
     }
 
     /**
@@ -66,14 +66,14 @@ public class Node {
 
     public void assertType(String name) {
         if (!this.name.equalsIgnoreCase(name)) {
-            throw record.createException("expected Node " + name + " in " + this.name);
+            throw record.createException(STR."expected Node \{name} in \{this.name}");
         }
     }
 
     public String toString() {
         StringBuilder buffer = new StringBuilder(50);
         print(buffer, "", "");
-        return "\n" + buffer;
+        return STR."\n\{buffer}";
     }
 
     public String getID() {

@@ -71,8 +71,8 @@ id := "word"
 number := "number"
 string := "string"
 
-function := "fn"? "("?! parameterList! ")"?! "->"?! type! "=" expression!
-
+function := "fn"? "("?! parameterList! ")"?! "->"?! type! functionType! "="?! expression!
+functionType := "<"?! type! ">"?!
 
 //unit := topList! "EOF"!
 //

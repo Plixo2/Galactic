@@ -81,7 +81,7 @@ public class PrimitiveType extends Type {
         private final boolean isNumeric;
 
         public static @Nullable PrimitiveType.StellaPrimitiveType fromHIR(
-                de.plixo.galactic.common.PrimitiveType primitiveType) {
+                de.plixo.galactic.high_level.PrimitiveType primitiveType) {
             return switch (primitiveType) {
                 case VOID -> null;
                 case INT -> INT;

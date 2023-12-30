@@ -1,7 +1,7 @@
 package de.plixo.galactic.types;
 
 
-import de.plixo.galactic.tir.Context;
+import de.plixo.galactic.typed.Context;
 
 public abstract class Type {
 

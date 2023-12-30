@@ -1,13 +1,13 @@
 package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.boundary.JVMLoadedClass;
-import de.plixo.galactic.tir.Context;
-import de.plixo.galactic.tir.Scope;
-import de.plixo.galactic.tir.expressions.*;
-import de.plixo.galactic.tir.path.Unit;
-import de.plixo.galactic.tir.stellaclass.MethodOwner;
-import de.plixo.galactic.tir.stellaclass.StellaClass;
-import de.plixo.galactic.tir.stellaclass.StellaMethod;
+import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.Scope;
+import de.plixo.galactic.typed.expressions.*;
+import de.plixo.galactic.typed.path.Unit;
+import de.plixo.galactic.typed.stellaclass.MethodOwner;
+import de.plixo.galactic.typed.stellaclass.StellaClass;
+import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
@@ -45,7 +45,7 @@ public class Codegen {
         classNode.name = unit.getJVMDestination();
         classNode.version = version;
         classNode.superName = "java/lang/Object";
-        var out = getJarOutput(classNode, classNode.name + ".class");
+        var out = getJarOutput(classNode, STR."\{classNode.name}.class");
         this.jarOutputs.add(out);
     }
 
@@ -59,6 +59,9 @@ public class Codegen {
         classNode.name = stellaClass.getJVMDestination();
         classNode.version = version;
         classNode.superName = stellaClass.superClass.getJVMDestination();
+        classNode.interfaces.addAll(stellaClass.interfaces.stream()
+                .map(Class::getJVMDestination).toList());
+
         var out = getJarOutput(classNode, STR."\{classNode.name}.class");
         this.jarOutputs.add(out);
     }
@@ -90,7 +93,7 @@ public class Codegen {
             //TODO
              context.add(new VarInsnNode(ALOAD, 0));
               var superCall =
-                     new MethodInsnNode(INVOKESTATIC, "java/lang/Object", "<init>", "()V", false);
+                     new MethodInsnNode(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
               context.add(superCall);
               context.add(new InsnNode(RETURN));
         } else {
@@ -187,8 +190,8 @@ public class Codegen {
                             case MethodOwner.UnitOwner(var unit) -> {
                                 owner = unit.getJVMDestination();
                             }
-                            case MethodOwner.ClassOwner(var aticClass) -> {
-                                switch (aticClass) {
+                            case MethodOwner.ClassOwner(var stellaClass) -> {
+                                switch (stellaClass) {
                                     case StellaClass ignored -> {
                                         throw new NullPointerException(
                                                 "classes are not compiled yet");
@@ -197,7 +200,7 @@ public class Codegen {
                                         owner = loadedClass.getNode().name;
                                     }
                                     default -> throw new IllegalStateException(
-                                            "Unexpected value: " + aticClass);
+                                            STR."Unexpected value: \{stellaClass}");
                                 }
                             }
                         }

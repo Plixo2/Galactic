@@ -7,6 +7,7 @@ public enum FlairKind {
     FORMAT,
     IMPORT,
     UNKNOWN_TYPE,
+    TOKEN,
     TYPE_MISMATCH,
     SECURITY,
     NAME,

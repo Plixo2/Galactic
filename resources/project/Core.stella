@@ -1,21 +1,8 @@
-import @java ArrayList java.util.ArrayList
 import @java System java.lang.System
 
-class Transform {
-    fn make() -> void = {
-        1
-    }
-}
-
-class IList extends ArrayList {
-    fn exists() -> boolean = true
-    fn getCount() -> int = 0
-
-    fn get(index: int) -> int = {
-        if false { 9 } else { 1 }
-    }
-}
-
-fn print(msg: java.lang.String) -> void = {
+fn println(msg: java.lang.String) -> void = {
     System.out.println(msg)
+}
+fn print(msg: java.lang.String) -> void = {
+    System.out.print(msg)
 }

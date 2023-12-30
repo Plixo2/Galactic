@@ -148,6 +148,8 @@ Check Stage:
 - TODO check duplicate fields, methods and classes
 - TODO check duplicate imports 
 - TODO check if `void` is used as a non-returning type
+- TODO check for finals in methods, fields and super classes
+- TODO check for unsolved generics
 
 ```
 StringExpression
