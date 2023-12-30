@@ -20,9 +20,11 @@ public class Main {
         var root = language.parse(new File("resources/project"));
         switch (root) {
             case Universe.Success success -> {
-                try (var out = new FileOutputStream("resources/build.jar")) {
+                var output = "resources/build.jar";
+                try (var out = new FileOutputStream(output)) {
                     language.write(out, success.root(), mainClass);
                 }
+                System.out.println(STR."Wrote to \{output}");
             }
             case Universe.Error error -> {
                 System.err.println(error.exception().prettyPrint());
@@ -30,7 +32,6 @@ public class Main {
                 error.exception().printStackTrace(System.err);
             }
         }
-        System.out.println("fin");
     }
 
 }
