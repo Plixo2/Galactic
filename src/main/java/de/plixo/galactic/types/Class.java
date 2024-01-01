@@ -1,17 +1,20 @@
 package de.plixo.galactic.types;
 
 import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.MethodCollection;
-import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static de.plixo.galactic.exception.FlairKind.*;
+import static de.plixo.galactic.exception.FlairKind.NAME;
+import static de.plixo.galactic.exception.FlairKind.UNEXPECTED_TYPE;
 
 /**
  * Base Class type
@@ -92,7 +95,7 @@ public abstract class Class extends Type {
     }
 
     public Expression getDotNotation(Region region, Expression expression, String id,
-                                               Context context) {
+                                     Context context) {
         var possibleField = this.getField(id, context);
         if (possibleField != null) {
             return new FieldExpression(region, expression, this, possibleField);
@@ -107,5 +110,41 @@ public abstract class Class extends Type {
 
     public final String getJVMDestination() {
         return path().asSlashString();
+    }
+
+    public Set<Method> implementationLeft(Context context) {
+        var set = new HashSet<Method>();
+        var superClass = getSuperClass();
+        if (superClass != null) {
+            set.addAll(superClass.getAbstractMethods());
+        }
+        for (var anInterface : getInterfaces()) {
+            set.addAll(anInterface.getAbstractMethods());
+        }
+        set.removeIf(ref -> {
+            var methodList = getMethods();
+            var impls = methodList.stream().filter(me -> !me.isAbstract()).toList();
+            for (var impl : impls) {
+                if (impl.name().equals(ref.name()) && Method.signatureMatch(ref, impl, context)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        return set;
+    }
+
+    /**
+     * Returns the method that is the functional interface method of this class.
+     * If the class cannot be used as an interface, null is returned.
+     * @return method to implement as a function
+     */
+    public @Nullable Method functionalInterfaceMethod(Context context) {
+        var implementationLeft = this.implementationLeft(context);
+        if (implementationLeft.size() != 1) {
+            return null;
+        }
+
+        return implementationLeft.iterator().next();
     }
 }

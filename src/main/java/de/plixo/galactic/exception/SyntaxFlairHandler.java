@@ -7,7 +7,6 @@ import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -36,7 +35,7 @@ public class SyntaxFlairHandler {
                     yield STR."Failed \{failedRule.failedRule.name()}: \{failedRecord.errorMessage()}";
                 }
             }
-            case FailedLiteral failedLiteral -> failedLiteral.consumedLiteral.errorMessage();
+            case FailedLiteral failedLiteral -> STR."Failed \{failedLiteral.parentRule.name()}: Expected \{failedLiteral.expectedLiteral} but got \{failedLiteral.consumedLiteral.literal()} at \{failedLiteral.consumedLiteral.position().toString()}";
         }).toList();
         var msg = String.join("\n", strings);
         throw new FlairException(STR."\n\{msg}");

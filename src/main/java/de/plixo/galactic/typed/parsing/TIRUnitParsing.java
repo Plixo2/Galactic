@@ -15,6 +15,8 @@ import de.plixo.galactic.typed.path.PathElement;
 import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.*;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.Type;
+import de.plixo.galactic.types.VoidType;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -29,7 +31,8 @@ public class TIRUnitParsing {
         for (var hirItem : unit.hirItems()) {
             if (hirItem instanceof HIRClass hirClass) {
                 var parsed =
-                        new StellaClass(hirClass.region(), hirClass.className(), unit, hirClass, defaultSuperClass);
+                        new StellaClass(hirClass.region(), hirClass.className(), unit, hirClass,
+                                defaultSuperClass);
                 unit.addClass(parsed);
             } else if (hirItem instanceof HIRTopBlock block) {
                 var hirBlock = new HIRBlock(block.region(), block.expressions());
@@ -139,9 +142,9 @@ public class TIRUnitParsing {
     public static void fillBlockExpressions(Unit unit, StellaBlock block, Context context) {
         var language = context.language();
         var base = TIRExpressionParsing.parse(block.hirBlock(), context);
-        base = language.symbolsStage().parse(base, context);
-        base = language.inferStage().parse(base, context);
-        language.checkStage().parse(base, context);
+        base = language.symbolsStage().parse(base, context, 0);
+        base = language.inferStage().parse(base, context, null);
+        language.checkStage().parse(base, context, 0);
         block.expression(base);
     }
 
@@ -155,7 +158,12 @@ public class TIRUnitParsing {
                     var parse = TIRTypeParsing.parse(ref.type(), context);
                     return new Parameter(ref.name(), parse);
                 }).toList();
-                var returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
+                Type returnType;
+                if (hirMethod.returnType() != null) {
+                    returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
+                } else {
+                    returnType = new VoidType();
+                }
                 var owner = new MethodOwner.UnitOwner(unit);
                 var stellaMethod =
                         new StellaMethod(flags, name, parameters, returnType, hirMethod, owner);

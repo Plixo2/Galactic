@@ -12,9 +12,9 @@ public class TIRMethodParsing {
         if (ref.hirMethod() != null) {
             var expression = ref.hirMethod().expression();
             ref.body = TIRExpressionParsing.parse(expression, context);
-            ref.body = language.symbolsStage().parse(ref.body, context);
-            ref.body = language.inferStage().parse(ref.body, context);
-            language.checkStage().parse(ref.body, context);
+            ref.body = language.symbolsStage().parse(ref.body, context, 0);
+            ref.body = language.inferStage().parse(ref.body, context, ref.returnType());
+            language.checkStage().parse(ref.body, context, 0);
             var expected = ref.returnType();
             assert ref.body != null;
 

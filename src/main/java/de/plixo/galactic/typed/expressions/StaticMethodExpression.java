@@ -13,4 +13,9 @@ public record StaticMethodExpression(Region region, MethodOwner owner, MethodCol
     public Type getType(Context context) {
         return new VoidType();
     }
+
+    @Override
+    public Type getCallType(Context context) {
+        return new VoidType();
+    }
 }

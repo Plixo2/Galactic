@@ -2,7 +2,6 @@ package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.boundary.JVMLoadedClass;
 import de.plixo.galactic.boundary.LoadedBytecode;
-import de.plixo.galactic.common.JsonUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
@@ -17,12 +16,14 @@ import java.util.jar.JarOutputStream;
 
 /**
  * Output of the code generator
+ *
  * @param output
  */
 public record GeneratedCode(List<JarOutput> output) {
 
     /**
      * Dumps the generated code to the given directory
+     *
      * @param file the directory to write to
      */
     @SneakyThrows
@@ -38,6 +39,7 @@ public record GeneratedCode(List<JarOutput> output) {
             FileUtils.writeByteArrayToFile(new File(path), jarOutput.data());
         }
     }
+
     private static void deleteClassFiles(File fileToDelete) {
         File[] allContents = fileToDelete.listFiles();
         if (allContents != null) {

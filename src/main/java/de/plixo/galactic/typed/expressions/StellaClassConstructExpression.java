@@ -8,8 +8,7 @@ import de.plixo.galactic.types.Type;
 import java.util.List;
 
 public record StellaClassConstructExpression(Region region, Class constructType,
-                                            List<Expression> arguments)
-        implements Expression {
+                                             List<Expression> arguments) implements Expression {
 
     @Override
     public Type getType(Context context) {

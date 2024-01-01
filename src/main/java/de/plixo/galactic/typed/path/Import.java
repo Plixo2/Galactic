@@ -10,6 +10,7 @@ public sealed interface Import {
     record ClassImport(String alias, Class importedClass) implements Import {
 
     }
+
     record StaticMethodImport(String alias, StellaMethod method) implements Import {
 
     }

@@ -8,10 +8,8 @@ import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
+import de.plixo.galactic.types.*;
 import de.plixo.galactic.types.Class;
-import de.plixo.galactic.types.PrimitiveType;
-import de.plixo.galactic.types.Type;
-import de.plixo.galactic.types.VoidType;
 import lombok.RequiredArgsConstructor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.*;
@@ -62,12 +60,21 @@ public class Codegen {
         classNode.name = stellaClass.getJVMDestination();
         classNode.version = version;
         classNode.superName = stellaClass.superClass.getJVMDestination();
-        classNode.interfaces.addAll(stellaClass.interfaces.stream()
-                .map(Class::getJVMDestination).toList());
+        classNode.interfaces.addAll(
+                stellaClass.interfaces.stream().map(Class::getJVMDestination).toList());
+        classNode.fields = new ArrayList<>();
+        for (var field : stellaClass.fields) {
+            var fieldNode =
+                    new FieldNode(field.modifier(), field.name(), field.getDescriptor(), null,
+                            null);
+            classNode.fields.add(fieldNode);
+        }
+//        classNode
 
         var out = getJarOutput(classNode, STR."\{classNode.name}.class");
         this.jarOutputs.add(out);
     }
+
 
     private JarOutput getJarOutput(ClassNode classNode, String name) {
         ClassWriter cw = new ClassWriter(COMPUTE_FRAMES | COMPUTE_MAXS);
@@ -92,18 +99,17 @@ public class Codegen {
         }
         method.parameters().forEach(ref -> context.putVariable(ref.variable()));
 
-        if (method.body == null && method.localName().equals("<init>")) {
+        if (method.localName().equals("<init>")) {
             //TODO
-             context.add(new VarInsnNode(ALOAD, 0));
-              var superCall =
-                     new MethodInsnNode(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-              context.add(superCall);
-              context.add(new InsnNode(RETURN));
-        } else {
-            parseExpression(
-                    Objects.requireNonNull(method.body,
-                            STR."require expression \{method.localName()}"),
-                    context);
+            context.add(new VarInsnNode(ALOAD, 0));
+            var superCall =
+                    new MethodInsnNode(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+            context.add(superCall);
+//            context.add(new InsnNode(RETURN));
+        }
+        if (method.body != null) {
+            parseExpression(Objects.requireNonNull(method.body,
+                    STR."require expression \{method.localName()}"), context);
         }
 
         var returned = method.returnType();
@@ -273,18 +279,25 @@ public class Codegen {
                 context.add(new VarInsnNode(opcode, target));
             }
             case VarExpression varExpression -> {
-                var target = context.getVariablesIndex(varExpression.variable());
-                var type = varExpression.variable().getType();
-                var opcode = ALOAD;
-                if (type instanceof PrimitiveType primitive) {
-                    opcode = switch (primitive.typeOfPrimitive) {
-                        case INT, BOOLEAN, CHAR, BYTE, SHORT -> ILOAD;
-                        case LONG -> LLOAD;
-                        case FLOAT -> FLOAD;
-                        case DOUBLE -> DLOAD;
-                    };
-                }
-                context.add(new VarInsnNode(opcode, target));
+//                if (varExpression.variable() instanceof Scope.ClosureVariable closureVariable) {
+//                    var field = Objects.requireNonNull(closureVariable.field());
+//                    var owner = Objects.requireNonNull(closureVariable.owningExpression());
+//                    var fieldExpression = new FieldExpression(varExpression.region(), owner, field.owner(), field);
+//                    parseExpression(fieldExpression, context);
+//                } else {
+                    var target = context.getVariablesIndex(varExpression.variable());
+                    var type = varExpression.variable().getType();
+                    var opcode = ALOAD;
+                    if (type instanceof PrimitiveType primitive) {
+                        opcode = switch (primitive.typeOfPrimitive) {
+                            case INT, BOOLEAN, CHAR, BYTE, SHORT -> ILOAD;
+                            case LONG -> LLOAD;
+                            case FLOAT -> FLOAD;
+                            case DOUBLE -> DLOAD;
+                        };
+                    }
+                    context.add(new VarInsnNode(opcode, target));
+//                }
             }
             case StaticFieldExpression staticFieldExpression -> {
                 var field = staticFieldExpression.field();

@@ -1,6 +1,5 @@
 package test;
 
-import de.plixo.galactic.common.JsonUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.ClassReader;
@@ -31,10 +30,21 @@ public class ClassDebugger {
         cr.accept(cw, 0);
         byte[] b = cw.toByteArray();
         var outFile = new File("resources/Child.class");
-        JsonUtil.makeFile(outFile);
+        makeFile(outFile);
         FileUtils.writeByteArrayToFile(outFile, b);
     }
 
+    private static void makeFile(File file) {
+        if (!file.exists()) {
+            try {
+                var _ = file.getParentFile().mkdirs();
+                var _ = file.createNewFile();
+            } catch (Exception var2) {
+                var2.printStackTrace();
+            }
+        }
+
+    }
 
     public static void printClass(byte[] byteArray) {
         ClassReader cr = new ClassReader(byteArray);

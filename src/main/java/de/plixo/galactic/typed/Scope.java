@@ -1,7 +1,11 @@
 package de.plixo.galactic.typed;
 
+import de.plixo.galactic.typed.stellaclass.StellaClass;
+import de.plixo.galactic.types.Field;
 import de.plixo.galactic.types.Type;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,12 +15,16 @@ import java.util.List;
 /**
  * A Scope for variables
  */
-@RequiredArgsConstructor
 public class Scope {
 
     @Getter
-    private @Nullable
-    final Scope parent;
+    @Setter
+    private @Nullable Scope parent;
+
+    public Scope(@Nullable Scope parent) {
+        this.parent = parent;
+    }
+
     private final List<Variable> variables = new ArrayList<>();
 
     public @Nullable Variable getVariable(String name) {
@@ -31,29 +39,69 @@ public class Scope {
         return null;
     }
 
+    public List<Variable> getAllVariables() {
+        var variables = new ArrayList<>(this.variables);
+        if (parent != null) {
+            variables.addAll(parent.getAllVariables());
+        }
+        return variables;
+    }
+
 
     public void addVariable(Variable variable) {
         variables.add(variable);
     }
 
 
-    /**
-     * A Variable, the Type will be resolved in the Infer Stage
-     */
-    @AllArgsConstructor
+    @Getter
     @ToString
     public static class Variable {
-        @Getter
         private final String name;
-        @Getter
         private final int flags;
 
-        @Getter
         @Setter
         @Accessors(fluent = false)
         private @Nullable Type type;
 
-        private final @Nullable Variable outsideClosure;
+        public Variable(String name, int flags, @Nullable Type type) {
+            this.name = name;
+            this.flags = flags;
+            this.type = type;
+        }
+
+        private int usageCount = 0;
+
+        public void addUsage() {
+            usageCount += 1;
+        }
+
+        public boolean isFinal() {
+            return (flags & FINAL) != 0;
+        }
+    }
+
+    @Getter
+    @ToString
+    public static class ClosureVariable extends Variable {
+        private final Variable outsideClosure;
+
+        @Setter
+        Variable fieldOwner;
+        @Setter
+        StellaClass owner;
+        @Setter
+        private Field field;
+
+        public ClosureVariable(Variable outsideClosure) {
+            super(outsideClosure.name, FINAL, outsideClosure.type);
+            assert this.isFinal();
+            this.outsideClosure = outsideClosure;
+        }
+
+        @Override
+        public Type getType() {
+            return outsideClosure.type;
+        }
     }
 
     /**

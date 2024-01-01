@@ -2,7 +2,7 @@ package de.plixo.galactic.boundary;
 
 import com.google.common.io.ByteStreams;
 import de.plixo.galactic.exception.FlairException;
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.*;
@@ -49,7 +49,7 @@ public class JVMLoader {
         }
         classReader.accept(classNode, 0);
 
-        var jvmLoadedClass = new JVMLoadedClass(classNode,bytes, path, classNode.name);
+        var jvmLoadedClass = new JVMLoadedClass(classNode, bytes, path, classNode.name);
         bytecode.putClass(path, jvmLoadedClass);
         generate(jvmLoadedClass, classNode, bytecode);
 
@@ -121,7 +121,8 @@ public class JVMLoader {
                     new PrimitiveType(PrimitiveType.StellaPrimitiveType.BYTE);
             case org.objectweb.asm.Type.SHORT ->
                     new PrimitiveType(PrimitiveType.StellaPrimitiveType.SHORT);
-            case org.objectweb.asm.Type.INT -> new PrimitiveType(PrimitiveType.StellaPrimitiveType.INT);
+            case org.objectweb.asm.Type.INT ->
+                    new PrimitiveType(PrimitiveType.StellaPrimitiveType.INT);
             case org.objectweb.asm.Type.FLOAT ->
                     new PrimitiveType(PrimitiveType.StellaPrimitiveType.FLOAT);
             case org.objectweb.asm.Type.LONG ->

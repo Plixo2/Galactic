@@ -1,7 +1,7 @@
 package de.plixo.galactic.high_level.utils;
 
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.parsing.Node;
-import de.plixo.galactic.common.ObjectPath;
 import lombok.Getter;
 
 import java.util.ArrayList;

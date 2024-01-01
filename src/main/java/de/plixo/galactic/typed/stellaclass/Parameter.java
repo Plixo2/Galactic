@@ -20,6 +20,6 @@ public class Parameter {
     public Parameter(String name, Type type) {
         this.name = name;
         this.type = type;
-        this.variable = new Scope.Variable(name, INPUT, type, null);
+        this.variable = new Scope.Variable(name, INPUT, type);
     }
 }

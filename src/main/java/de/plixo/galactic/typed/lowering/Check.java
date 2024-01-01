@@ -14,7 +14,9 @@ import java.lang.reflect.Modifier;
 /**
  * Check stage is the final Stage for the Expressions, to test if every expression is valid.
  */
-public class Check implements Tree<Context> {
+public class Check implements Tree<Context, Integer> {
+
+
     @Override
     public Expression defaultBehavior(Expression expression) {
         throw new FlairException(STR."Expression of type \{expression.getClass()
@@ -22,8 +24,8 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseCastExpression(CastExpression expression, Context context) {
-        var parsed = parse(expression.object(), context);
+    public Expression parseCastExpression(CastExpression expression, Context context, Integer unused) {
+        var parsed = parse(expression.object(), context, 0);
         var type = expression.type();
         if (!(type instanceof Class)) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
@@ -33,8 +35,8 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context) {
-        var parsed = parse(expression.object(), context);
+    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context, Integer unused) {
+        var parsed = parse(expression.object(), context,0);
         var type = expression.type();
         if (!(type instanceof Class)) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
@@ -44,9 +46,9 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parsePutFieldExpression(PutFieldExpression expression, Context context) {
-        parse(expression.object(), context);
-        var value = parse(expression.value(), context);
+    public Expression parsePutFieldExpression(PutFieldExpression expression, Context context, Integer unused) {
+        parse(expression.object(), context, 0);
+        var value = parse(expression.value(), context, 0);
 
         var field = expression.field();
         if (!field.isPublic() || field.isFinal()) {
@@ -64,8 +66,8 @@ public class Check implements Tree<Context> {
 
     @Override
     public Expression parsePutStaticExpression(PutStaticFieldExpression expression,
-                                               Context context) {
-        var value = parse(expression.value(), context);
+                                               Context context, Integer unused) {
+        var value = parse(expression.value(), context, 0);
         var field = expression.field();
         if (!field.isPublic() || field.isFinal()) {
             throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
@@ -80,11 +82,15 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseLocalVariableAssign(LocalVariableAssign expression, Context context) {
-
-        var parsed = parse(expression.expression(), context);
+    public Expression parseLocalVariableAssign(LocalVariableAssign expression, Context context, Integer unused) {
         var variable = expression.variable();
+        System.out.println(STR."variable = \{variable}");
         assert variable != null;
+        if (variable.isFinal()) {
+            throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
+                    "cant reassign final variable");
+        }
+        var parsed = parse(expression.expression(), context, 0);
         if (!Type.isAssignableFrom(variable.getType(), parsed.getType(context), context)) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                     "variable type does not match expression type");
@@ -93,33 +99,33 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseStringExpression(StringExpression expression, Context context) {
+    public Expression parseStringExpression(StringExpression expression, Context context, Integer unused) {
         return expression;
     }
 
     @Override
-    public Expression parseNumberExpression(NumberExpression expression, Context context) {
+    public Expression parseNumberExpression(NumberExpression expression, Context context, Integer unused) {
         return expression;
     }
 
     @Override
-    public Expression parseBooleanExpression(BooleanExpression expression, Context context) {
+    public Expression parseBooleanExpression(BooleanExpression expression, Context context, Integer unused) {
         return expression;
     }
 
     @Override
-    public Expression parseObjectFieldExpression(FieldExpression expression, Context context) {
-        parse(expression.object(), context);
+    public Expression parseObjectFieldExpression(FieldExpression expression, Context context, Integer unused) {
+        parse(expression.object(), context, 0);
         if (!expression.field().isPublic()) {
             throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
-                    "cant access non public methods");
+                    "cant access non public field");
         }
 
         return expression;
     }
 
     @Override
-    public Expression parseMethodCallExpression(MethodCallExpression expression, Context context) {
+    public Expression parseMethodCallExpression(MethodCallExpression expression, Context context, Integer unused) {
         var method = expression.method();
         var region = expression.region();
         if (!method.isPublic()) {
@@ -141,9 +147,9 @@ public class Check implements Tree<Context> {
                         "method call arguments dont match");
             }
         }
-        found.forEach(ref -> parse(ref, context));
+        found.forEach(ref -> parse(ref, context, 0));
         if (expression.source() instanceof GetMethodExpression getMethodExpression) {
-            parse(getMethodExpression.object(), context);
+            parse(getMethodExpression.object(), context, 0);
         }
 
         return expression;
@@ -151,38 +157,38 @@ public class Check implements Tree<Context> {
 
 
     @Override
-    public Expression parseBranchExpression(BranchExpression expression, Context context) {
-        parse(expression.condition(), context);
-        parse(expression.then(), context);
+    public Expression parseBranchExpression(BranchExpression expression, Context context, Integer unused) {
+        parse(expression.condition(), context, 0);
+        parse(expression.then(), context, 0);
 
         var found = expression.condition().getType(context);
         if (!Type.isAssignableFrom(PrimitiveType.BOOLEAN, found, context)) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
-                    "condition is not boolean, its " + found);
+                    STR."condition is not boolean, its \{found}");
         }
         if (expression.elseExpression() != null) {
-            parse(expression.elseExpression(), context);
+            parse(expression.elseExpression(), context, 0);
         }
 
         return expression;
     }
 
     @Override
-    public Expression parseBlockExpression(BlockExpression expression, Context context) {
-        expression.expressions().forEach(ref -> parse(ref, context));
+    public Expression parseBlockExpression(BlockExpression expression, Context context, Integer unused) {
+        expression.expressions().forEach(ref -> parse(ref, context, 0));
         return expression;
     }
 
     @Override
-    public Expression parseVarDefExpression(VarDefExpression expression, Context context) {
-        parse(expression.expression(), context);
+    public Expression parseVarDefExpression(VarDefExpression expression, Context context, Integer unused) {
+        parse(expression.expression(), context, 0);
 
         if (expression.hint() != null) {
             var expected = expression.hint();
             var found = expression.expression().getType(context);
             if (!Type.isAssignableFrom(expected, found, context)) {
                 throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
-                        "hint does not match expression, expected " + expected + " found " + found);
+                        STR."hint does not match expression, expected \{expected} found \{found}");
             }
         }
 
@@ -190,13 +196,13 @@ public class Check implements Tree<Context> {
     }
 
     @Override
-    public Expression parseVarExpression(VarExpression expression, Context context) {
+    public Expression parseVarExpression(VarExpression expression, Context context, Integer unused) {
         return expression;
     }
 
     @Override
     public Expression parseStaticFieldExpression(StaticFieldExpression expression,
-                                                 Context context) {
+                                                 Context context, Integer unused) {
         if (!expression.field().isPublic()) {
             throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
                     "cant access non public fields");
@@ -206,7 +212,7 @@ public class Check implements Tree<Context> {
 
     @Override
     public Expression parseInstanceCreationExpression(InstanceCreationExpression expression,
-                                                      Context context) {
+                                                      Context context, Integer unused) {
 
         var constructor = expression.constructor();
         var region = expression.region();
@@ -229,7 +235,7 @@ public class Check implements Tree<Context> {
                         "constructor call arguments dont match");
             }
         }
-        found.forEach(ref -> parse(ref, context));
+        found.forEach(ref -> parse(ref, context, 0));
 
         return expression;
     }

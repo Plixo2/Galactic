@@ -1,6 +1,6 @@
 package de.plixo.galactic.boundary;
 
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.ClassSource;
 import de.plixo.galactic.types.Field;

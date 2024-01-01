@@ -1,6 +1,6 @@
 package de.plixo.galactic.typed.path;
 
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import org.jetbrains.annotations.Nullable;
@@ -67,6 +67,7 @@ public sealed interface PathElement {
             return null;
         }
     }
+
     record StellaMethodElement(StellaMethod method) implements PathElement {
 
         @Override

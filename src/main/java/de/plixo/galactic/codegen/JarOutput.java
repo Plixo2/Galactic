@@ -2,7 +2,6 @@ package de.plixo.galactic.codegen;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 
 @RequiredArgsConstructor
 @Getter

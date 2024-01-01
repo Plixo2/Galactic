@@ -2,8 +2,11 @@ package de.plixo.galactic.types;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 
 /**
  * Represents a field (a variable) in a class.
@@ -13,22 +16,25 @@ import java.lang.reflect.Modifier;
 public class Field {
     private final int modifier;
     private final String name;
-    private final Type type;
-    private final Class owner;
+    @Setter
+    private @Nullable Type type;
+    @Setter
+    private @Nullable Class owner;
 
     @Override
     public String toString() {
-        return "Field " + name + "(" + getDescriptor() + ")";
+        return STR."Field \{name}(\{getDescriptor()})";
     }
 
     public String getDescriptor() {
-        return type.getDescriptor();
+        return Objects.requireNonNull(type).getDescriptor();
     }
 
 
     public boolean isStatic() {
         return Modifier.isStatic(modifier);
     }
+
     public boolean isPublic() {
         return Modifier.isPublic(modifier);
     }

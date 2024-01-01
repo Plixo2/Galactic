@@ -5,23 +5,23 @@ import de.plixo.galactic.boundary.JVMLoader;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.codegen.Codegen;
 import de.plixo.galactic.codegen.GeneratedCode;
-import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.SyntaxFlairHandler;
 import de.plixo.galactic.exception.TokenFlairHandler;
 import de.plixo.galactic.files.FileTree;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.GalacticTokens;
 import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.parsing.Grammar;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.TreeBuilding;
-import de.plixo.galactic.typed.parsing.TIRClassParsing;
-import de.plixo.galactic.typed.parsing.TIRUnitParsing;
-import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.lowering.Check;
 import de.plixo.galactic.typed.lowering.Infer;
 import de.plixo.galactic.typed.lowering.Symbols;
+import de.plixo.galactic.typed.parsing.TIRClassParsing;
+import de.plixo.galactic.typed.parsing.TIRUnitParsing;
+import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.stellaclass.StellaBlock;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import lombok.Getter;
@@ -64,6 +64,7 @@ public class Universe {
 
     /**
      * Entry point for the compiler. Reads the Grammar and generates a Tokenizer.
+     *
      * @param file the project Path (file or directory)
      * @return result of the compilation
      */
@@ -102,8 +103,9 @@ public class Universe {
 
     /**
      * Writes the compiled code into the output stream
-     * @param stream the output stream
-     * @param root the root of the compile tree
+     *
+     * @param stream    the output stream
+     * @param root      the root of the compile tree
      * @param mainClass the main class, e.g. "de/plixo/Main"
      */
     public void write(FileOutputStream stream, CompileRoot root, @Nullable String mainClass)
@@ -112,7 +114,7 @@ public class Universe {
         var units = root.getUnits();
         var compiler = new Codegen(codeGenVersion);
         for (var unit : units) {
-            var context = new Context(this,unit, root, loadedBytecode);
+            var context = new Context(this, unit, root, loadedBytecode);
             compiler.addUnit(unit, context);
             for (var aClass : unit.classes()) {
                 compiler.addClass(aClass, context);
@@ -129,6 +131,7 @@ public class Universe {
 
     /**
      * Main compiler step. read, lex, parse and check
+     *
      * @param root the root of the compile tree
      */
     private void read(CompileRoot root) {
@@ -154,13 +157,13 @@ public class Universe {
         }
 
         for (var aClass : classes) {
-            var context = new Context(this,aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillSuperclasses(aClass, context, defaultSuperClass);
         }
 
         //types are known here
         units.forEach(unit -> {
-            var context = new Context(this,unit, root, loadedBytecode);
+            var context = new Context(this, unit, root, loadedBytecode);
             TIRUnitParsing.fillMethodShells(unit, context);
         });
         //rerun import for static method imports

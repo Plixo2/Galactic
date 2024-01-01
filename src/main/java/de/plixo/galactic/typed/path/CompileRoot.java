@@ -1,6 +1,6 @@
 package de.plixo.galactic.typed.path;
 
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 
 import java.util.List;
 

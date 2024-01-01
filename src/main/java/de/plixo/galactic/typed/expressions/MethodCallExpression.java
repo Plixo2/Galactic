@@ -2,6 +2,7 @@ package de.plixo.galactic.typed.expressions;
 
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.MethodCollection;
 import de.plixo.galactic.types.Method;
 import de.plixo.galactic.types.Type;
 
@@ -17,6 +18,7 @@ public record MethodCallExpression(Region region, MethodSource source, Method me
     }
 
     public sealed interface MethodSource permits StaticMethodExpression, GetMethodExpression {
-
+        MethodCollection methods();
+        Type getCallType(Context context);
     }
 }

@@ -4,7 +4,6 @@ import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Contract;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
@@ -40,7 +39,7 @@ public class CompileContext {
 
     public int getVariablesIndex(Scope.Variable variable) {
         if (!variables.containsKey(variable)) {
-            throw new NullPointerException("Variable not found");
+            throw new NullPointerException(STR."Variable not found \{variable}");
         }
         return variables.get(variable);
     }

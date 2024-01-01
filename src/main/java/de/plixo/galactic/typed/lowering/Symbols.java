@@ -6,13 +6,19 @@ import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.Field;
+
+import java.util.*;
 
 import static de.plixo.galactic.exception.FlairKind.NAME;
+import static de.plixo.galactic.typed.Scope.FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
  * The Symbols stage is responsible for resolving symbols and names. It's the first stage of the Expression parser.
  */
-public class Symbols implements Tree<Context> {
+public class Symbols implements Tree<Context, Integer> {
 
 
     @Override
@@ -22,9 +28,9 @@ public class Symbols implements Tree<Context> {
     }
 
     @Override
-    public Expression parseAssign(AssignExpression expression, Context context) {
-        var left = parse(expression.left(), context);
-        var value = parse(expression.right(), context);
+    public Expression parseAssign(AssignExpression expression, Context context, Integer unused) {
+        var left = parse(expression.left(), context, 0);
+        var value = parse(expression.right(), context, 0);
         if (left instanceof VarExpression varExpression) {
             return new LocalVariableAssign(expression.region(), varExpression.variable(), value);
         } else {
@@ -37,11 +43,42 @@ public class Symbols implements Tree<Context> {
     }
 
     @Override
-    public Expression parseConstructExpression(ConstructExpression expression, Context context) {
+    public Expression parseFunctionExpression(FunctionExpression expression, Context context, Integer unused) {
+        var outsideScopeVariables = context.scope().getAllVariables();
+        context.pushScope();
+        var definedVariables = new HashSet<Scope.ClosureVariable>();
+        var currentScope = context.scope();
+        currentScope.parent(null);
+        for (var outsideScopeVariable : outsideScopeVariables) {
+            var variable = new Scope.ClosureVariable(outsideScopeVariable);
+            currentScope.addVariable(variable);
+            definedVariables.add(variable);
+        }
+
+        for (var functionalParameter : expression.inputVariable()) {
+            currentScope.addVariable(functionalParameter.variable());
+        }
+        var body = parse(expression.expression(), context, 0);
+
+        var outsideClosure = new ArrayList<Scope.ClosureVariable>();
+        definedVariables.forEach(variable -> {
+            if (variable.usageCount() != 0) {
+                outsideClosure.add(variable);
+                variable.field(new Field(ACC_PUBLIC, variable.name(), null, null));
+            }
+        });
+
+        context.popScope();
+        return new FunctionExpression(expression.region(), expression.inputVariable(),
+                expression.interfaceTypeHint(), expression.returnTypeHint(), body, outsideClosure);
+    }
+
+    @Override
+    public Expression parseConstructExpression(ConstructExpression expression, Context context, Integer unused) {
 
         var parsed = expression.arguments().stream().map(ref -> {
             context.pushScope();
-            var parse = parse(ref, context);
+            var parse = parse(ref, context, 0);
             context.popScope();
             return parse;
         }).toList();
@@ -50,41 +87,42 @@ public class Symbols implements Tree<Context> {
         if (type instanceof Class aClass) {
             return new StellaClassConstructExpression(expression.region(), aClass, parsed);
         } else {
-            throw new NullPointerException("not supported yet from class " + type);
+            throw new NullPointerException(STR."not supported yet from class \{type}");
         }
     }
 
     @Override
-    public Expression parseStringExpression(StringExpression expression, Context context) {
+    public Expression parseStringExpression(StringExpression expression, Context context, Integer unused) {
         return expression;
     }
 
     @Override
-    public Expression parseNumberExpression(NumberExpression expression, Context context) {
+    public Expression parseNumberExpression(NumberExpression expression, Context context, Integer unused) {
         return expression;
     }
 
 
     @Override
-    public Expression parseBooleanExpression(BooleanExpression expression, Context context) {
+    public Expression parseBooleanExpression(BooleanExpression expression, Context context, Integer unused) {
         return expression;
     }
+
     @Override
-    public Expression parseCastExpression(CastExpression expression, Context context) {
-        var parsed = parse(expression.object(), context);
+    public Expression parseCastExpression(CastExpression expression, Context context, Integer unused) {
+        var parsed = parse(expression.object(), context, 0);
         return new CastExpression(expression.region(), parsed, expression.type());
     }
 
     @Override
-    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context) {
-        var parsed = parse(expression.object(), context);
+    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context, Integer unused) {
+        var parsed = parse(expression.object(), context, 0);
         return new CastCheckExpression(expression.region(), parsed, expression.type());
     }
 
     @Override
-    public Expression parseDotNotation(DotNotation expression, Context context) {
+    public Expression parseDotNotation(DotNotation expression, Context context, Integer unused) {
         context.pushScope();
-        var parsed = parse(expression.object(), context);
+        var parsed = parse(expression.object(), context, 0);
         context.popScope();
 
         var id = expression.id();
@@ -117,14 +155,14 @@ public class Symbols implements Tree<Context> {
     }
 
     @Override
-    public Expression parseCallNotation(CallNotation expression, Context context) {
+    public Expression parseCallNotation(CallNotation expression, Context context, Integer unused) {
         context.pushScope();
-        var parsed = parse(expression.object(), context);
+        var parsed = parse(expression.object(), context, 0);
         context.popScope();
 
         var arguments = expression.arguments().stream().map(ref -> {
             context.pushScope();
-            var parse = parse(ref, context);
+            var parse = parse(ref, context, 0);
             context.popScope();
             return parse;
         }).toList();
@@ -132,19 +170,19 @@ public class Symbols implements Tree<Context> {
     }
 
     @Override
-    public Expression parseBranchExpression(BranchExpression expression, Context context) {
+    public Expression parseBranchExpression(BranchExpression expression, Context context, Integer unused) {
         context.pushScope();
-        var parsedCondition = parse(expression.condition(), context);
+        var parsedCondition = parse(expression.condition(), context, 0);
         context.popScope();
 
 
         context.pushScope(new Scope(context.scope()));
-        var parsedThen = parse(expression.then(), context);
+        var parsedThen = parse(expression.then(), context, 0);
         context.popScope();
         Expression parsedElse = null;
         if (expression.elseExpression() != null) {
             context.pushScope(new Scope(context.scope()));
-            parsedElse = parse(expression.elseExpression(), context);
+            parsedElse = parse(expression.elseExpression(), context, 0);
             context.popScope();
         }
         return new BranchExpression(expression.region(), parsedCondition, parsedThen, parsedElse);
@@ -152,38 +190,38 @@ public class Symbols implements Tree<Context> {
 
 
     @Override
-    public Expression parseBlockExpression(BlockExpression blockExpression, Context context) {
+    public Expression parseBlockExpression(BlockExpression blockExpression, Context context, Integer unused) {
         context.pushScope();
         var parsed =
-                blockExpression.expressions().stream().map(ref -> parse(ref, context)).toList();
+                blockExpression.expressions().stream().map(ref -> parse(ref, context, 0)).toList();
         context.popScope();
         return new BlockExpression(blockExpression.region(), parsed);
     }
 
     @Override
-    public Expression parseVarDefExpression(VarDefExpression varDefExpression, Context context) {
+    public Expression parseVarDefExpression(VarDefExpression varDefExpression, Context context, Integer unused) {
         var region = varDefExpression.region();
         var scope = context.scope();
         var name = varDefExpression.name();
         var existingVariable = scope.getVariable(name);
         if (existingVariable != null) {
             throw new FlairCheckException(varDefExpression.region(), NAME,
-                    "Variable " + name + " already exists");
+                    STR."Variable \{name} already exists");
         }
         if (!isValidVariableName(name, context)) {
             throw new FlairCheckException(varDefExpression.region(), NAME,
-                    "Variable " + name + " is not a valid name");
+                    STR."Variable \{name} is not a valid name");
         }
-        var variable = new Scope.Variable(name, 0, null, null);
+        var variable = new Scope.Variable(name, 0, null);
         scope.addVariable(variable);
         context.pushScope();
-        var parsed = parse(varDefExpression.expression(), context);
+        var parsed = parse(varDefExpression.expression(), context, 0);
         context.popScope();
         return new VarDefExpression(region, name, varDefExpression.hint(), parsed, variable);
     }
 
     @Override
-    public Expression parseSymbolExpression(SymbolExpression expression, Context context) {
+    public Expression parseSymbolExpression(SymbolExpression expression, Context context, Integer unused) {
         var id = expression.id();
         var region = expression.region();
         if (id.equals("true") || id.equals("false")) {

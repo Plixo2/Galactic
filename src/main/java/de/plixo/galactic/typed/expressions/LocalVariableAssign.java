@@ -7,7 +7,7 @@ import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.VoidType;
 import org.jetbrains.annotations.Nullable;
 
-public record LocalVariableAssign(Region region, @Nullable Scope.Variable variable,
+public record LocalVariableAssign(Region region, Scope.Variable variable,
                                   Expression expression) implements Expression {
 
     @Override

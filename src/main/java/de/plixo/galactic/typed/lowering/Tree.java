@@ -7,170 +7,193 @@ import java.util.Objects;
 
 /**
  * Tree is the interface for the compiler stages.
+ *
  * @param <C> Context to parse with
  */
-public interface Tree<C extends Context> {
+public interface Tree<C extends Context, A> {
 
     Expression defaultBehavior(Expression expression);
 
-    default Expression parse(Expression expression, C context) {
+    default Expression parse(Expression expression, C context, A hint) {
         return Objects.requireNonNull(switch (expression) {
-            case BlockExpression blockExpression -> parseBlockExpression(blockExpression, context);
+            case BlockExpression blockExpression ->
+                    parseBlockExpression(blockExpression, context, hint);
             case BooleanExpression booleanExpression ->
-                    parseBooleanExpression(booleanExpression, context);
+                    parseBooleanExpression(booleanExpression, context, hint);
             case BranchExpression branchExpression ->
-                    parseBranchExpression(branchExpression, context);
-            case CallNotation callNotation -> parseCallNotation(callNotation, context);
+                    parseBranchExpression(branchExpression, context, hint);
+            case CallNotation callNotation -> parseCallNotation(callNotation, context, hint);
             case ConstructExpression constructExpression ->
-                    parseConstructExpression(constructExpression, context);
-            case DotNotation dotNotation -> parseDotNotation(dotNotation, context);
+                    parseConstructExpression(constructExpression, context, hint);
+            case DotNotation dotNotation -> parseDotNotation(dotNotation, context, hint);
             case MethodCallExpression methodCallExpression ->
-                    parseMethodCallExpression(methodCallExpression, context);
+                    parseMethodCallExpression(methodCallExpression, context, hint);
             case NumberExpression numberExpression ->
-                    parseNumberExpression(numberExpression, context);
+                    parseNumberExpression(numberExpression, context, hint);
             case FieldExpression fieldExpression ->
-                    parseObjectFieldExpression(fieldExpression, context);
+                    parseObjectFieldExpression(fieldExpression, context, hint);
             case GetMethodExpression methodExpression ->
-                    parseObjectMethodExpression(methodExpression, context);
+                    parseObjectMethodExpression(methodExpression, context, hint);
             case StaticFieldExpression staticFieldExpression ->
-                    parseStaticFieldExpression(staticFieldExpression, context);
+                    parseStaticFieldExpression(staticFieldExpression, context, hint);
             case StaticMethodExpression staticMethodExpression ->
-                    parseStaticMethodExpression(staticMethodExpression, context);
+                    parseStaticMethodExpression(staticMethodExpression, context, hint);
             case StringExpression stringExpression ->
-                    parseStringExpression(stringExpression, context);
+                    parseStringExpression(stringExpression, context, hint);
             case SymbolExpression symbolExpression ->
-                    parseSymbolExpression(symbolExpression, context);
+                    parseSymbolExpression(symbolExpression, context, hint);
             case VarDefExpression varDefExpression ->
-                    parseVarDefExpression(varDefExpression, context);
-            case VarExpression varExpression -> parseVarExpression(varExpression, context);
+                    parseVarDefExpression(varDefExpression, context, hint);
+            case VarExpression varExpression -> parseVarExpression(varExpression, context, hint);
             case StellaClassConstructExpression stellaClassConstructExpression ->
-                    parseStellaClassConstructExpression(stellaClassConstructExpression, context);
+                    parseStellaClassConstructExpression(stellaClassConstructExpression, context,
+                            hint);
             case StaticClassExpression staticClassExpression ->
-                    parseStellaClassExpression(staticClassExpression, context);
+                    parseStellaClassExpression(staticClassExpression, context, hint);
             case StellaPackageExpression stellaPackageExpression ->
-                    parseStellaPackageExpression(stellaPackageExpression, context);
-            case UnitExpression unitExpression -> parseUnitExpression(unitExpression, context);
+                    parseStellaPackageExpression(stellaPackageExpression, context, hint);
+            case UnitExpression unitExpression ->
+                    parseUnitExpression(unitExpression, context, hint);
             case InstanceCreationExpression instanceCreationExpression ->
-                    parseInstanceCreationExpression(instanceCreationExpression, context);
+                    parseInstanceCreationExpression(instanceCreationExpression, context, hint);
             case LocalVariableAssign localVariableAssign ->
-                    parseLocalVariableAssign(localVariableAssign, context);
-            case AssignExpression assignExpression -> parseAssign(assignExpression, context);
+                    parseLocalVariableAssign(localVariableAssign, context, hint);
+            case AssignExpression assignExpression -> parseAssign(assignExpression, context, hint);
             case PutFieldExpression putFieldExpression ->
-                    parsePutFieldExpression(putFieldExpression, context);
-            case PutStaticFieldExpression putStaticFieldExpression -> parsePutStaticExpression(putStaticFieldExpression, context);
-            case CastExpression castExpression -> parseCastExpression(castExpression, context);
-            case CastCheckExpression castCheckExpression -> parseCastCheckExpression(castCheckExpression, context);
+                    parsePutFieldExpression(putFieldExpression, context, hint);
+            case PutStaticFieldExpression putStaticFieldExpression ->
+                    parsePutStaticExpression(putStaticFieldExpression, context, hint);
+            case CastExpression castExpression ->
+                    parseCastExpression(castExpression, context, hint);
+            case CastCheckExpression castCheckExpression ->
+                    parseCastCheckExpression(castCheckExpression, context, hint);
+            case FunctionExpression functionExpression ->
+                    parseFunctionExpression(functionExpression, context, hint);
         }, expression.getClass().getSimpleName());
     }
-    default Expression parseCastCheckExpression(CastCheckExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-    default Expression parseCastExpression(CastExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-    default Expression parsePutStaticExpression(PutStaticFieldExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-    default Expression parsePutFieldExpression(PutFieldExpression expression, C context) {
+
+    default Expression parseFunctionExpression(FunctionExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseAssign(AssignExpression expression, C context) {
+    default Expression parseCastCheckExpression(CastCheckExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseLocalVariableAssign(LocalVariableAssign expression, C context) {
+    default Expression parseCastExpression(CastExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseInstanceCreationExpression(
-            InstanceCreationExpression expression,
-            C context) {
+    default Expression parsePutStaticExpression(PutStaticFieldExpression expression, C context,
+                                                A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseUnitExpression(UnitExpression expression, C context) {
+    default Expression parsePutFieldExpression(PutFieldExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStellaPackageExpression(StellaPackageExpression expression, C context) {
+    default Expression parseAssign(AssignExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStellaClassExpression(StaticClassExpression expression, C context) {
+    default Expression parseLocalVariableAssign(LocalVariableAssign expression, C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseInstanceCreationExpression(InstanceCreationExpression expression,
+                                                       C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseUnitExpression(UnitExpression expression, C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseStellaPackageExpression(StellaPackageExpression expression, C context,
+                                                    A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseStellaClassExpression(StaticClassExpression expression, C context,
+                                                  A hint) {
         return defaultBehavior(expression);
     }
 
     default Expression parseStellaClassConstructExpression(
-            StellaClassConstructExpression expression, C context) {
+            StellaClassConstructExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseVarExpression(VarExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-
-
-    default Expression parseBlockExpression(BlockExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-
-    default Expression parseBooleanExpression(BooleanExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-
-    default Expression parseBranchExpression(BranchExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-
-    default Expression parseCallNotation(CallNotation expression, C context) {
+    default Expression parseVarExpression(VarExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
 
-    default Expression parseConstructExpression(ConstructExpression expression, C context) {
+    default Expression parseBlockExpression(BlockExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseDotNotation(DotNotation expression, C context) {
+    default Expression parseBooleanExpression(BooleanExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseMethodCallExpression(MethodCallExpression expression, C context) {
+    default Expression parseBranchExpression(BranchExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseNumberExpression(NumberExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-
-    default Expression parseObjectFieldExpression(FieldExpression expression, C context) {
-        return defaultBehavior(expression);
-    }
-
-    default Expression parseObjectMethodExpression(GetMethodExpression expression, C context) {
+    default Expression parseCallNotation(CallNotation expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
 
-    default Expression parseStaticFieldExpression(StaticFieldExpression expression, C context) {
+    default Expression parseConstructExpression(ConstructExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStaticMethodExpression(StaticMethodExpression expression, C context) {
+    default Expression parseDotNotation(DotNotation expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseStringExpression(StringExpression expression, C context) {
+    default Expression parseMethodCallExpression(MethodCallExpression expression, C context,
+                                                 A hint) {
         return defaultBehavior(expression);
     }
 
-    default Expression parseSymbolExpression(SymbolExpression expression, C context) {
+    default Expression parseNumberExpression(NumberExpression expression, C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseObjectFieldExpression(FieldExpression expression, C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseObjectMethodExpression(GetMethodExpression expression, C context,
+                                                   A hint) {
         return defaultBehavior(expression);
     }
 
 
-    default Expression parseVarDefExpression(VarDefExpression expression, C context) {
+    default Expression parseStaticFieldExpression(StaticFieldExpression expression, C context,
+                                                  A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseStaticMethodExpression(StaticMethodExpression expression, C context,
+                                                   A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseStringExpression(StringExpression expression, C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+    default Expression parseSymbolExpression(SymbolExpression expression, C context, A hint) {
+        return defaultBehavior(expression);
+    }
+
+
+    default Expression parseVarDefExpression(VarDefExpression expression, C context, A hint) {
         return defaultBehavior(expression);
     }
 
