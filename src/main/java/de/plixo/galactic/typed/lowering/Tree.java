@@ -2,6 +2,8 @@ package de.plixo.galactic.typed.lowering;
 
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.expressions.*;
+import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.Objects;
 
@@ -67,14 +69,9 @@ public interface Tree<C extends Context, A> {
                     parseCastExpression(castExpression, context, hint);
             case CastCheckExpression castCheckExpression ->
                     parseCastCheckExpression(castCheckExpression, context, hint);
-            case FunctionExpression functionExpression ->
-                    parseFunctionExpression(functionExpression, context, hint);
         }, expression.getClass().getSimpleName());
     }
 
-    default Expression parseFunctionExpression(FunctionExpression expression, C context, A hint) {
-        return defaultBehavior(expression);
-    }
 
     default Expression parseCastCheckExpression(CastCheckExpression expression, C context, A hint) {
         return defaultBehavior(expression);

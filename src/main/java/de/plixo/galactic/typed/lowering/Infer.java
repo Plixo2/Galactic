@@ -5,7 +5,6 @@ import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
-import de.plixo.galactic.typed.parsing.TIRFunctionParsing;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.*;
@@ -25,11 +24,7 @@ public class Infer implements Tree<Context, Type> {
                 .getSimpleName()} not implemented for Infer stage");
     }
 
-    @Override
-    public Expression parseFunctionExpression(FunctionExpression expression, Context context,
-                                              @Nullable Type hint) {
-        return TIRFunctionParsing.parse(expression, context, hint, this);
-    }
+
 
     @Override
     public Expression parseAssign(AssignExpression expression, Context context,

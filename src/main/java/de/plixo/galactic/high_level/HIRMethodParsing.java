@@ -22,6 +22,6 @@ public class HIRMethodParsing {
             return new HIRParameter(param.region(), paramID, type);
         }).toList();
 
-        return new HIRMethod(name, parameterList, returnType, blockExpr);
+        return new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr);
     }
 }

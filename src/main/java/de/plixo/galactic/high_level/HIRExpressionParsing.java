@@ -19,38 +19,8 @@ public class HIRExpressionParsing {
             return parseFactor(node.get("factor"));
         } else if (node.has("variableDefinition")) {
             return parseVarDefinition(node.get("variableDefinition"));
-        } else if (node.has("function")) {
-            throw new NullPointerException("TODO: function");
-           // return parseFunction(node.get("function"));
         }
         throw new NullPointerException("unknown expression");
-    }
-
-    private static HIRFunction parseFunction(Node node) {
-        node.assertType("function");
-        var returnTypeOpt = node.get("returnTypeOpt");
-        HIRType returnType = null;
-        if (returnTypeOpt.has("type")) {
-            returnType = HIRTypeParsing.parse(returnTypeOpt.get("type"));
-        }
-        var blockExpr = HIRExpressionParsing.parse(node.get("expression"));
-        var functionInterfaceType = node.get("functionType");
-        HIRType functionInterface = null;
-        if (functionInterfaceType.has("type")) {
-            functionInterface = HIRTypeParsing.parse(functionInterfaceType.get("type"));
-        }
-        var parameters =
-                node.list("functionParameterList", "functionParameterListOpt", "functionParameter");
-        var parameterList = parameters.stream().map(param -> {
-            var paramID = param.getID();
-            HIRType paramType = null;
-            if (param.has("type")) {
-                paramType = HIRTypeParsing.parse(param.get("type"));
-            }
-            return new HIRFunction.HIRFunctionParameter(param.region(), paramID, paramType);
-        }).toList();
-        return new HIRFunction(node.region(), parameterList, returnType, blockExpr,
-                functionInterface);
     }
 
     private static HIRBranch parseBranch(Node node) {

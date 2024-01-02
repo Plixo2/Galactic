@@ -70,20 +70,11 @@ public class CheckUnit {
                 throw new FlairCheckException(method.region(), NAME,
                         STR."Method \{name} has no body");
             }
-            checkProject.checkExpressions().parse(method.body(), context);
-
-            var expected = method.returnType();
-            assert method.body != null;
-
-            var found = method.body.getType(context);
-            var isVoid = Type.isSame(expected, new VoidType());
-            var typeMatch = Type.isAssignableFrom(expected, found, context);
-            if (!typeMatch && !isVoid) {
-                throw new FlairCheckException(method.region(), TYPE_MISMATCH,
-                        STR."method return type doesnt match, expected \{expected}, but found \{found}");
-            }
+            CheckProject.checkMethodBody(context, checkProject, method);
         }
     }
+
+
 
     private void checkImports(List<Import> imports, Set<String> names) {
         for (var anImport : imports) {

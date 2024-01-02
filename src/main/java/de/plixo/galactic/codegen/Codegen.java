@@ -8,8 +8,10 @@ import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
-import de.plixo.galactic.types.*;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.PrimitiveType;
+import de.plixo.galactic.types.Type;
+import de.plixo.galactic.types.VoidType;
 import lombok.RequiredArgsConstructor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.*;
@@ -109,8 +111,8 @@ public class Codegen {
                 case MethodOwner.UnitOwner _ ->
                         new MethodInsnNode(INVOKESPECIAL, "java/lang/Object", "<init>", "()V",
                                 false);
-                default -> throw new IllegalStateException(
-                        STR."Unexpected value: \{method.owner()}");
+                default ->
+                        throw new IllegalStateException(STR."Unexpected value: \{method.owner()}");
             };
             context.add(superCall);
         }
@@ -292,18 +294,18 @@ public class Codegen {
 //                    var fieldExpression = new FieldExpression(varExpression.region(), owner, field.owner(), field);
 //                    parseExpression(fieldExpression, context);
 //                } else {
-                    var target = context.getVariablesIndex(varExpression.variable());
-                    var type = varExpression.variable().getType();
-                    var opcode = ALOAD;
-                    if (type instanceof PrimitiveType primitive) {
-                        opcode = switch (primitive.typeOfPrimitive) {
-                            case INT, BOOLEAN, CHAR, BYTE, SHORT -> ILOAD;
-                            case LONG -> LLOAD;
-                            case FLOAT -> FLOAD;
-                            case DOUBLE -> DLOAD;
-                        };
-                    }
-                    context.add(new VarInsnNode(opcode, target));
+                var target = context.getVariablesIndex(varExpression.variable());
+                var type = varExpression.variable().getType();
+                var opcode = ALOAD;
+                if (type instanceof PrimitiveType primitive) {
+                    opcode = switch (primitive.typeOfPrimitive) {
+                        case INT, BOOLEAN, CHAR, BYTE, SHORT -> ILOAD;
+                        case LONG -> LLOAD;
+                        case FLOAT -> FLOAD;
+                        case DOUBLE -> DLOAD;
+                    };
+                }
+                context.add(new VarInsnNode(opcode, target));
 //                }
             }
             case StaticFieldExpression staticFieldExpression -> {

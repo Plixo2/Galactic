@@ -3,17 +3,15 @@ import * Core
 import @java Text java.lang.String
 
 class Base {
-    fn create() -> Better = {
+    fn create() -> Base = {
        var hello = new Better { "Bye" }
        hello.name = "hello"
-       hello.print()
        hello
     }
     fn print() -> void = {
         println("Hello world")
     }
     fn contains(name: Text) -> boolean = if this is Better { (this as Better).name.equals(name) } else false
-
 }
 class Better extends Base {
     name: Text
@@ -31,7 +29,7 @@ class Implementor {
             hello.create()
             j as java.lang.Object as Better
         } else {
-            hello as Better
+            hello.create() as Better
         }
     }
 }

@@ -43,37 +43,6 @@ public class Symbols implements Tree<Context, Integer> {
     }
 
     @Override
-    public Expression parseFunctionExpression(FunctionExpression expression, Context context, Integer unused) {
-        var outsideScopeVariables = context.scope().getAllVariables();
-        context.pushScope();
-        var definedVariables = new HashSet<Scope.ClosureVariable>();
-        var currentScope = context.scope();
-        currentScope.parent(null);
-        for (var outsideScopeVariable : outsideScopeVariables) {
-            var variable = new Scope.ClosureVariable(outsideScopeVariable);
-            currentScope.addVariable(variable);
-            definedVariables.add(variable);
-        }
-
-        for (var functionalParameter : expression.inputVariable()) {
-            currentScope.addVariable(functionalParameter.variable());
-        }
-        var body = parse(expression.expression(), context, 0);
-
-        var outsideClosure = new ArrayList<Scope.ClosureVariable>();
-        definedVariables.forEach(variable -> {
-            if (variable.usageCount() != 0) {
-                outsideClosure.add(variable);
-                variable.field(new Field(ACC_PUBLIC, variable.name(), null, null));
-            }
-        });
-
-        context.popScope();
-        return new FunctionExpression(expression.region(), expression.inputVariable(),
-                expression.interfaceTypeHint(), expression.returnTypeHint(), body, outsideClosure);
-    }
-
-    @Override
     public Expression parseConstructExpression(ConstructExpression expression, Context context, Integer unused) {
 
         var parsed = expression.arguments().stream().map(ref -> {

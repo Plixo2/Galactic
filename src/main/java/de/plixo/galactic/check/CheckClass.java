@@ -12,8 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static de.plixo.galactic.exception.FlairKind.TYPE_MISMATCH;
-
 public class CheckClass {
 
     public void check(StellaClass stellaClass, Context context, CheckProject checkProject) {
@@ -88,17 +86,7 @@ public class CheckClass {
                 throw new FlairCheckException(stellaMethod.region(), FlairKind.NAME,
                         STR."Method \{name} has no body");
             }
-            checkProject.checkExpressions().parse(stellaMethod.body(), context);
-            var expected = stellaMethod.returnType();
-            assert stellaMethod.body != null;
-
-            var found = stellaMethod.body.getType(context);
-            var isVoid = Type.isSame(expected, new VoidType());
-            var typeMatch = Type.isAssignableFrom(expected, found, context);
-            if (!typeMatch && !isVoid) {
-                throw new FlairCheckException(stellaMethod.region(), TYPE_MISMATCH,
-                        STR."method return type doesnt match, expected \{expected}, but found \{found}");
-            }
+            CheckProject.checkMethodBody(context, checkProject, stellaMethod);
         }
         return names;
     }

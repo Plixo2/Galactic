@@ -30,7 +30,6 @@ blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
 
 expression := variableDefinition | factor
-//expression := variableDefinition | factor | function
 variableDefinition := "var" id! typeHint! "="! expression! |
 typeHint := ":"? type! ||
 branch := "if"? expression! body! branchOpt!
@@ -82,79 +81,8 @@ functionParameterList := functionParameter functionParameterListOpt! ||
 functionParameterListOpt := "," functionParameterList! ||
 functionParameter := id ":"? type! | id
 
-//unit := topList! "EOF"!
-//
-//topList := annotatedItem topList ||
-//annotatedItem := annotationList topEntry
-//topEntry := import | struct | constant | atInterface
-//import := "use"? language! wordChain! importAll!
-//language := "interface" ||
-//importAll := "."? "*" ||
-//
-//atInterface := "@interface"? id! definitionBlock!
-//
-//struct := "structure"? id! genericDefinition! definitionBlock!
-//constant := constDefine
-//
-//
-//annotationList := annotation annotationList! ||
-//annotation := "#"? id! annotationParamOpt!
-//annotationParamOpt := "("? expressionList! ")"?! ||
-//
-//genericDefinition := "<"? wordList! ">"?! ||
-//
-//definitionBlock := "{"? definitionList! "}"?!
-//definitionList := annotatedDefinition definitionList ||
-//
-//annotatedDefinition := annotationList definition
-//definition := id typeHintOpt defaultParamOpt
-//defaultParamOpt := "="? expression! ||
-//typeHintOpt := ":"? type! ||
-//
-//type := functionType | classType
-//
-//functionType := "fn"? ownerDef typeOrTypeList! returnTypeOpt!
-//
-//typeOrTypeList := "("? typeList! ")"?! | type!
-//typeList := type typeListOpt! ||
-//typeListOpt := ","? typeList! ||
-//
-//classType := wordChain genericHintOpt!
-//genericHintOpt := "<"? typeList! ">"?! ||
-//
-//number := "number"
-//string := "string"
-//
-//id := "keyword"
-//
-//wordChain := id wordChainOpt
-//wordChainOpt := "."? wordChain ||
-//
-//wordList := id wordListOpt
-//wordListOpt := ","? wordList ||
-//
-//branchExpr := "if"? expression! body! branchOpt!
-//branchOpt := elseifOpt | elseOpt ||
-//elseifOpt := "elif"? expression! body! branchOpt! | "else"? "if"? expression! body! branchOpt!
-//elseOpt := "else"? body!
-//body := "=>" expression! | blockExpr!
-//
-//blockExpr := "{"? blockExprList!
-//blockExprList := "}"? | expression blockExprList!
-//
-//
-//returnStatement := "return"? expressionOpt!
-//expressionOpt := expression ||
-//
-//constDefine := id constTypeDef
-//constTypeDef := ":"? "="? expression! | ":"? type "="? expression!
-//
-//
-//varDefinition := id varTypeDef
-//varTypeDef := "="? expression! | ":"? "="? expression! | ":"? type "="? expression!
-//
-////expression
-//expression := "var"? varDefinition endOfStatement! | returnStatement endOfStatement! | boolArithmetic endOfStatement!
+
+
 //boolArithmetic := comparisonArithmetic boolRight!
 //comparisonArithmetic := arithmetic comparisonRight!
 //arithmetic := term arithmeticRight!
@@ -166,25 +94,7 @@ functionParameter := id ":"? type! | id
 //termRight := termFunc term ||
 //
 //factor := object memberList! assignOpt!
-//endOfStatement := ||
-//assignOpt := "="? expression! ||
-//object := blockExpr | branchExpr | unary | "("? expression ")"? | number | id | function | string
-//memberList := memberAccess memberList! ||
-//memberAccess := "." id! | callAccess | "["? expression! "]"?!
-//callAccess := "("? expressionList! ")"?! | ":"? expression!
-//
-//unary :=  "!"? factor! | "-" factor
-//
-//expressionList := expression expressionListOpt! ||
-//expressionListOpt := ","? expressionList! ||
-//
-////function
-//function := "fn"? ownerDef "("?! argumentList ")"? returnTypeOpt expression
-//ownerDef := "["? type "]"? ||
-//returnTypeOpt := "->"? type! ||
-//argumentList := definition argumentListOpt ||
-//argumentListOpt := "," argumentList ||
-//
+
 ////operators
 //termFunc := "*" | "/"
 //arithmeticFunc := "+" | "-"

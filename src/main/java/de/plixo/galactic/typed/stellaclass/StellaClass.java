@@ -124,7 +124,7 @@ public class StellaClass extends Class {
 
 
     public void addAllFieldsConstructor(Context context) {
-        var thisVariable = new Scope.Variable("this", INPUT | THIS, this, null);
+        var thisVariable = new Scope.Variable("this", INPUT | THIS, this);
         var expressions = new ArrayList<HIRExpression>();
         var params = new ArrayList<Parameter>();
         var thisSymbol = new HIRIdentifier(region(), "this");
