@@ -23,6 +23,9 @@ class with `--enable-preview` as vm flag.
 The main class opens the Project in `/resources/project` and builds it to `/resources/build.jar`.
 This jar can be executed with `java -jar build.jar` and will print `Hello World!` to the console.
 
+> [!Note]
+> Anonymous function are not on main yet, generics are not implemented and there is no way of calling the super methods yet.
+
 
 ## Examples:
 
@@ -48,12 +51,7 @@ import @java ArrayList java.util.ArrayList
 import @java String java.lang.String
 
 fn main(args: [String]) -> void = {
-    var list = new ArrayList
-    list.add("Hello")
-    list.add("World!")
-    list.forEach(fn(obj: Object) -> void implements Consumer = {
-        println(obj as String)
-    })
+    println("Hello World!");
 }
 ```
 Output:
