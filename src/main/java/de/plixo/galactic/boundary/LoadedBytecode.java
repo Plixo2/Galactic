@@ -1,6 +1,6 @@
 package de.plixo.galactic.boundary;
 
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;

@@ -1,7 +1,6 @@
 package de.plixo.galactic.high_level;
 
 import de.plixo.galactic.high_level.expressions.*;
-import de.plixo.galactic.high_level.items.HIRParameter;
 import de.plixo.galactic.high_level.types.HIRType;
 import de.plixo.galactic.high_level.utils.ExpressionCommaList;
 import de.plixo.galactic.parsing.Node;
@@ -29,17 +28,29 @@ public class HIRExpressionParsing {
 
     private static HIRFunction parseFunction(Node node) {
         node.assertType("function");
-        var parameters = node.list("parameterList", "parameterListOpt", "parameter");
-        var returnType = HIRTypeParsing.parse(node.get("type"));
+        var returnTypeOpt = node.get("returnTypeOpt");
+        HIRType returnType = null;
+        if (returnTypeOpt.has("type")) {
+            returnType = HIRTypeParsing.parse(returnTypeOpt.get("type"));
+        }
         var blockExpr = HIRExpressionParsing.parse(node.get("expression"));
-        var functionType = node.get("functionType").get("type");
+        var functionInterfaceType = node.get("functionType");
+        HIRType functionInterface = null;
+        if (functionInterfaceType.has("type")) {
+            functionInterface = HIRTypeParsing.parse(functionInterfaceType.get("type"));
+        }
+        var parameters =
+                node.list("functionParameterList", "functionParameterListOpt", "functionParameter");
         var parameterList = parameters.stream().map(param -> {
             var paramID = param.getID();
-            var type = HIRTypeParsing.parse(param.get("type"));
-            return new HIRParameter(param.region(), paramID, type);
+            HIRType paramType = null;
+            if (param.has("type")) {
+                paramType = HIRTypeParsing.parse(param.get("type"));
+            }
+            return new HIRFunction.HIRFunctionParameter(param.region(), paramID, paramType);
         }).toList();
-        var functionInterfaceType = HIRTypeParsing.parse(functionType);
-        return new HIRFunction(node.region(), parameterList, returnType, blockExpr, functionInterfaceType);
+        return new HIRFunction(node.region(), parameterList, returnType, blockExpr,
+                functionInterface);
     }
 
     private static HIRBranch parseBranch(Node node) {

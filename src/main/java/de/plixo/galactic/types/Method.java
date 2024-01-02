@@ -67,4 +67,20 @@ public class Method {
         return Modifier.isAbstract(modifier);
     }
 
+    public static boolean signatureMatch(Method method, Method otherMethod, Context context) {
+        if (!method.name().equals(otherMethod.name())) {
+            return false;
+        }
+        if (method.arguments().size() != otherMethod.arguments().size()) {
+            return false;
+        }
+        for (int i = 0; i < method.arguments().size(); i++) {
+            var aType = method.arguments().get(i);
+            var stellaSide = otherMethod.arguments().get(i);
+            if (!Type.isSame(aType, stellaSide)) {
+                return false;
+            }
+        }
+        return Type.isSame(method.returnType(), otherMethod.returnType());
+    }
 }

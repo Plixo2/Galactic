@@ -15,6 +15,8 @@ import de.plixo.galactic.typed.path.PathElement;
 import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.*;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.Type;
+import de.plixo.galactic.types.VoidType;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -144,7 +146,12 @@ public class TIRUnitParsing {
                     var parse = TIRTypeParsing.parse(ref.type(), context);
                     return new Parameter(ref.name(), parse);
                 }).toList();
-                var returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
+                Type returnType;
+                if (hirMethod.returnType() != null) {
+                    returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
+                } else {
+                    returnType = new VoidType();
+                }
                 var owner = new MethodOwner.UnitOwner(unit);
                 var region = staticMethod.hirMethod().region();
                 var stellaMethod =

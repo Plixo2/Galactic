@@ -21,25 +21,11 @@ public class HIRItemParsing {
         } else if (node.has("block")) {
             return parseBlock(node.get("block"));
         } else if (node.has("method")) {
-            return parseStaticMethod(node.get("method"));
+            return new HIRStaticMethod(HIRMethodParsing.parse(node.get("method")));
         }
         throw new NullPointerException("Unknown item");
     }
 
-    private static HIRStaticMethod parseStaticMethod(Node node) {
-        node.assertType("method");
-        var name = node.getID();
-        var parameters = node.list("parameterList", "parameterListOpt", "parameter");
-        var returnType = HIRTypeParsing.parse(node.get("type"));
-        var blockExpr = HIRExpressionParsing.parse(node.get("expression"));
-        var parameterList = parameters.stream().map(param -> {
-            var paramID = param.getID();
-            var type = HIRTypeParsing.parse(param.get("type"));
-            return new HIRParameter(param.region(), paramID, type);
-        }).toList();
-
-        return new HIRStaticMethod(new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr));
-    }
 
     private static HIRTopBlock parseBlock(Node node) {
         node.assertType("block");

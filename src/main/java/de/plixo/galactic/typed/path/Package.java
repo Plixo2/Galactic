@@ -1,7 +1,7 @@
 package de.plixo.galactic.typed.path;
 
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.Region;
-import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.typed.expressions.Expression;
 import de.plixo.galactic.typed.expressions.StellaPackageExpression;
 import de.plixo.galactic.typed.expressions.UnitExpression;

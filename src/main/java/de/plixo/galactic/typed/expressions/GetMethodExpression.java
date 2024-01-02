@@ -12,4 +12,9 @@ public record GetMethodExpression(Region region, Expression object, MethodCollec
     public Type getType(Context context) {
         return new VoidType();
     }
+
+    @Override
+    public Type getCallType(Context context) {
+        return object.getType(context);
+    }
 }

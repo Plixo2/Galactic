@@ -2,7 +2,7 @@ package de.plixo.galactic.typed;
 
 import de.plixo.galactic.Universe;
 import de.plixo.galactic.boundary.LoadedBytecode;
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.typed.path.CompileRoot;
@@ -67,6 +67,7 @@ public class Context {
     public @Nullable Expression getSymbolExpression(Region region, String symbol, Context context) {
         var variable = scope().getVariable(symbol);
         if (variable != null) {
+            variable.addUsage();
             return new VarExpression(region, variable);
         }
         var aClass = unit.getImportedClass(symbol);

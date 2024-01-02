@@ -1,7 +1,7 @@
 package de.plixo.galactic.high_level.items;
 
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.Region;
-import de.plixo.galactic.common.ObjectPath;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;

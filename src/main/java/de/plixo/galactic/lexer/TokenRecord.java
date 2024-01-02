@@ -2,7 +2,6 @@ package de.plixo.galactic.lexer;
 
 
 import de.plixo.galactic.exception.FlairCheckException;
-import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.lexer.tokens.Token;
 

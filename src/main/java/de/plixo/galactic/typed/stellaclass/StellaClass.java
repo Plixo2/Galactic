@@ -1,6 +1,6 @@
 package de.plixo.galactic.typed.stellaclass;
 
-import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.high_level.expressions.*;
 import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.lexer.Region;
@@ -62,14 +62,14 @@ public class StellaClass extends Class {
         }
         var aMethod = method.asMethod();
         for (var abstractMethod : superClass.getMethods()) {
-            if (signatureMatch(abstractMethod, aMethod, context)) {
+            if (Method.signatureMatch(abstractMethod, aMethod, context)) {
                 methods.add(new ImplementedMethod(abstractMethod, method));
                 return;
             }
         }
         for (Class anInterface : interfaces) {
             for (var abstractMethod : anInterface.getMethods()) {
-                if (signatureMatch(abstractMethod, aMethod, context)) {
+                if (Method.signatureMatch(abstractMethod, aMethod, context)) {
                     methods.add(new ImplementedMethod(abstractMethod, method));
                     return;
                 }
@@ -78,22 +78,6 @@ public class StellaClass extends Class {
         methods.add(new NewMethod(method));
     }
 
-    private boolean signatureMatch(Method method, Method otherMethod, Context context) {
-        if (!method.name().equals(otherMethod.name())) {
-            return false;
-        }
-        if (method.arguments().size() != otherMethod.arguments().size()) {
-            return false;
-        }
-        for (int i = 0; i < method.arguments().size(); i++) {
-            var aType = method.arguments().get(i);
-            var stellaSide = otherMethod.arguments().get(i);
-            if (!Type.isSame(aType, stellaSide)) {
-                return false;
-            }
-        }
-        return Type.isSame(method.returnType(), otherMethod.returnType());
-    }
 
     @Override
     public ObjectPath path() {
@@ -158,31 +142,6 @@ public class StellaClass extends Class {
         addMethod(method, context);
     }
 
-    public Set<Method> implementationLeft(Context context) {
-        var set = new HashSet<>(superClass.getAbstractMethods());
-        for (var anInterface : interfaces) {
-            set.addAll(anInterface.getAbstractMethods());
-        }
-        set.removeIf(ref -> {
-            var methodList = getMethods();
-            var impls = methodList.stream().filter(me -> !me.isAbstract()).toList();
-            for (var impl : impls) {
-                if (impl.name().equals(ref.name()) && signatureMatch(ref, impl, context)) {
-                    return true;
-                }
-            }
-            return false;
-//            ref.matchSignature(context);
-        });
-
-//        for (MethodImplementation method : methods) {
-//            if (method instanceof ImplementedMethod implemented) {
-//                set.remove(implemented.toImplement());
-//            }
-//        }
-
-        return set;
-    }
 
     public String name() {
         return STR."\{unit().name()}.\{localName()}";

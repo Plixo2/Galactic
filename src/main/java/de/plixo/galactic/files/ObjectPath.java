@@ -1,4 +1,4 @@
-package de.plixo.galactic.common;
+package de.plixo.galactic.files;
 
 import lombok.Getter;
 

@@ -20,7 +20,8 @@ field := id ":" type!
 
 block := blockExpr
 
-method := "fn"? id! "("?! parameterList! ")"?! "->"?! type! "=" expression!
+method := "fn"? id! "("?! parameterList! ")"?! returnTypeOpt! "="! expression!
+returnTypeOpt := "->"? type! ||
 parameterList := parameter parameterListOpt! ||
 parameterListOpt := "," parameterList! ||
 parameter := id ":"?! type!
@@ -73,8 +74,13 @@ id := "word"
 number := "number"
 string := "string"
 
-//function := "fn"? "("?! parameterList! ")"?! "->"?! type! functionType! "="?! expression!
-//functionType := "implements"! type!
+
+function := "fn"? "("?! functionParameterList! ")"?! returnTypeOpt! functionType! "="?! expression!
+functionType := "implements" type! ||
+
+functionParameterList := functionParameter functionParameterListOpt! ||
+functionParameterListOpt := "," functionParameterList! ||
+functionParameter := id ":"? type! | id
 
 //unit := topList! "EOF"!
 //

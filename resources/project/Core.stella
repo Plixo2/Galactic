@@ -1,5 +1,5 @@
 import @java System java.lang.System
 
-fn println(msg: java.lang.String) -> void = {
+fn println(msg: java.lang.String) = {
     System.out.println(msg)
 }

@@ -1,8 +1,9 @@
 package de.plixo.galactic.boundary;
 
 import com.google.common.io.ByteStreams;
-import de.plixo.galactic.common.ObjectPath;
 import de.plixo.galactic.exception.FlairException;
+import de.plixo.galactic.exception.FlairException;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.*;

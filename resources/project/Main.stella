@@ -1,6 +1,18 @@
 import * Core
 
 import @java String java.lang.String
+import @java Consumer java.util.function.Consumer
+import @java Function java.util.function.Function
+import @java Boolean java.lang.Boolean
+import @java System java.lang.System
+import @java Object java.lang.Object
+import @java ArrayList java.util.ArrayList
+import @java List java.util.List
+import @java TestObj test.TestObj
+import @java Arrays java.util.Arrays
+import @java InternalTest test.Child
+import @java String java.lang.String
+import @java Integer java.lang.Integer
 
 fn main(args: [String]) -> void = {
     println("Hello World!")

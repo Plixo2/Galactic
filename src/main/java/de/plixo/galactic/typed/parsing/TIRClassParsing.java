@@ -10,6 +10,8 @@ import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.Field;
+import de.plixo.galactic.types.Type;
+import de.plixo.galactic.types.VoidType;
 
 import static de.plixo.galactic.typed.Scope.INPUT;
 import static de.plixo.galactic.typed.Scope.THIS;
@@ -74,7 +76,13 @@ public class TIRClassParsing {
                 var parse = TIRTypeParsing.parse(ref.type(), context);
                 return new Parameter(ref.name(), parse);
             }).toList();
-            var returnType = TIRTypeParsing.parse(method.returnType(), context);
+
+            Type returnType;
+            if (method.returnType() != null) {
+                returnType = TIRTypeParsing.parse(method.returnType(), context);
+            } else {
+                returnType = new VoidType();
+            }
             var stellaMethod =
                     new StellaMethod(ACC_PUBLIC, method.methodName(), parameters, returnType,
                             method.expression(), new MethodOwner.ClassOwner(stellaClass), method.region());
@@ -89,7 +97,7 @@ public class TIRClassParsing {
             stellaMethod.parameters().forEach(ref -> {
                 context.scope().addVariable(ref.variable());
             });
-            var variable = new Scope.Variable("this", INPUT | THIS, stellaClass, null);
+            var variable = new Scope.Variable("this", INPUT | THIS, stellaClass);
             stellaMethod.thisVariable(variable);
             context.scope().addVariable(variable);
             TIRMethodParsing.parse(stellaMethod, context);

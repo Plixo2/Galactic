@@ -51,6 +51,7 @@ public class MethodCollection {
     /**
      * Find the best matching method for the given signature.
      * Returns null, if to signature matches.
+     *
      * @param signature the signature to match
      * @return the best matching method
      */

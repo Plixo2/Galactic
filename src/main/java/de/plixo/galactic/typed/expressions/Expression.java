@@ -2,7 +2,7 @@ package de.plixo.galactic.typed.expressions;
 
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
-import de.plixo.galactic.types.*;
+import de.plixo.galactic.types.Type;
 
 /**
  * Base class for all expressions,
@@ -11,11 +11,11 @@ import de.plixo.galactic.types.*;
 public sealed interface Expression
         permits AssignExpression, BlockExpression, BooleanExpression, BranchExpression,
         CallNotation, CastCheckExpression, CastExpression, ConstructExpression, DotNotation,
-        FieldExpression, GetMethodExpression, InstanceCreationExpression, LocalVariableAssign,
-        MethodCallExpression, NumberExpression, PutFieldExpression, PutStaticFieldExpression,
-        StaticClassExpression, StaticFieldExpression, StaticMethodExpression,
-        StellaClassConstructExpression, StellaPackageExpression, StringExpression, SymbolExpression,
-        UnitExpression, VarDefExpression, VarExpression {
+        FieldExpression, FunctionExpression, GetMethodExpression, InstanceCreationExpression,
+        LocalVariableAssign, MethodCallExpression, NumberExpression, PutFieldExpression,
+        PutStaticFieldExpression, StaticClassExpression, StaticFieldExpression,
+        StaticMethodExpression, StellaClassConstructExpression, StellaPackageExpression,
+        StringExpression, SymbolExpression, UnitExpression, VarDefExpression, VarExpression {
 
 
     Type getType(Context context);

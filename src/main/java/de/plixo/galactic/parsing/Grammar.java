@@ -1,7 +1,5 @@
 package de.plixo.galactic.parsing;
 
-import de.plixo.galactic.exception.FlairCheckException;
-import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.lexer.TokenRecord;
 import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.lexer.tokens.*;
