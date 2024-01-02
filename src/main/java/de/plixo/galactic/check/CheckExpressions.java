@@ -30,6 +30,10 @@ public class CheckExpressions implements Tree<Context> {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                     "Cant cast to primitive type or array");
         }
+        var parsedType = parsed.getType(context);
+        if (!Type.isAssignableFrom(type, parsedType, context) && !Type.isAssignableFrom(parsedType, type, context)) {
+            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH, "Cant cast across inheritance");
+        }
         return new CastExpression(expression.region(), parsed, type);
     }
 
@@ -152,12 +156,12 @@ public class CheckExpressions implements Tree<Context> {
 
     @Override
     public Expression parseBranchExpression(BranchExpression expression, Context context) {
-        parse(expression.condition(), context);
+        var condition = parse(expression.condition(), context);
         parse(expression.then(), context);
 
         var found = expression.condition().getType(context);
         if (!Type.isAssignableFrom(PrimitiveType.BOOLEAN, found, context)) {
-            throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
+            throw new FlairCheckException(condition.region(), FlairKind.TYPE_MISMATCH,
                     STR."condition is not boolean, its \{found}");
         }
         if (expression.elseExpression() != null) {

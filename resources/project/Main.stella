@@ -4,5 +4,7 @@ import @java String java.lang.String
 
 fn main(args: [String]) -> void = {
     println("Hello World!")
+    var a = new Example.Implementor { "cast" }
+    a.main().print()
 }
 

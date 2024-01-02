@@ -62,9 +62,15 @@ public class Codegen {
         classNode.name = stellaClass.getJVMDestination();
         classNode.version = version;
         classNode.superName = stellaClass.superClass.getJVMDestination();
-        classNode.interfaces.addAll(stellaClass.interfaces.stream()
-                .map(Class::getJVMDestination).toList());
-
+        classNode.interfaces.addAll(
+                stellaClass.interfaces.stream().map(Class::getJVMDestination).toList());
+        classNode.fields = new ArrayList<>();
+        for (var field : stellaClass.fields) {
+            var fieldNode =
+                    new FieldNode(field.modifier(), field.name(), field.getDescriptor(), null,
+                            null);
+            classNode.fields.add(fieldNode);
+        }
         var out = getJarOutput(classNode, STR."\{classNode.name}.class");
         this.jarOutputs.add(out);
     }
@@ -92,19 +98,28 @@ public class Codegen {
         }
         method.parameters().forEach(ref -> context.putVariable(ref.variable()));
 
-        if (method.body == null && method.localName().equals("<init>")) {
+        if (method.isConstructor()) {
             //TODO
-             context.add(new VarInsnNode(ALOAD, 0));
-              var superCall =
-                     new MethodInsnNode(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-              context.add(superCall);
-              context.add(new InsnNode(RETURN));
-        } else {
-            parseExpression(
-                    Objects.requireNonNull(method.body,
-                            STR."require expression \{method.localName()}"),
-                    context);
+            context.add(new VarInsnNode(ALOAD, 0));
+
+
+            var superCall = switch (method.owner()) {
+                case MethodOwner.ClassOwner(var owningClass) when owningClass.getSuperClass() !=
+                        null -> new MethodInsnNode(INVOKESPECIAL,
+                        owningClass.getSuperClass().getJVMDestination(), "<init>", "()V", false);
+                case MethodOwner.UnitOwner _ ->
+                        new MethodInsnNode(INVOKESPECIAL, "java/lang/Object", "<init>", "()V",
+                                false);
+                default -> throw new IllegalStateException(
+                        STR."Unexpected value: \{method.owner()}");
+            };
+            context.add(superCall);
+//            context.add(new InsnNode(RETURN));
         }
+        parseExpression(
+                Objects.requireNonNull(method.body, STR."require expression \{method.localName()}"),
+                context);
+
 
         var returned = method.returnType();
         if (Type.isSame(returned, new VoidType())) {

@@ -34,8 +34,8 @@ public class TokenFlairHandler {
             var contains = false;
 
             for (var existing : unique) {
-                var file = existing.position().file();
-                if (file == record.position().file()) {
+                var file = existing.position().left().file();
+                if (file == record.position().left().file()) {
                     contains = true;
                     break;
                 }

@@ -54,7 +54,7 @@ public class Tokenizer {
         var matchingStartTokens = new ArrayList<Token>(5);
         var length = string.length();
         for (int index = 0; index < length; index++) {
-            var position = new Position(file, line, index);
+            var start = new Position(file, line, index);
             var currentChar = string.charAt(index);
             for (Token token : tokens) {
                 if (token.startsWith(currentChar)) {
@@ -68,14 +68,15 @@ public class Tokenizer {
                     continue;
                 }
                 var literal = string.substring(index, Math.min(next, length));
-                records.add(new TokenRecord(matchingStart, literal, position));
                 index = next - 1;
+                var end = new Position(file, line, index);
+                records.add(new TokenRecord(matchingStart, literal, new Region(start, end)));
                 matched = true;
                 break;
             }
             if (!matched) {
                 var literal = string.substring(index, Math.min(index + 1, length));
-                records.add(new TokenRecord(Token.unknownToken(), literal, position));
+                records.add(new TokenRecord(Token.unknownToken(), literal, start.toRegion()));
             }
             matchingStartTokens.clear();
         }

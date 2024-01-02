@@ -13,16 +13,16 @@ import de.plixo.galactic.lexer.tokens.Token;
  * @param literal  data of the token
  * @param position where the token was captured
  */
-public record TokenRecord(Token token, String literal, Position position) {
+public record TokenRecord(Token token, String literal, Region position) {
 
     public RuntimeException createException() {
         var msg = STR."Unexpected Token (\{token}) '\{literal}' at \{position.toString()}";
-        return new FlairCheckException(position.toRegion(), FlairKind.TOKEN, msg);
+        return new FlairCheckException(position, FlairKind.TOKEN, msg);
     }
 
     public RuntimeException createException(String msg) {
         var message = STR."\{msg} at \{position.toString()}";
-        return new FlairCheckException(position.toRegion(), FlairKind.TOKEN, message);
+        return new FlairCheckException(position, FlairKind.TOKEN, message);
     }
 
     public String errorMessage() {

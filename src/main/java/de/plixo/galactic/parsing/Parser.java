@@ -68,18 +68,16 @@ public class Parser {
      */
     private @Nullable SyntaxResult testSentence(Grammar.Rule rule, Grammar.Sentence sentence) {
         var nodes = new ArrayList<Node>();
-        TokenRecord leftToken;
-        Position rightPos;
         if (!stream.hasEntriesLeft()) {
             return null;
         }
-        leftToken = stream.current();
-        rightPos = stream.current().position();
+        var leftToken = stream.current();
+        var rightPos = stream.current().position().maxPosition();
         for (var entry : sentence.entries()) {
             if (!stream.hasEntriesLeft()) {
                 return null;
             }
-            rightPos = stream.current().position();
+            rightPos = stream.current().position().maxPosition();
             switch (entry) {
                 case Grammar.LiteralEntry literalEntry -> {
                     var token = stream.current();
@@ -93,7 +91,7 @@ public class Parser {
                         }
                     }
                     if (literalEntry.capture()) {
-                        var region = token.position().toRegion();
+                        var region = token.position();
                         nodes.add(new Node(token, rule.name(), new ArrayList<>(), region));
                     }
                     stream.consume();
@@ -107,7 +105,11 @@ public class Parser {
                         case FailedRule syntaxError -> {
                             return syntaxError;
                         }
-                        case SyntaxMatch syntaxMatch -> nodes.add(syntaxMatch.node());
+                        case SyntaxMatch syntaxMatch -> {
+                            var node = syntaxMatch.node();
+                            nodes.add(node);
+                            rightPos = node.region().right();
+                        }
                         case null -> {
                             if (ruleEntry.throwError()) {
                                 return new FailedRule(stream.left(), ruleEntry.rule(), rule);
@@ -118,10 +120,10 @@ public class Parser {
                 }
             }
         }
-        if (stream.hasEntriesLeft()) {
-            rightPos = stream.current().position();
-        }
-        var region = new Region(leftToken.position(), rightPos);
+//        if (stream.hasEntriesLeft()) {
+//            rightPos = stream.current().position();
+//        }
+        var region = new Region(leftToken.position().minPosition(), rightPos);
         return new SyntaxMatch(new Node(leftToken, rule.name(), nodes, region));
     }
 
