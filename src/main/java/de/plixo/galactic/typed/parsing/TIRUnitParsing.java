@@ -4,11 +4,11 @@ import de.plixo.galactic.Universe;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairKind;
-import de.plixo.galactic.high_level.expressions.HIRBlock;
 import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.high_level.items.HIRImport;
 import de.plixo.galactic.high_level.items.HIRStaticMethod;
 import de.plixo.galactic.high_level.items.HIRTopBlock;
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.path.PathElement;
@@ -29,12 +29,11 @@ public class TIRUnitParsing {
         for (var hirItem : unit.hirItems()) {
             if (hirItem instanceof HIRClass hirClass) {
                 var parsed =
-                        new StellaClass(hirClass.region(), hirClass.className(), unit, hirClass, defaultSuperClass);
+                        new StellaClass(hirClass.region(), hirClass.className(), unit, hirClass,
+                                defaultSuperClass);
                 unit.addClass(parsed);
             } else if (hirItem instanceof HIRTopBlock block) {
-                var hirBlock = new HIRBlock(block.region(), block.expressions());
-                var stellaBlock = new StellaBlock(unit, hirBlock);
-                unit.addBlock(stellaBlock);
+                throw new NullPointerException("TODO remove blocks");
             } else if (!(hirItem instanceof HIRImport || hirItem instanceof HIRStaticMethod)) {
                 throw new NullPointerException(STR."unknown hir item \{hirItem}");
             }
@@ -53,14 +52,15 @@ public class TIRUnitParsing {
         // clear imports, from previous run
         unit.clearImports();
         unit.classes().forEach(ref -> {
-            unit.addImport(ref.localName(), ref);
+            unit.addImport(unit.getRegion(), ref.localName(), ref, false);
         });
         unit.staticMethods().forEach(ref -> {
-            unit.addImport(ref.localName(), ref);
+            unit.addImport(unit.getRegion(), ref.localName(), ref, false);
         });
 
         for (var hirItem : unit.hirItems()) {
             if (hirItem instanceof HIRImport hirImport) {
+                var region = hirImport.region();
                 var path = hirImport.path();
                 var importType = hirImport.importType();
                 var alias = hirImport.name();
@@ -70,25 +70,23 @@ public class TIRUnitParsing {
                         case PathElement.StellaClassElement(var stellaClass) -> {
                             if (alias.equals("*")) {
                                 if (throwErrors) {
-                                    throw new FlairCheckException(hirImport.region(),
-                                            FlairKind.IMPORT,
+                                    throw new FlairCheckException(region, FlairKind.IMPORT,
                                             STR."Cant import inner parts of a class \{stellaClass.name()}");
                                 }
                             }
-                            unit.addImport(alias, stellaClass);
+                            unit.addImport(region, alias, stellaClass, true);
                         }
                         case PathElement.UnitElement(var unitElement) -> {
                             if (alias.equals("*")) {
                                 unitElement.classes().forEach(ref -> {
-                                    unit.addImport(ref.localName(), ref);
+                                    unit.addImport(region, ref.localName(), ref, true);
                                 });
                                 unitElement.staticMethods().forEach(ref -> {
-                                    unit.addImport(ref.localName(), ref);
+                                    unit.addImport(region, ref.localName(), ref, true);
                                 });
                             } else {
                                 if (throwErrors) {
-                                    throw new FlairCheckException(hirImport.region(),
-                                            FlairKind.IMPORT,
+                                    throw new FlairCheckException(region, FlairKind.IMPORT,
                                             STR."could not locate matching stella class \{path}");
                                 }
                             }
@@ -96,16 +94,15 @@ public class TIRUnitParsing {
                         case PathElement.StellaMethodElement(var method) -> {
                             if (alias.equals("*")) {
                                 if (throwErrors) {
-                                    throw new FlairCheckException(hirImport.region(),
-                                            FlairKind.IMPORT,
+                                    throw new FlairCheckException(region, FlairKind.IMPORT,
                                             STR."Cant import inner parts of a method \{method.localName()}");
                                 }
                             }
-                            unit.addImport(alias, method);
+                            unit.addImport(region, alias, method, true);
                         }
                         case null, default -> {
                             if (throwErrors) {
-                                throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                                throw new FlairCheckException(region, FlairKind.IMPORT,
                                         STR."could not locate matching stella class, or method \{path}");
                             }
                         }
@@ -115,20 +112,20 @@ public class TIRUnitParsing {
                     var jvmClass = unit.locateJVMClass(path, bytecode);
                     if (alias.equals("*")) {
                         if (throwErrors) {
-                            throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                            throw new FlairCheckException(region, FlairKind.IMPORT,
                                     "import * not supported on java");
                         }
                     }
                     if (jvmClass == null) {
                         if (throwErrors) {
-                            throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                            throw new FlairCheckException(region, FlairKind.IMPORT,
                                     STR."could not locate jvm class \{path}");
                         }
                     }
-                    unit.addImport(alias, jvmClass);
+                    unit.addImport(region, alias, jvmClass, true);
                 } else {
                     if (throwErrors) {
-                        throw new FlairCheckException(hirImport.region(), FlairKind.IMPORT,
+                        throw new FlairCheckException(region, FlairKind.IMPORT,
                                 STR."unknown import type \{importType}");
                     }
                 }
@@ -136,14 +133,6 @@ public class TIRUnitParsing {
         }
     }
 
-    public static void fillBlockExpressions(Unit unit, StellaBlock block, Context context) {
-        var language = context.language();
-        var base = TIRExpressionParsing.parse(block.hirBlock(), context);
-        base = language.symbolsStage().parse(base, context);
-        base = language.inferStage().parse(base, context);
-        language.checkStage().parse(base, context);
-        block.expression(base);
-    }
 
     public static void fillMethodShells(Unit unit, Context context) {
         for (var method : unit.hirItems()) {
@@ -151,14 +140,16 @@ public class TIRUnitParsing {
                 var flags = ACC_PUBLIC | ACC_STATIC;
                 var hirMethod = staticMethod.hirMethod();
                 var name = hirMethod.methodName();
-                var parameters = hirMethod.HIRParameters().stream().map(ref -> {
+                var parameters = hirMethod.hirParameters().stream().map(ref -> {
                     var parse = TIRTypeParsing.parse(ref.type(), context);
                     return new Parameter(ref.name(), parse);
                 }).toList();
                 var returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
                 var owner = new MethodOwner.UnitOwner(unit);
+                var region = staticMethod.hirMethod().region();
                 var stellaMethod =
-                        new StellaMethod(flags, name, parameters, returnType, hirMethod, owner);
+                        new StellaMethod(flags, name, parameters, returnType, hirMethod.expression(), owner,
+                                region);
                 unit.addStaticMethod(stellaMethod);
             }
         }

@@ -38,7 +38,7 @@ public class HIRItemParsing {
             return new HIRParameter(param.region(), paramID, type);
         }).toList();
 
-        return new HIRStaticMethod(new HIRMethod(name, parameterList, returnType, blockExpr));
+        return new HIRStaticMethod(new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr));
     }
 
     private static HIRTopBlock parseBlock(Node node) {

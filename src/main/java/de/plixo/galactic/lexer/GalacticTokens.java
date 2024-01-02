@@ -9,6 +9,22 @@ import java.util.List;
  * Contains all tokens used by the lexer.
  */
 public class GalacticTokens {
+
+    private String[] keywords =
+            new String[]{"class", "interface", "void", "int", "byte", "short", "long", "float",
+                    "double", "boolean", "char", "fn", "if", "else", "new", "extends", "implements",
+                    "return", "var", "import", "as", "is",};
+
+    private String[] javaKeyworkds =
+            new String[]{"abstract", "continue", "for", "new", "switch", "assert", "default",
+                    "goto", "package", "synchronized", "boolean", "do", "if", "private", "this",
+                    "break", "double", "implements", "protected", "throw", "byte", "else", "import",
+                    "public", "throws", "case", "enum", "instanceof", "return", "transient",
+                    "catch", "extends", "int", "short", "try", "char", "final", "interface",
+                    "static", "void", "class", "finally", "long", "strictfp", "volatile", "const",
+                    "float", "native", "super", "while",};
+
+
     public List<Token> tokens() {
         var tokens = new ArrayList<Token>();
         tokens.add(new WhiteSpaceToken());
@@ -41,31 +57,21 @@ public class GalacticTokens {
         tokens.add(new CharToken('>'));
         tokens.add(new CharToken('@'));
         tokens.add(new CharToken('#'));
-        tokens.add(new LiteralToken("class"));
-        tokens.add(new LiteralToken("interface"));
-        tokens.add(new LiteralToken("void"));
-        tokens.add(new LiteralToken("int"));
-        tokens.add(new LiteralToken("byte"));
-        tokens.add(new LiteralToken("short"));
-        tokens.add(new LiteralToken("long"));
-        tokens.add(new LiteralToken("float"));
-        tokens.add(new LiteralToken("double"));
-        tokens.add(new LiteralToken("boolean"));
-        tokens.add(new LiteralToken("char"));
-        tokens.add(new LiteralToken("fn"));
-        tokens.add(new LiteralToken("if"));
-        tokens.add(new LiteralToken("else"));
-        tokens.add(new LiteralToken("new"));
-        tokens.add(new LiteralToken("extends"));
-        tokens.add(new LiteralToken("implements"));
-        tokens.add(new LiteralToken("return"));
-        tokens.add(new LiteralToken("var"));
-        tokens.add(new LiteralToken("import"));
-        tokens.add(new LiteralToken("as"));
-        tokens.add(new LiteralToken("is"));
+        for (String keyword : keywords) {
+            tokens.add(new LiteralToken(keyword));
+        }
         tokens.add(new WordToken());
         tokens.add(new NumberToken());
         tokens.add(new StringToken());
         return tokens;
     }
+
+    public boolean isKeyword(String name) {
+        return List.of(keywords).contains(name);
+    }
+
+    public boolean isJavaKeyword(String name) {
+        return List.of(javaKeyworkds).contains(name);
+    }
+
 }

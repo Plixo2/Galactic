@@ -15,4 +15,23 @@ public record Region(Position left, Position right) {
     public int maxLine() {
         return right.line();
     }
+
+    public Position minPosition() {
+        if (left.line() < right.line()) {
+            return left;
+        } else if (left.line() > right.line()) {
+            return right;
+        } else {
+            return left.character() < right.character() ? left : right;
+        }
+    }
+    public Position maxPosition() {
+        if (left.line() < right.line()) {
+            return right;
+        } else if (left.line() > right.line()) {
+            return left;
+        } else {
+            return left.character() < right.character() ? right : left;
+        }
+    }
 }

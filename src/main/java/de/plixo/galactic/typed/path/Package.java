@@ -34,7 +34,7 @@ public final class Package implements CompileRoot {
         if (parent == null) {
             return localName;
         }
-        return parent.name() + "." + localName;
+        return STR."\{parent.name()}.\{localName}";
     }
 
     @Override

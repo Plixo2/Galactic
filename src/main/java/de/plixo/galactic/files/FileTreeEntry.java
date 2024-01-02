@@ -58,7 +58,8 @@ public sealed abstract class FileTreeEntry {
                 if (!tokens.isEmpty()) {
                     line = tokens.get(tokens.size() - 1).position().line();
                 }
-                tokens.add(new TokenRecord(new EOFToken(), "", new Position(unit.file, line)));
+                tokens.add(
+                        new TokenRecord(new EOFToken(), "", new Position(unit.file, line + 1, 0)));
                 unit.tokens = tokens;
             }
             case FileTreePackage treePackage -> {

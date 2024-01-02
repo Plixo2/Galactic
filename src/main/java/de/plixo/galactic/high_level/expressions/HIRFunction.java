@@ -7,5 +7,5 @@ import de.plixo.galactic.lexer.Region;
 import java.util.List;
 
 public record HIRFunction(Region region, List<HIRParameter> HIRParameters, HIRType returnType,
-                          HIRExpression expression, HIRType interfaceType) implements HIRExpression {
+                          HIRExpression expression, HIRType interfaceType) {
 }

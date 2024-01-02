@@ -1,10 +1,11 @@
-package de.plixo.galactic.typed.lowering;
+package de.plixo.galactic.check;
 
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.expressions.*;
+import de.plixo.galactic.typed.lowering.Tree;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
@@ -14,7 +15,7 @@ import java.lang.reflect.Modifier;
 /**
  * Check stage is the final Stage for the Expressions, to test if every expression is valid.
  */
-public class Check implements Tree<Context> {
+public class CheckExpressions implements Tree<Context> {
     @Override
     public Expression defaultBehavior(Expression expression) {
         throw new FlairException(STR."Expression of type \{expression.getClass()
@@ -81,7 +82,6 @@ public class Check implements Tree<Context> {
 
     @Override
     public Expression parseLocalVariableAssign(LocalVariableAssign expression, Context context) {
-
         var parsed = parse(expression.expression(), context);
         var variable = expression.variable();
         assert variable != null;
@@ -158,7 +158,7 @@ public class Check implements Tree<Context> {
         var found = expression.condition().getType(context);
         if (!Type.isAssignableFrom(PrimitiveType.BOOLEAN, found, context)) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
-                    "condition is not boolean, its " + found);
+                    STR."condition is not boolean, its \{found}");
         }
         if (expression.elseExpression() != null) {
             parse(expression.elseExpression(), context);
@@ -176,13 +176,21 @@ public class Check implements Tree<Context> {
     @Override
     public Expression parseVarDefExpression(VarDefExpression expression, Context context) {
         parse(expression.expression(), context);
+        if (expression.variable() == null) {
+            throw new FlairException("variable is null");
+        }
+        var name = expression.variable().name();
+        if (!CheckProject.isAllowedTopLevelName(name)) {
+            throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
+                    "variable name is not allowed");
+        }
 
         if (expression.hint() != null) {
             var expected = expression.hint();
             var found = expression.expression().getType(context);
             if (!Type.isAssignableFrom(expected, found, context)) {
                 throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
-                        "hint does not match expression, expected " + expected + " found " + found);
+                        STR."hint does not match expression, expected \{expected} found \{found}");
             }
         }
 

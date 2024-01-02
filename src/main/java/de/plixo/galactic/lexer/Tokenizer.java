@@ -50,11 +50,11 @@ public class Tokenizer {
         if (string.isEmpty()) {
             return new ArrayList<>();
         }
-        var position = new Position(file, line);
         var records = new ArrayList<TokenRecord>();
         var matchingStartTokens = new ArrayList<Token>(5);
         var length = string.length();
         for (int index = 0; index < length; index++) {
+            var position = new Position(file, line, index);
             var currentChar = string.charAt(index);
             for (Token token : tokens) {
                 if (token.startsWith(currentChar)) {

@@ -21,7 +21,8 @@ public class HIRExpressionParsing {
         } else if (node.has("variableDefinition")) {
             return parseVarDefinition(node.get("variableDefinition"));
         } else if (node.has("function")) {
-            return parseFunction(node.get("function"));
+            throw new NullPointerException("TODO: function");
+           // return parseFunction(node.get("function"));
         }
         throw new NullPointerException("unknown expression");
     }

@@ -10,18 +10,18 @@ import java.io.File;
  * @param file source file (can be null)
  * @param line source line
  */
-public record Position(@Nullable File file, int line) {
+public record Position(@Nullable File file, int line, int character) {
 
     @Override
     public String toString() {
         if (file != null) {
-            return file.getAbsolutePath() + ":" + (line + 1);
+            return STR."file:///\{file.getAbsolutePath().replace("\\", "/")}:\{line + 1}:\{character + 1}";
         }
-        return "line " + line;
+        return STR."line \{line}, character \{character}";
     }
 
 
     public Region toRegion() {
-        return new Region(this, new Position(this.file, this.line));
+        return new Region(this, new Position(this.file, this.line, this.character + 1));
     }
 }

@@ -39,27 +39,42 @@ public class FlairCheckException extends FlairException {
         lines.add(STR."\{message} (\{kind})");
 
         if (file != null) {
-            var minLine = position.left().line();
-            var maxLine = position.right().line();
+            var minPosition = position.minPosition();
+            var maxPosition = position.maxPosition();
+            var minLine = minPosition.line();
+            var maxLine = maxPosition.line();
             try {
                 var src = FileUtils.readFileToString(file, StandardCharsets.UTF_8).lines().toList();
                 if (minLine >= 0 && minLine < src.size() && maxLine >= 0 && maxLine < src.size()) {
-                    var trueMin = Math.min(minLine, maxLine);
-                    var trueMax = Math.max(minLine, maxLine);
                     lines.add("");
-                    int index = trueMin;
+                    int index = minLine;
+
+                    var startLength = STR."\{index + 1}: ";
+                    boolean sameLine = minPosition.line() == maxPosition.line();
+                    if (sameLine) {
+                        var min = Math.min(minPosition.character(), maxPosition.character());
+                        var delta = Math.abs(maxPosition.character() - minPosition.character());
+                        lines.add(STR."\{" ".repeat(min + startLength.length())}\{"v".repeat(delta)} here");
+                    } else {
+                        lines.add(STR."\{" ".repeat(minPosition.character() + startLength.length())}v here");
+                    }
                     do {
-                        String line = STR."\{index + 1} \{src.get(index)}";
+                        String line = STR."\{index + 1}: \{src.get(index)}";
                         lines.add(line);
                         index++;
-                    } while (index < trueMax);
+                    } while (index < maxLine);
+                    if (!sameLine) {
+                        var endLength = STR."\{index + 1}: ";
+                        lines.add(STR."\{" ".repeat(maxPosition.character() + endLength.length())}^ until here");
+                    }
                     lines.add("");
                 }
 
             } catch (IOException e) {
                 throw new RuntimeException("cant open file for error parsing", e);
             }
-            lines.add(STR."in file:///\{file.getAbsolutePath().replace("\\", "/")}:\{minLine + 1}");
+            lines.add(STR."in file:///\{file.getAbsolutePath().replace("\\", "/")}:\{minLine + 1}:\{
+                    minPosition.character() + 1}");
         }
         return String.join("\n", lines);
     }

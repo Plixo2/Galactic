@@ -32,7 +32,7 @@ public class SyntaxFlairHandler {
                 if (failedRule.records.isEmpty()) {
                     yield STR."Failed to parse \{failedRule.failedRule.name()}";
                 } else {
-                    var failedRecord = failedRule.records.get(0);
+                    var failedRecord = failedRule.records.getFirst();
                     yield STR."Failed \{failedRule.failedRule.name()}: \{failedRecord.errorMessage()}";
                 }
             }

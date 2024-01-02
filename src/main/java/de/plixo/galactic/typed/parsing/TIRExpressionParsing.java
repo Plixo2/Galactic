@@ -43,7 +43,6 @@ public class TIRExpressionParsing {
             case HIRString hirString -> parseStringExpression(hirString, context);
             case HIRVarDefinition hirVarDefinition -> parseVarDefinition(hirVarDefinition, context);
             case HIRAssign hirAssign -> parseConstructExpression(hirAssign, context);
-            case HIRFunction hirFunction -> parseFunction(hirFunction, context);
             case HIRCast hirCast -> parseCast(hirCast, context);
             case HIRCastCheck hirCastCheck -> parseCastCheck(hirCastCheck, context);
         }, expression.getClass().getName());
@@ -57,72 +56,6 @@ public class TIRExpressionParsing {
         var type = TIRTypeParsing.parse(cast.type(), context);
         var parsed = parse(cast.object(), context);
         return new CastExpression(cast.region(), parsed, type);
-    }
-
-    //de-sugar function to class
-    private static ConstructExpression parseFunction(HIRFunction function, Context context) {
-        var owningUnit = context.unit();
-        var classes = owningUnit.classes().size();
-        var localName = STR."lambda&\{classes}";
-        var superInterface = TIRTypeParsing.parse(function.interfaceType(), context);
-        var region = function.region();
-        if (!(superInterface instanceof Class superInterfaceClass) ||
-                !superInterfaceClass.isInterface()) {
-            throw new FlairCheckException(region, FlairKind.TYPE_MISMATCH,
-                    "Interface type must be a interface class");
-        }
-        var defaultSuperClass = JVMLoader.asJVMClass(context.language().defaultSuperClass(), context.loadedBytecode());
-        var stellaClass = new StellaClass(region, localName, owningUnit, null, defaultSuperClass);
-        stellaClass.interfaces.add(superInterfaceClass);
-        var methodsToImplement = stellaClass.implementationLeft(context);
-        if (methodsToImplement.size() != 1) {
-            throw new FlairCheckException(region, FlairKind.SIGNATURE,
-                    "interface of function has more than one method to implement");
-        }
-        var methodToImplement = methodsToImplement.iterator().next();
-        owningUnit.addClass(stellaClass);
-        var classOwner = new MethodOwner.ClassOwner(stellaClass);
-        var initMethod =
-                new StellaMethod(ACC_PUBLIC, "<init>", List.of(), new VoidType(), null, classOwner);
-        stellaClass.addMethod(initMethod, context);
-
-        var functionParams = function.HIRParameters();
-        var methodTypes = methodToImplement.arguments();
-        if (functionParams.size() != methodTypes.size()) {
-            throw new FlairCheckException(region, FlairKind.SIGNATURE,
-                    "function has different amount of parameters than the method to implement");
-        }
-
-        var parameterIterator = functionParams.iterator();
-        var methodTypeIterator = methodTypes.iterator();
-        var methodParametersToImplement = new ArrayList<Parameter>();
-        while (parameterIterator.hasNext()) {
-            var parameter = parameterIterator.next();
-            var parameterType = TIRTypeParsing.parse(parameter.type(), context);
-            var type = methodTypeIterator.next();
-            if (!Type.isAssignableFrom(parameterType, type, context)) {
-                throw new FlairCheckException(region, FlairKind.SIGNATURE,
-                        "function parameter type doesnt match the method to implement");
-            }
-            methodParametersToImplement.add(new Parameter(parameter.name(), parameterType));
-        }
-        var toImplementName = methodToImplement.name();
-        var unusedReturnType = new HIRPrimitive(region, PrimitiveType.VOID);
-        var unusedParameters = new ArrayList<HIRParameter>();
-        var hirMethod = new HIRMethod(toImplementName, unusedParameters, unusedReturnType, function.expression());
-
-        var functionMethod =
-                new StellaMethod(ACC_PUBLIC, toImplementName, methodParametersToImplement, methodToImplement.returnType(), hirMethod, classOwner);
-        stellaClass.addMethod(functionMethod, context);
-        context.pushScope();
-        functionMethod.parameters().forEach(ref -> {
-            context.scope().addVariable(ref.variable());
-        });
-        TIRMethodParsing.parse(functionMethod, context);
-        functionMethod.thisVariable(new Scope.Variable("this", INPUT | THIS, stellaClass, null));
-        context.popScope();
-        assert stellaClass.implementationLeft(context).isEmpty();
-        return new ConstructExpression(region, stellaClass, new ArrayList<>());
     }
 
     private static AssignExpression parseConstructExpression(HIRAssign hirAssign, Context context) {

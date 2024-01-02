@@ -42,7 +42,7 @@ public class HIRClassParsing {
             }
         }
 
-        return new HIRClass(node.region(), name, superClass, implementsList, fields, methods);
+        return new HIRClass(node.getIDRegion(), name, superClass, implementsList, fields, methods);
     }
 
     private static HIRMethod parseMethod(Node node) {
@@ -57,7 +57,7 @@ public class HIRClassParsing {
             return new HIRParameter(param.region(), paramID, type);
         }).toList();
 
-        return new HIRMethod(name, parameterList, returnType, blockExpr);
+        return new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr);
     }
 
     private static HIRField parseField(Node node) {

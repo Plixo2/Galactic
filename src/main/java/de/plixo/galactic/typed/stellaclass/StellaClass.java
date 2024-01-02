@@ -1,10 +1,14 @@
 package de.plixo.galactic.typed.stellaclass;
 
 import de.plixo.galactic.common.ObjectPath;
+import de.plixo.galactic.high_level.expressions.*;
 import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
+import de.plixo.galactic.typed.expressions.AssignExpression;
+import de.plixo.galactic.typed.expressions.DotNotation;
+import de.plixo.galactic.typed.expressions.SymbolExpression;
 import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.method.AbstractMethod;
 import de.plixo.galactic.typed.stellaclass.method.ImplementedMethod;
@@ -97,10 +101,9 @@ public class StellaClass extends Class {
     }
 
     @Override
-    public boolean isInterface() {
-        return false;
+    public int modifiers() {
+        return ACC_PUBLIC;
     }
-
 
     @Override
     public List<Method> getAbstractMethods() {
@@ -137,14 +140,21 @@ public class StellaClass extends Class {
 
 
     public void addAllFieldsConstructor(Context context) {
+        var thisVariable = new Scope.Variable("this", INPUT | THIS, this, null);
+        var expressions = new ArrayList<HIRExpression>();
         var params = new ArrayList<Parameter>();
+        var thisSymbol = new HIRIdentifier(region(), "this");
         for (var field : this.fields) {
             params.add(new Parameter(field.name(), field.type()));
-        }
-        var owner = new MethodOwner.ClassOwner(this);
+            var dotNotation = new HIRDotNotation(region(), thisSymbol, field.name());
+            var valueSymbol = new HIRIdentifier(region(), field.name());
+            var assign = new HIRAssign(region(), dotNotation, valueSymbol);
+            expressions.add(assign);
+        } var owner = new MethodOwner.ClassOwner(this);
+        var method = new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(),
+                new HIRBlock(region(), expressions), owner, region());
+        method.thisVariable(thisVariable);
 
-        var method = new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(), null, owner);
-        method.thisVariable(new Scope.Variable("this", INPUT | THIS, this, null));
         addMethod(method, context);
     }
 

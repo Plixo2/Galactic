@@ -4,6 +4,7 @@ import de.plixo.galactic.boundary.JVMLoader;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.high_level.items.HIRItem;
+import de.plixo.galactic.lexer.Position;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.MethodCollection;
@@ -39,8 +40,6 @@ public final class Unit implements CompileRoot {
 
     private final List<StellaClass> classes = new ArrayList<>();
 
-    private final List<StellaBlock> blocks = new ArrayList<>();
-
     private final List<Import> imports = new ArrayList<>();
 
     private final List<StellaMethod> staticMethods = new ArrayList<>();
@@ -60,9 +59,6 @@ public final class Unit implements CompileRoot {
         this.classes.add(stellaClass);
     }
 
-    public void addBlock(StellaBlock block) {
-        this.blocks.add(block);
-    }
 
     @Override
     public String name() {
@@ -161,13 +157,13 @@ public final class Unit implements CompileRoot {
     }
 
 
-    public void addImport(String name, Class aClass) {
-        imports.add(new Import.ClassImport(name, aClass));
+    public void addImport(Region region, String name, Class aClass, boolean isUserDefined) {
+        imports.add(new Import.ClassImport(region, name, aClass, isUserDefined));
     }
 
-    public void addImport(String name, StellaMethod method) {
+    public void addImport(Region region, String name, StellaMethod method, boolean isUserDefined) {
         assert method.isStatic();
-        imports.add(new Import.StaticMethodImport(name, method));
+        imports.add(new Import.StaticMethodImport(region, name, method, isUserDefined));
     }
 
     public String getJVMDestination() {
@@ -176,5 +172,9 @@ public final class Unit implements CompileRoot {
 
     public void clearImports() {
         imports.clear();
+    }
+
+    public Region getRegion() {
+       return new Position(this.treeUnit().file(), 0, 0).toRegion();
     }
 }

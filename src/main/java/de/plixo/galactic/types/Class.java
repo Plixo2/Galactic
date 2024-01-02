@@ -9,9 +9,11 @@ import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 import static de.plixo.galactic.exception.FlairKind.*;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
  * Base Class type
@@ -30,7 +32,16 @@ public abstract class Class extends Type {
         return path().toString();
     }
 
-    public abstract boolean isInterface();
+    public abstract int modifiers();
+    public boolean isInterface() {
+        return Modifier.isInterface(modifiers());
+    }
+    public boolean isPublic() {
+        return Modifier.isPublic(modifiers());
+    }
+    public boolean isFinal() {
+        return Modifier.isFinal(modifiers());
+    }
 
     public abstract List<Method> getAbstractMethods();
 

@@ -28,7 +28,8 @@ parameter := id ":"?! type!
 blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
 
-expression := variableDefinition | factor | function
+expression := variableDefinition | factor
+//expression := variableDefinition | factor | function
 variableDefinition := "var" id! typeHint! "="! expression! |
 typeHint := ":"? type! ||
 branch := "if"? expression! body! branchOpt!
@@ -72,8 +73,8 @@ id := "word"
 number := "number"
 string := "string"
 
-function := "fn"? "("?! parameterList! ")"?! "->"?! type! functionType! "="?! expression!
-functionType := "implements"! type!
+//function := "fn"? "("?! parameterList! ")"?! "->"?! type! functionType! "="?! expression!
+//functionType := "implements"! type!
 
 //unit := topList! "EOF"!
 //

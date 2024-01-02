@@ -70,14 +70,14 @@ public class TIRClassParsing {
             throw new NullPointerException("no hir class, this should not happen in this stage");
         }
         for (var method : hirClass.methods()) {
-            var parameters = method.HIRParameters().stream().map(ref -> {
+            var parameters = method.hirParameters().stream().map(ref -> {
                 var parse = TIRTypeParsing.parse(ref.type(), context);
                 return new Parameter(ref.name(), parse);
             }).toList();
             var returnType = TIRTypeParsing.parse(method.returnType(), context);
             var stellaMethod =
                     new StellaMethod(ACC_PUBLIC, method.methodName(), parameters, returnType,
-                            method, new MethodOwner.ClassOwner(stellaClass));
+                            method.expression(), new MethodOwner.ClassOwner(stellaClass), method.region());
             stellaClass.addMethod(stellaMethod, context);
         }
     }

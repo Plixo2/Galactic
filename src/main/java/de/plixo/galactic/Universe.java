@@ -3,6 +3,7 @@ package de.plixo.galactic;
 import com.google.common.io.Resources;
 import de.plixo.galactic.boundary.JVMLoader;
 import de.plixo.galactic.boundary.LoadedBytecode;
+import de.plixo.galactic.check.CheckProject;
 import de.plixo.galactic.codegen.Codegen;
 import de.plixo.galactic.codegen.GeneratedCode;
 import de.plixo.galactic.common.ObjectPath;
@@ -19,10 +20,8 @@ import de.plixo.galactic.typed.TreeBuilding;
 import de.plixo.galactic.typed.parsing.TIRClassParsing;
 import de.plixo.galactic.typed.parsing.TIRUnitParsing;
 import de.plixo.galactic.typed.path.CompileRoot;
-import de.plixo.galactic.typed.lowering.Check;
 import de.plixo.galactic.typed.lowering.Infer;
 import de.plixo.galactic.typed.lowering.Symbols;
-import de.plixo.galactic.typed.stellaclass.StellaBlock;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +59,6 @@ public class Universe {
      */
     private final Symbols symbolsStage = new Symbols();
     private final Infer inferStage = new Infer();
-    private final Check checkStage = new Check();
 
     /**
      * Entry point for the compiler. Reads the Grammar and generates a Tokenizer.
@@ -90,6 +88,8 @@ public class Universe {
         syntaxFlairHandler.handle();
         try {
             read(root);
+            var checkProject = new CheckProject();
+            checkProject.check(root, this);
         } catch (FlairCheckException e) {
             return new Error(e);
         } finally {
@@ -148,10 +148,6 @@ public class Universe {
         for (var unit : units) {
             classes.addAll(unit.classes());
         }
-        var blocks = new ArrayList<StellaBlock>();
-        for (var unit : units) {
-            blocks.addAll(unit.blocks());
-        }
 
         for (var aClass : classes) {
             var context = new Context(this,aClass.unit(), root, loadedBytecode);
@@ -184,10 +180,6 @@ public class Universe {
         classes.forEach(aClass -> {
             var context = new Context(this, aClass.unit(), root, loadedBytecode);
             TIRClassParsing.fillMethodExpressions(aClass, context);
-        });
-        blocks.forEach(block -> {
-            var context = new Context(this, block.unit(), root, loadedBytecode);
-            TIRUnitParsing.fillBlockExpressions(block.unit(), block, context);
         });
 
         units.forEach(unit -> {

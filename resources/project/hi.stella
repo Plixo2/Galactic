@@ -1,0 +1,20 @@
+import * Core
+
+
+class Some {
+    fn create() -> Hello = {
+        var hello = new Hello { "Bye" }
+        hello.a = "hello"
+        hello.print()
+        hello
+    }
+    fn print() -> void = {
+        println("Hello world")
+    }
+}
+class Hello extends Some {
+    a: java.lang.String
+}
+class final {
+
+}

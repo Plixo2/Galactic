@@ -14,6 +14,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Scope {
 
+    public float a = 0;
+    public float b = 0;
+
+
+
+
     @Getter
     private @Nullable
     final Scope parent;
