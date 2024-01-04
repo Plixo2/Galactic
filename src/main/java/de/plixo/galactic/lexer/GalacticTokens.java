@@ -13,7 +13,7 @@ public class GalacticTokens {
     private String[] keywords =
             new String[]{"class", "interface", "void", "int", "byte", "short", "long", "float",
                     "double", "boolean", "char", "fn", "if", "else", "new", "extends", "implements",
-                    "return", "var", "import", "as", "is",};
+                    "return", "var", "import", "as", "is", "super", "this"};
 
     private String[] javaKeyworkds =
             new String[]{"abstract", "continue", "for", "new", "switch", "assert", "default",
@@ -37,6 +37,11 @@ public class GalacticTokens {
         tokens.add(new LiteralToken(">="));
         tokens.add(new LiteralToken("||"));
         tokens.add(new LiteralToken("&&"));
+        tokens.add(new CharToken('|'));
+        tokens.add(new CharToken('&'));
+        tokens.add(new CharToken('%'));
+        tokens.add(new CharToken('~'));
+        tokens.add(new CharToken('^'));
         tokens.add(new CharToken('{'));
         tokens.add(new CharToken('}'));
         tokens.add(new CharToken('['));
@@ -57,6 +62,7 @@ public class GalacticTokens {
         tokens.add(new CharToken('>'));
         tokens.add(new CharToken('@'));
         tokens.add(new CharToken('#'));
+        tokens.add(new CharToken('?'));
         for (String keyword : keywords) {
             tokens.add(new LiteralToken(keyword));
         }

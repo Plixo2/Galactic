@@ -1,0 +1,21 @@
+import * Core
+
+class Sub {
+    fn baseMethod() = {
+        println("baseMethod")
+    }
+}
+
+class Impl extends Sub implements java.util.function.Consumer {
+    fn accept(obj: java.lang.Object) = {
+        println("accept")
+        println(obj as java.lang.String)
+    }
+
+    fn baseMethod() = {
+        println("overriden")
+       // super<Sub>baseMethod()
+        //super<java.util.function.Consumer>accept("hii")
+        //super()
+    }
+}

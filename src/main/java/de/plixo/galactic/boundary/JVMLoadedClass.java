@@ -84,7 +84,6 @@ public class JVMLoadedClass extends Class {
         for (var anInterface : evaluateInterfaces()) {
             list.addAll(anInterface.getMethods());
         }
-        //TODO check collisions in check stage
         return list;
     }
 

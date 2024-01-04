@@ -3,9 +3,11 @@ package de.plixo.galactic.typed.lowering;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.MethodCollection;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.typed.stellaclass.MethodOwner;
+import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.*;
 
@@ -23,7 +25,6 @@ public class Infer implements Tree<Context, Type> {
         throw new FlairException(STR."Expression of type \{expression.getClass()
                 .getSimpleName()} not implemented for Infer stage");
     }
-
 
 
     @Override
@@ -137,11 +138,31 @@ public class Infer implements Tree<Context, Type> {
     public Expression parseCallNotation(CallNotation expression, Context context,
                                         @Nullable Type hint) {
         var parsed = parse(expression.object(), context, null);
+
+        if (parsed instanceof ExtensionBitExpression(
+                var region, var staticMethodExpression, var object
+        )) {
+//            parsed = new StaticMethodExpression(region, staticMethodExpression.owner(),
+//                    staticMethodExpression.methods().map(ref -> {
+//                        var types = new ArrayList<Type>();
+//                        types.add(object.getType(context));
+//                        types.addAll(ref.arguments());
+//                        return new Method(ref.modifier(), ref.name(), ref.returnType(), types,
+//                                ref.owner());
+//                    }));
+            parsed = staticMethodExpression;
+            var argsPlus = new ArrayList<Expression>();
+            argsPlus.add(object);
+            argsPlus.addAll(expression.arguments());
+            expression = new CallNotation(region, parsed, argsPlus);
+        }
+
         if (parsed instanceof MethodCallExpression.MethodSource source) {
-            var sizeFilter = source.methods()
-                    .filter(ref -> ref.arguments().size() == expression.arguments().size());
+            var argsSize = expression.arguments().size();
+            var sizeFilter = source.methods().filter(ref -> ref.arguments().size() == argsSize);
             if (sizeFilter.isEmpty()) {
-                throw new FlairCheckException(parsed.region(), SIGNATURE, "Method type not found");
+                throw new FlairCheckException(parsed.region(), SIGNATURE,
+                        STR."Method with \{argsSize} types not found");
             }
             var parsedArguments = new ArrayList<Expression>();
             var expressions = expression.arguments().iterator();
@@ -156,8 +177,9 @@ public class Infer implements Tree<Context, Type> {
             var signature = new Signature(null, types);
             var bestMatch = sizeFilter.findBestMatch(signature, context);
             if (bestMatch == null) {
+                var searched = sizeFilter.methods().stream().map(Method::getDescriptor).toList();
                 throw new FlairCheckException(parsed.region(), SIGNATURE,
-                        STR."Method type types \{types} not found");
+                        STR."Method with types \{types} not found. Searched: \{searched}");
             }
             return new MethodCallExpression(parsed.region(), source, bestMatch,
                     source.getCallType(context), parsedArguments);
@@ -165,7 +187,12 @@ public class Infer implements Tree<Context, Type> {
             throw new FlairCheckException(parsed.region(), UNEXPECTED_TYPE,
                     "Can only call methods");
         }
+    }
 
+    @Override
+    public Expression parseMethodCallExpression(MethodCallExpression expression, Context context,
+                                                Type hint) {
+        return expression;
     }
 
     @Override
@@ -232,19 +259,48 @@ public class Infer implements Tree<Context, Type> {
                 parsed, variable);
     }
 
+    @Override
+    public Expression parseThisExpression(ThisExpression thisExpression, Context context,
+                                          Type hint) {
+        return thisExpression;
+    }
 
     @Override
     public Expression parseDotNotation(DotNotation expression, Context context,
                                        @Nullable Type hint) {
         var parsed = parse(expression.object(), context, null);
 
+        var region = expression.region();
         var id = expression.id();
-        if (parsed.getType(context) instanceof Class aClass) {
-            return aClass.getDotNotation(expression.region(), parsed, id, context);
-
-        } else {
-            throw new FlairCheckException(expression.region(), UNEXPECTED_TYPE,
-                    "only fields in classes are supported");
+        var parsedType = parsed.getType(context);
+        if (parsedType instanceof Class aClass) {
+            var dotNotation = aClass.getDotNotation(region, parsed, id, context);
+            if (dotNotation != null) {
+                return dotNotation;
+            }
         }
+        var symbolExpression = context.unit().getImportedStaticMethod(id);
+        if (!symbolExpression.isEmpty()) {
+            var possibleMethods = symbolExpression.stream().filter(ref -> {
+                assert ref.isStatic();
+                var thisContext = ref.thisContext();
+                if (thisContext == null) {
+                    return false;
+                }
+                return Type.isAssignableFrom(thisContext, parsedType, context);
+            }).toList();
+
+            if (possibleMethods.isEmpty()) {
+                throw new FlairCheckException(region, UNEXPECTED_TYPE,
+                        STR."Method \{id} is not an Extension for type \{parsedType}");
+            }
+            var collection = new MethodCollection(id, possibleMethods.stream().map(
+                    StellaMethod::asMethod).toList());
+            var methodExpression =
+                    new StaticMethodExpression(region, collection);
+            return new ExtensionBitExpression(region, methodExpression, parsed);
+        }
+        throw new FlairCheckException(region, UNEXPECTED_TYPE,
+                STR."Symbol \{id} not found on Object from class \{parsedType}");
     }
 }

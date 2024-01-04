@@ -1,0 +1,24 @@
+import * Core
+import * Math
+
+//import @java System java.lang.System
+//import @java String java.lang.String
+//import @java Integer java.lang.Integer
+
+fn test() = {
+    println("Enter two numbers: ")
+    var one = stdIn().toInt()
+    var two = stdIn().toInt()
+    if (one.equals(two)) {
+        println("equals")
+    } else {
+        println("not equals")
+    }
+    print("Addition: ")
+    println(one.add(two))
+    assertValue(1d.add(3d).equals(4d))
+}
+
+
+
+

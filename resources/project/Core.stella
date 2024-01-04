@@ -1,5 +1,68 @@
 import @java System java.lang.System
+import @java String java.lang.String
+import @java Integer java.lang.Integer
+import @java Function java.util.function.Function
+import @java Predicate java.util.function.Predicate
+import @java List java.util.List
+import @java Codex stella.Codex
 
 fn println(msg: java.lang.String) = {
     System.out.println(msg)
+}
+fn println(msg: boolean) = {
+    System.out.println(msg)
+}
+fn println(msg: int) = {
+    System.out.println(msg)
+}
+fn println(msg: double) = {
+    System.out.println(msg)
+}
+fn println(msg: float) = {
+    System.out.println(msg)
+}
+fn print(msg: java.lang.String) = {
+    System.out.print(msg)
+}
+fn stdIn() -> String = {
+    var reader = new java.io.BufferedReader {
+            new java.io.InputStreamReader { System.in }
+    }
+    reader.readLine()
+}
+
+fn toInt() -> int extends String = {
+    Integer.parseInt(this)
+}
+
+fn map(function: Function) -> List extends List = {
+    this.stream().map(function).toList()
+}
+
+fn filter(predicate: Predicate) -> List extends List = {
+    this.stream().filter(predicate).toList()
+}
+
+fn equals(rhs: java.lang.Object) -> boolean extends java.lang.Object = {
+    this.equals(rhs)
+}
+fn equals(rhs: int) -> boolean extends int = {
+    Codex.equals(this, rhs)
+}
+fn equals(rhs: double) -> boolean extends double = {
+    Codex.equals(this, rhs)
+}
+
+fn assertValue(condition: boolean) = {
+    Codex.assertValue(condition)
+}
+
+
+
+fn not() -> boolean extends boolean = {
+    if this {
+        false
+    } else {
+        true
+    }
 }

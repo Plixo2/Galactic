@@ -40,8 +40,7 @@ public class Codegen {
     public void addUnit(Unit unit, Context context) {
         var classNode = new ClassNode();
         for (var methods : unit.staticMethods()) {
-            var method = createMethod(methods, context);
-            method.access = method.access | ACC_STATIC;
+            var method = createMethod(methods, context, true);
             classNode.methods.add(method);
         }
         classNode.access = ACC_PUBLIC;
@@ -56,7 +55,7 @@ public class Codegen {
         var classNode = new ClassNode();
         for (var methodImpl : stellaClass.methods()) {
             var method = methodImpl.stellaMethod();
-            classNode.methods.add(createMethod(method, context));
+            classNode.methods.add(createMethod(method, context, false));
         }
         classNode.access = ACC_PUBLIC | ACC_STATIC;
         classNode.name = stellaClass.getJVMDestination();
@@ -83,27 +82,33 @@ public class Codegen {
         return new JarOutput(name, b);
     }
 
-    private MethodNode createMethod(StellaMethod method, Context normalContext) {
+    private MethodNode createMethod(StellaMethod method, Context normalContext, boolean isStatic) {
         var methodNode = new MethodNode();
         methodNode.access = ACC_PUBLIC;
+        if (isStatic) {
+            methodNode.access = methodNode.access | ACC_STATIC;
+        }
         methodNode.name = method.localName();
-        methodNode.desc = method.asMethod().getDescriptor();
         methodNode.signature = null;
         methodNode.exceptions = new ArrayList<>();
-        var context = new CompileContext(methodNode.instructions, methodNode, normalContext);
+        var thisContext = method.thisContext();
+        var methodType = method.asMethod();
+        methodNode.desc = methodType.getDescriptor();
+        var startIndex = 0;
+        if (!isStatic) {
+            assert thisContext != null;
+            startIndex = 1;
+        }
+
+        var context =
+                new CompileContext(methodNode.instructions, methodNode, normalContext, startIndex);
         LabelNode start;
         context.add(start = new LabelNode());
-
-        if (method.thisVariable() != null) {
-            context.putVariable(method.thisVariable());
-        }
         method.parameters().forEach(ref -> context.putVariable(ref.variable()));
 
         if (method.isConstructor()) {
             //TODO
             context.add(new VarInsnNode(ALOAD, 0));
-
-
             var superCall = switch (method.owner()) {
                 case MethodOwner.ClassOwner(var owningClass) when owningClass.getSuperClass() !=
                         null -> new MethodInsnNode(INVOKESPECIAL,
@@ -141,6 +146,13 @@ public class Codegen {
         context.add(end = new LabelNode());
 
         methodNode.instructions = context.instructions();
+        methodNode.localVariables = new ArrayList<>();
+        if (!isStatic) {
+            assert thisContext != null;
+            var node =
+                    new LocalVariableNode("this", thisContext.getDescriptor(), null, start, end, 0);
+            methodNode.localVariables.add(node);
+        }
         methodNode.localVariables = getLocalVariableNodes(context, start, end);
         return methodNode;
     }
@@ -199,26 +211,26 @@ public class Codegen {
                 }
             }
             case MethodCallExpression methodCallExpression -> {
-                var name = methodCallExpression.method().name();
+                var method = methodCallExpression.method();
+                var name = method.name();
                 var descriptor = methodCallExpression.method().getDescriptor();
                 switch (methodCallExpression.source()) {
                     case StaticMethodExpression staticMethodExpression -> {
-                        var owner = "project/Main";
-                        switch (staticMethodExpression.owner()) {
+                        String owner;
+                        switch (method.owner()) {
                             case MethodOwner.UnitOwner(var unit) -> {
                                 owner = unit.getJVMDestination();
                             }
-                            case MethodOwner.ClassOwner(var stellaClass) -> {
-                                switch (stellaClass) {
-                                    case StellaClass ignored -> {
-                                        throw new NullPointerException(
-                                                "classes are not compiled yet");
+                            case MethodOwner.ClassOwner(var owningClass) -> {
+                                switch (owningClass) {
+                                    case StellaClass stellaClass -> {
+                                        owner = stellaClass.getJVMDestination();
                                     }
                                     case JVMLoadedClass loadedClass -> {
                                         owner = loadedClass.getNode().name;
                                     }
                                     default -> throw new IllegalStateException(
-                                            STR."Unexpected value: \{stellaClass}");
+                                            STR."Unexpected value: \{owningClass}");
                                 }
                             }
                         }
@@ -265,9 +277,18 @@ public class Codegen {
                 while (iterator.hasNext()) {
                     var next = iterator.next();
                     parseExpression(next, context);
-                    if (!next.getType(context.normalContext()).equals(new VoidType()) &&
-                            iterator.hasNext()) {
-                        context.add(new InsnNode(POP));
+                    var type = next.getType(context.normalContext());
+                    if (!type.equals(new VoidType()) && iterator.hasNext()) {
+                        var size = type.JVMSize();
+                        if (size == 2) {
+                            context.add(new InsnNode(POP2));
+                        } else if (size == 1) {
+                            context.add(new InsnNode(POP));
+                        } else {
+                            for (int i = 0; i < size; i++) {
+                                context.add(new InsnNode(POP));
+                            }
+                        }
                     }
                 }
             }
@@ -353,6 +374,18 @@ public class Codegen {
                 }
                 context.add(new TypeInsnNode(INSTANCEOF, aClass.getJVMDestination()));
             }
+            case ThisExpression thisExpression -> {
+                var opcode = ALOAD;
+                if (thisExpression.type() instanceof PrimitiveType primitive) {
+                    opcode = switch (primitive.typeOfPrimitive) {
+                        case INT, BOOLEAN, CHAR, BYTE, SHORT -> ILOAD;
+                        case LONG -> LLOAD;
+                        case FLOAT -> FLOAD;
+                        case DOUBLE -> DLOAD;
+                    };
+                }
+                context.add(new VarInsnNode(opcode, 0));
+            }
             case null -> {
                 throw new NullPointerException("expression is null");
             }
@@ -366,6 +399,7 @@ public class Codegen {
         for (Map.Entry<Scope.Variable, Integer> variable : context.getVariables()) {
             var index = variable.getValue();
             var variableKey = variable.getKey();
+            assert variableKey != null : STR."variableKey \{variable} is null";
             var name = variableKey.name();
             assert variableKey.getType() != null;
             var node =

@@ -7,6 +7,7 @@ import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.Field;
+import de.plixo.galactic.types.Type;
 
 import java.util.*;
 
@@ -25,6 +26,12 @@ public class Symbols implements Tree<Context, Integer> {
     public Expression defaultBehavior(Expression expression) {
         throw new FlairException(STR."Expression of type \{expression.getClass()
                 .getSimpleName()} not implemented for Symbol stage");
+    }
+
+    @Override
+    public Expression parseThisExpression(ThisExpression thisExpression, Context context,
+                                          Integer unused) {
+        return thisExpression;
     }
 
     @Override
@@ -122,6 +129,7 @@ public class Symbols implements Tree<Context, Integer> {
             default -> new DotNotation(region, parsed, id);
         };
     }
+
 
     @Override
     public Expression parseCallNotation(CallNotation expression, Context context, Integer unused) {

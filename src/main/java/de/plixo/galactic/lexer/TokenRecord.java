@@ -25,7 +25,7 @@ public record TokenRecord(Token token, String literal, Region position) {
     }
 
     public String errorMessage() {
-        return STR."Unexpected Token (\{token}) '\{literal}': \n\{position.toString()} ";
+        return STR."Unexpected Token (\{token}) '\{literal}': \n\{position.left().toString()} ";
     }
 
     public boolean ofType(Class<? extends Token> tokenClass) {

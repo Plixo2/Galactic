@@ -27,7 +27,7 @@ public class HIRExpressionParsing {
         node.assertType("branch");
         var expression = HIRExpressionParsing.parse(node.get("expression"));
         var body = node.get("body");
-        var bodyExpression = HIRExpressionParsing.parse(body.get("expression"));
+        var bodyExpression = HIRExpressionParsing.parseBlock(body.get("blockExpr"));
         var branchOpt = node.get("branchOpt");
         HIRExpression elsePart = null;
         if (branchOpt.has("expression")) {
@@ -89,9 +89,7 @@ public class HIRExpressionParsing {
     private static HIRExpression parseObject(Node node) {
         node.assertType("object");
         if (node.has("blockExpr")) {
-            var list = node.get("blockExpr").list("blockExprList", "expression").stream()
-                    .map(HIRExpressionParsing::parse).toList();
-            return new HIRBlock(node.region(), list);
+            return parseBlock(node.get("blockExpr"));
         } else if (node.has("number")) {
             var nodeNumber = node.getNumber();
             return new HIRNumber(node.region(), nodeNumber);
@@ -108,8 +106,27 @@ public class HIRExpressionParsing {
             return parseConstruct(node.get("initialisation"));
         } else if (node.has("branch")) {
             return parseBranch(node.get("branch"));
+        } else if (node.has("superCall")) {
+            return parseSuperCall(node.get("superCall"));
+        } else if (node.has("this")) {
+            return new HIRThis(node.region());
         }
-        throw new NullPointerException("Unknown Object " + node);
+        throw new NullPointerException(STR."Unknown Object \{node}");
+    }
+
+    private static HIRSuperCall parseSuperCall(Node node) {
+        node.assertType("superCall");
+        HIRType superType = null;
+
+        if (node.has("type")) {
+            superType = HIRTypeParsing.parse(node.get("type"));
+        }
+        String name = null;
+        if (node.has("id")) {
+            name = node.getID();
+        }
+        var arguments = ExpressionCommaList.toList(node.get("expressionList"));
+        return new HIRSuperCall(node.region(), superType, name, arguments);
     }
 
     private static HIRConstruct parseConstruct(Node node) {
@@ -137,5 +154,13 @@ public class HIRExpressionParsing {
 
         var values = HIRExpressionParsing.parse(node.get("expression"));
         return new HIRVarDefinition(node.region(), name, type, values);
+    }
+
+    private static HIRExpression parseBlock(Node node) {
+        node.assertType("blockExpr");
+        var list =
+                node.list("blockExprList", "expression").stream().map(HIRExpressionParsing::parse)
+                        .toList();
+        return new HIRBlock(node.region(), list);
     }
 }

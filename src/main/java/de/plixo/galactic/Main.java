@@ -11,11 +11,11 @@ public class Main {
         var root = language.parse(new File("resources/project"));
         switch (root) {
             case Universe.Success success -> {
-                var output = "resources/build.jar";
-                try (var out = new FileOutputStream(output)) {
-                    language.write(out, success.root(), mainClass);
-                }
-                System.out.println(STR."Wrote to \{output}");
+                    var output = "resources/build.jar";
+                    try (var out = new FileOutputStream(output)) {
+                        language.write(out, success.root(), mainClass);
+                    }
+                    System.out.println(STR."Wrote to \{output}");
             }
             case Universe.Error error -> {
                 System.err.println(error.exception().prettyPrint());

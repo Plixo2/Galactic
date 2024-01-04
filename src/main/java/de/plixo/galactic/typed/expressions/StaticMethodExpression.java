@@ -7,7 +7,7 @@ import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.VoidType;
 
-public record StaticMethodExpression(Region region, MethodOwner owner, MethodCollection methods)
+public record StaticMethodExpression(Region region, MethodCollection methods)
         implements Expression, MethodCallExpression.MethodSource {
     @Override
     public Type getType(Context context) {

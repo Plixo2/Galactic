@@ -22,6 +22,12 @@ public class HIRMethodParsing {
             return new HIRParameter(param.region(), paramID, type);
         }).toList();
 
-        return new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr);
+        HIRType extendsType = null;
+        var anExtends = node.get("extends");
+        if (anExtends.has("type")) {
+            extendsType = HIRTypeParsing.parse(anExtends.get("type"));
+        }
+
+        return new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr, extendsType);
     }
 }

@@ -19,6 +19,7 @@ public final class HIRMethod {
     private final List<HIRParameter> hirParameters;
     private final @Nullable HIRType returnType;
     private final HIRExpression expression;
+    private final @Nullable HIRType extensionType;
 
 
 }

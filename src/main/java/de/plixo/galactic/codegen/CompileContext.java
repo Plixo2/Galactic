@@ -2,21 +2,23 @@ package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * The CompileContext is used to store information about the current compilation.
  * It is used to store the instructions and variables.
  */
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 public class CompileContext {
     private final InsnList instructions;
@@ -30,10 +32,11 @@ public class CompileContext {
         this.instructions.add(instruction);
     }
 
-    public void putVariable(Scope.Variable variable) {
+    public void putVariable(@NotNull Scope.Variable variable) {
         if (!variables.containsKey(variable)) {
             variables.put(variable, variablesCount);
-            variablesCount++;
+            var type = variable.getType();
+            variablesCount += Objects.requireNonNull(type).JVMSize();
         }
     }
 

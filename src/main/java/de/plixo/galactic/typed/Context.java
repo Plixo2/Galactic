@@ -6,10 +6,13 @@ import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.typed.path.CompileRoot;
-import de.plixo.galactic.typed.path.Package;
+import de.plixo.galactic.typed.path.PathElement;
 import de.plixo.galactic.typed.path.Unit;
+import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.Type;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Stack;
@@ -25,6 +28,11 @@ public class Context {
     @Getter
     private final Unit unit;
     @Getter
+    private final @Nullable Class owningClass;
+    @Getter
+    @Setter
+    private @Nullable Type thisContext;
+    @Getter
     private final CompileRoot root;
 
     @Getter
@@ -32,9 +40,11 @@ public class Context {
 
     private final Stack<Scope> scopes = new Stack<>();
 
-    public Context(Universe language, Unit unit, CompileRoot root, LoadedBytecode loadedBytecode) {
+    public Context(Universe language, Unit unit, @Nullable Class owningClass, CompileRoot root,
+                   LoadedBytecode loadedBytecode) {
         this.language = language;
         this.unit = unit;
+        this.owningClass = owningClass;
         this.root = root;
         this.loadedBytecode = loadedBytecode;
         pushScope(new Scope(null));
@@ -62,7 +72,6 @@ public class Context {
      * Make an Expression from a Name, as a top level name
      *
      * @param symbol name of the Symbol
-     * @return
      */
     public @Nullable Expression getSymbolExpression(Region region, String symbol, Context context) {
         var variable = scope().getVariable(symbol);
@@ -75,22 +84,22 @@ public class Context {
             return new StaticClassExpression(region, aClass);
         }
         var staticMethod = unit.getImportedStaticMethod(symbol);
-        if (staticMethod != null) {
-            var collection = new MethodCollection(symbol, staticMethod.asMethod());
-            return new StaticMethodExpression(region, staticMethod.owner(), collection);
+        if (!staticMethod.isEmpty()) {
+            var collection = new MethodCollection(symbol,
+                    staticMethod.stream().map(StellaMethod::asMethod).toList());
+            return new StaticMethodExpression(region, collection);
         }
-        if (context.root().name().equals(symbol)) {
-            switch (context.root()) {
-                case Package aPackage -> {
-                    return new StellaPackageExpression(region, aPackage);
-                }
-                case Unit unit1 -> {
-                    return new UnitExpression(region, unit1);
-                }
+        return switch (context.root().toPathElement().next(symbol)) {
+            case PathElement.PackageElement(var aPackage) -> {
+                yield new StellaPackageExpression(region, aPackage);
             }
-        }
-
-        return null;
+            case PathElement.UnitElement(var unit) -> {
+                yield new UnitExpression(region, unit);
+            }
+            case null, default -> {
+                yield null;
+            }
+        };
     }
 
     public @Nullable Class getClass(ObjectPath objectPath) {

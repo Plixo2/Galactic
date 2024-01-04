@@ -17,11 +17,11 @@ import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.parsing.Grammar;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.TreeBuilding;
+import de.plixo.galactic.typed.lowering.Infer;
+import de.plixo.galactic.typed.lowering.Symbols;
 import de.plixo.galactic.typed.parsing.TIRClassParsing;
 import de.plixo.galactic.typed.parsing.TIRUnitParsing;
 import de.plixo.galactic.typed.path.CompileRoot;
-import de.plixo.galactic.typed.lowering.Infer;
-import de.plixo.galactic.typed.lowering.Symbols;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -114,9 +114,10 @@ public class Universe {
         var units = root.getUnits();
         var compiler = new Codegen(codeGenVersion);
         for (var unit : units) {
-            var context = new Context(this, unit, root, loadedBytecode);
+            var context = new Context(this, unit, null, root, loadedBytecode);
             compiler.addUnit(unit, context);
             for (var aClass : unit.classes()) {
+                context = new Context(this, unit, aClass, root, loadedBytecode);
                 compiler.addClass(aClass, context);
             }
         }
@@ -153,13 +154,13 @@ public class Universe {
         }
 
         for (var aClass : classes) {
-            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
             TIRClassParsing.fillSuperclasses(aClass, context, defaultSuperClass);
         }
 
         //types are known here
         units.forEach(unit -> {
-            var context = new Context(this, unit, root, loadedBytecode);
+            var context = new Context(this, unit, null, root, loadedBytecode);
             TIRUnitParsing.fillMethodShells(unit, context);
         });
         //rerun import for static method imports
@@ -167,33 +168,29 @@ public class Universe {
             TIRUnitParsing.parseImports(unit, root, loadedBytecode, true);
         }
         classes.forEach(aClass -> {
-            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
             TIRClassParsing.fillFields(aClass, context);
         });
         classes.forEach(aClass -> {
-            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
             TIRClassParsing.fillMethodShells(aClass, context);
         });
         classes.forEach(aClass -> {
-            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
             aClass.addAllFieldsConstructor(context);
         });
 
         //expressions can be evaluated here
         classes.forEach(aClass -> {
-            var context = new Context(this, aClass.unit(), root, loadedBytecode);
+            var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
             TIRClassParsing.fillMethodExpressions(aClass, context);
         });
 
         units.forEach(unit -> {
-            var context = new Context(this, unit, root, loadedBytecode);
+            var context = new Context(this, unit, null, root, loadedBytecode);
             TIRUnitParsing.fillMethodExpressions(unit, context, this);
         });
 
-        for (var aClass : classes) {
-            var context = new Context(this, aClass.unit(), root, loadedBytecode);
-            TIRClassParsing.assertMethodsImplemented(aClass, context);
-        }
     }
 
     /**

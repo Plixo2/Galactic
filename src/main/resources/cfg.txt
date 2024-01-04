@@ -1,7 +1,7 @@
 unit := itemList! "EOF"?
 
 itemList := item itemList ||
-item := import | class | block | method
+item := import | class | method
 
 import := "import"? importType! importName! dotWordChain!
 importName := id | "*"?
@@ -18,9 +18,8 @@ classItem := method | field
 
 field := id ":" type!
 
-block := blockExpr
 
-method := "fn"? id! "("?! parameterList! ")"?! returnTypeOpt! "="! expression!
+method := "fn"? id! "("?! parameterList! ")"?! returnTypeOpt! extends! "="! expression!
 returnTypeOpt := "->"? type! ||
 parameterList := parameter parameterListOpt! ||
 parameterListOpt := "," parameterList! ||
@@ -34,12 +33,13 @@ variableDefinition := "var" id! typeHint! "="! expression! |
 typeHint := ":"? type! ||
 branch := "if"? expression! body! branchOpt!
 branchOpt := "else"? expression! ||
-body := expression!
+body := blockExpr!
 
 factor := object postfixList! assignOpt!
 assignOpt := "="? expression! ||
 
-object := initialisation | branch | blockExpr | string | number | id | "("? expression! ")"?!
+this := "this"
+object := initialisation | branch | blockExpr | this | string | number | id | "("? expression! ")"?!
 
 initialisation := "new"? type! initialisationList!
 initialisationList := "{"? initialisationFieldList! "}"?! ||
@@ -67,6 +67,7 @@ typeListOpt := ","? typeList! ||
 dotWordChain := id dotWordChainOpt!
 dotWordChainOpt := "."? dotWordChain ||
 
+superCall := "super"? "<"? type! ">"?! id! "("?! expressionList! ")"?! | "super" "("? expressionList! ")"?!
 
 
 id := "word"
@@ -81,6 +82,44 @@ functionParameterList := functionParameter functionParameterListOpt! ||
 functionParameterListOpt := "," functionParameterList! ||
 functionParameter := id ":"? type! | id
 
+
+ConditionalOrExpression := ConditionalAndExpression ConditionalOrExpressionRight!
+ConditionalOrExpressionRight := ConditionalOrExpressionFunction ConditionalOrExpression ||
+ConditionalOrExpressionFunction := "||"
+
+ConditionalAndExpression := InclusiveOrExpression ConditionalAndExpressionRight!
+ConditionalAndExpressionRight := ConditionalAndExpressionFunction ConditionalAndExpression ||
+ConditionalAndExpressionFunction := "&&"
+
+InclusiveOrExpression := ExclusiveOrExpression InclusiveOrExpressionRight!
+InclusiveOrExpressionRight := InclusiveOrExpressionFunction InclusiveOrExpression ||
+InclusiveOrExpressionFunction := "|"
+
+ExclusiveOrExpression := AndExpression ExclusiveOrExpressionRight!
+ExclusiveOrExpressionRight := ExclusiveOrExpressionFunction ExclusiveOrExpression ||
+ExclusiveOrExpressionFunction := "^"
+
+AndExpression := EqualityExpression AndExpressionRight!
+AndExpressionRight := AndExpressionFunction AndExpression ||
+AndExpressionFunction := "&"
+
+EqualityExpression := RelationalExpression EqualityExpressionRight!
+EqualityExpressionRight := EqualityExpressionFunction EqualityExpression ||
+EqualityExpressionFunction := "==" | "!="
+
+RelationalExpression := AdditiveExpression RelationalExpressionRight!
+RelationalExpressionRight := RelationalExpressionFunction RelationalExpression ||
+RelationalExpressionFunction := ">=" | "<=" | ">" | "<"
+
+AdditiveExpression := MultiplicativeExpression AdditiveExpressionRight!
+AdditiveExpressionRight := AdditiveExpressionFunction AdditiveExpression ||
+AdditiveExpressionFunction := "+" | "-"
+
+MultiplicativeExpression := UnaryExpression MultiplicativeExpressionRight!
+MultiplicativeExpressionRight := MultiplicativeExpressionFunction MultiplicativeExpression ||
+MultiplicativeExpressionFunction := "*" | "/" | "%"
+
+UnaryExpression := "!" factor | "~" factor | "-" factor | "+" factor | factor
 
 
 //boolArithmetic := comparisonArithmetic boolRight!

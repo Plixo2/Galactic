@@ -1,0 +1,31 @@
+import * Core
+
+import @java List java.util.List
+import @java String java.lang.String
+import @java Function java.util.function.Function
+import @java Boolean java.lang.Boolean
+import @java System java.lang.System
+
+
+fn test() = {
+    var list = new java.util.ArrayList {}
+    list.add("Hello")
+    list.add(" ")
+    list.add("World")
+    list.add("!")
+    //var names: List = list.map(new upperCase).filter(new EmptyFilter)
+   // System.out.println(names)
+}
+
+class EmptyFilter implements java.util.function.Predicate {
+    fn test(t: java.lang.Object) -> boolean = {
+        (t as String).isBlank()//.not()
+    }
+}
+
+
+class upperCase implements Function {
+    fn apply(t: java.lang.Object) -> java.lang.Object = {
+        (t as String).toUpperCase()
+    }
+}

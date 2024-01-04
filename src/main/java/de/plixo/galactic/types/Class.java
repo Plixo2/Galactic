@@ -98,14 +98,13 @@ public abstract class Class extends Type {
         }
         var possibleMethods = this.getMethods(id, context).filter(Method::isStatic);
         if (!possibleMethods.isEmpty()) {
-            return new StaticMethodExpression(region, new MethodOwner.ClassOwner(this),
-                    possibleMethods);
+            return new StaticMethodExpression(region, possibleMethods);
         }
         throw new FlairCheckException(region, NAME,
                 STR."Symbol \{id} not found in class \{this.name()}");
     }
 
-    public Expression getDotNotation(Region region, Expression expression, String id,
+    public @Nullable Expression getDotNotation(Region region, Expression expression, String id,
                                      Context context) {
         var possibleField = this.getField(id, context);
         if (possibleField != null) {
@@ -115,8 +114,7 @@ public abstract class Class extends Type {
         if (!possibleMethods.isEmpty()) {
             return new GetMethodExpression(region, expression, possibleMethods);
         }
-        throw new FlairCheckException(expression.region(), UNEXPECTED_TYPE,
-                STR."Symbol \{id} not found on Object from class \{this.name()}");
+        return null;
     }
 
     public final String getJVMDestination() {

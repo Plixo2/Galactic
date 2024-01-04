@@ -5,8 +5,8 @@ import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.typed.stellaclass.method.MethodImplementation;
-import de.plixo.galactic.types.*;
 import de.plixo.galactic.types.Class;
+import de.plixo.galactic.types.Field;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +34,12 @@ public class CheckClass {
                         "Superclass must not be an interface");
             }
         }
+        var interfaces = new HashSet<Class>();
         for (Class anInterface : stellaClass.interfaces) {
+            if (!interfaces.add(anInterface)) {
+                throw new FlairCheckException(stellaClass.region(), FlairKind.NAME,
+                        STR."Duplicate interface \{anInterface.name()}");
+            }
             if (!anInterface.isPublic()) {
                 throw new FlairCheckException(stellaClass.region(), FlairKind.SECURITY,
                         "Interface must be public");
@@ -59,6 +64,14 @@ public class CheckClass {
                 throw new FlairCheckException(stellaClass.region(), FlairKind.NAME,
                         STR."Field name \{name} is not allowed");
             }
+            if (field.type() == null) {
+                throw new FlairCheckException(stellaClass.region(), FlairKind.UNKNOWN_TYPE,
+                        STR."Field \{name} has no type");
+            }
+            if (field.type().isVoid()) {
+                throw new FlairCheckException(stellaClass.region(), FlairKind.TYPE_MISMATCH,
+                        STR."field \{field.name()} cant be void");
+            }
         }
         var implementationLeft = stellaClass.implementationLeft(context);
         if (!implementationLeft.isEmpty()) {
@@ -67,12 +80,18 @@ public class CheckClass {
         }
     }
 
+
     private Set<String> checkMethods(List<MethodImplementation> methods, Context context,
                                      CheckProject checkProject) {
         var names = new HashSet<String>();
         for (var method : methods) {
             //TODO check modifiers of super method and signature and stuff
             var stellaMethod = method.stellaMethod();
+            if (stellaMethod.extension() != null) {
+                throw new FlairCheckException(stellaMethod.region(), FlairKind.TYPE_MISMATCH,
+                        "Extension methods are not allowed in classes");
+            }
+
             var name = stellaMethod.localName();
             if (!names.add(name)) {
                 throw new FlairCheckException(stellaMethod.region(), FlairKind.NAME,

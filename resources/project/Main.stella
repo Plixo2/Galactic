@@ -15,7 +15,15 @@ import @java Integer java.lang.Integer
 
 fn main(args: [String]) -> void = {
     println("Hello World!")
-    var a = new Example.Implementor { "no cast" }
-    a.main().print()
+
+    //println("Class Test:")
+    //examples.Classes.test()
+    //println("Interface Test:")
+    //examples.Interfaces.test()
+    //println("Exceptions Test:")
+    //examples.Extension.test()
+
+    println("Math Test:")
+    examples.MathTest.test()
 }
 

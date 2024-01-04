@@ -25,39 +25,45 @@ public class CheckUnit {
         if (!CheckProject.isAllowedTopLevelName(unit.localName())) {
             throw new FlairException(STR."Unit name \{unit.name()} is not allowed");
         }
-        var context = new Context(language, unit, root, language.loadedBytecode());
+        var context = new Context(language, unit, null, root, language.loadedBytecode());
         var names = new HashSet<String>();
-        checkImports(unit.imports(), names);
         checkMethods(unit.staticMethods(), context, checkProject, names);
+        checkImports(unit.imports(), names);
         checkClasses(unit.classes(), context, checkProject, names);
     }
 
     private void checkClasses(List<StellaClass> classes, Context context, CheckProject checkProject,
                               Set<String> names) {
         for (StellaClass aClass : classes) {
-            if (!names.add(aClass.name())) {
+            var classContext =
+                    new Context(context.language(), context.unit(), aClass, context.root(),
+                            context.language().loadedBytecode());
+            classContext.thisContext(aClass);
+            if (!names.add(aClass.localName())) {
                 throw new FlairCheckException(aClass.region(), NAME,
-                        STR."Duplicate name for class \{aClass.name()}");
+                        STR."Duplicate name for class \{aClass.localName()}");
             }
-            checkProject.checkClass().check(aClass, context, checkProject);
+            checkProject.checkClass().check(aClass, classContext, checkProject);
         }
     }
 
     private void checkMethods(List<StellaMethod> methods, Context context,
                               CheckProject checkProject, Set<String> names) {
         for (StellaMethod method : methods) {
+            context.thisContext(method.thisContext());
             var name = method.localName();
-            if (!names.add(name)) {
-                throw new FlairCheckException(method.region(), NAME,
-                        STR."Duplicate name for method \{name}");
-            }
+            names.add(name);
+//            if (!) {
+               // throw new FlairCheckException(method.region(), NAME,
+                 //       STR."Duplicate name for method \{name}");
+//            }
             if (!CheckProject.isAllowedTopLevelName(name)) {
                 throw new FlairCheckException(method.region(), NAME,
                         STR."Method name \{name} is not allowed");
             }
             for (Parameter parameter : method.parameters()) {
                 var paramName = parameter.name();
-                if (!CheckProject.isAllowedTopLevelName(paramName)) {
+                if (!CheckProject.isAllowedTopLevelName(paramName) && !paramName.equals("this")) {
                     throw new FlairCheckException(method.region(), NAME,
                             STR."Parameter name \{paramName} is not allowed");
                 }
@@ -75,7 +81,6 @@ public class CheckUnit {
     }
 
 
-
     private void checkImports(List<Import> imports, Set<String> names) {
         for (var anImport : imports) {
             var alias = anImport.alias();
@@ -84,13 +89,13 @@ public class CheckUnit {
                     throw new FlairCheckException(anImport.region(), NAME,
                             STR."Import name \{alias} is not allowed");
                 }
-                if (anImport.isUserDefined() && !names.add(alias)) {
-                    throw new FlairCheckException(anImport.region(), IMPORT,
-                            STR."Duplicate name for import alias \{anImport.alias()}");
-                }
             }
             switch (anImport) {
                 case Import.ClassImport(var _, var _, var aclass, var _) -> {
+                    if (anImport.isUserDefined() && !names.add(alias)) {
+                        throw new FlairCheckException(anImport.region(), IMPORT,
+                                STR."Duplicate name for import alias \{anImport.alias()}");
+                    }
                     if (!aclass.isPublic()) {
                         throw new FlairCheckException(anImport.region(), IMPORT,
                                 STR."Cant import non public class \{aclass.name()}");

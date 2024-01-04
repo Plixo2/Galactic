@@ -1,11 +1,12 @@
 package de.plixo.galactic.typed.parsing;
 
+import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.high_level.expressions.*;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.types.Type;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -28,7 +29,21 @@ public class TIRExpressionParsing {
             case HIRAssign hirAssign -> parseConstructExpression(hirAssign, context);
             case HIRCast hirCast -> parseCast(hirCast, context);
             case HIRCastCheck hirCastCheck -> parseCastCheck(hirCastCheck, context);
+            case HIRSuperCall hirSuperCall -> parseSuperCall(hirSuperCall, context);
+            case HIRThis hirThis -> parseThis(hirThis, context);
         }, expression.getClass().getName());
+    }
+    private static Expression parseThis(HIRThis hirThis, Context context) {
+        if (context.thisContext() == null) {
+            throw new FlairCheckException(hirThis.region(), FlairKind.UNKNOWN_TYPE, "this is not defined in this context");
+        }
+        return new ThisExpression(hirThis.region(), context.thisContext());
+    }
+
+    private static Expression parseSuperCall(HIRSuperCall superCall, Context context) {
+        throw new NullPointerException("SuperCallExpression not implemented");
+        //. return new SuperCallExpression(superCall.region(), superCall.superType(), superCall.method(),
+         //       superCall.arguments().stream().map(ref -> parse(ref, context)).toList());
     }
 
     private static CastCheckExpression parseCastCheck(HIRCastCheck cast, Context context) {

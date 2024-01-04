@@ -48,6 +48,14 @@ public class PrimitiveType extends Type {
     }
 
     @Override
+    public int JVMSize() {
+        return switch (typeOfPrimitive) {
+            case INT, FLOAT, BOOLEAN, CHAR, BYTE, SHORT -> 1;
+            case LONG, DOUBLE -> 2;
+        };
+    }
+
+    @Override
     public char getJVMKind() {
         return switch (typeOfPrimitive) {
             case INT -> 'I';

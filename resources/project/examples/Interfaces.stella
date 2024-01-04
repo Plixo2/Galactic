@@ -1,0 +1,42 @@
+import * Core
+
+import @java ElementList java.util.ArrayList
+import @java Function java.util.function.Function
+import @java Getter java.util.function.Supplier
+import @java Setter java.util.function.Consumer
+import @java Text java.lang.String
+
+class Test implements Function, Setter, Getter {
+    fn accept(obj: java.lang.Object) = {
+        print("accept ")
+        if obj is Text {
+            println(obj as Text)
+        } else {
+            println("not text")
+        }
+    }
+    fn apply(obj: java.lang.Object) -> java.lang.Object = this.identity(obj)
+
+    fn get() -> java.lang.Object = {
+        println("get")
+        "get"
+    }
+
+
+    fn identity(obj: java.lang.Object) -> java.lang.Object = {
+        print("apply: ")
+        println(Text.valueOf(obj))
+        obj
+    }
+}
+
+fn test() = {
+    var list = new ElementList
+    list.add: "Hello"
+    list.add: " "
+    list.add: "World"
+    list.add: "!"
+    var mapped = list.stream().map(new Test).toList()
+    mapped.forEach: new Test
+    new ElementList { mapped }.forEach: new Test
+}

@@ -8,15 +8,16 @@ import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.high_level.items.HIRImport;
 import de.plixo.galactic.high_level.items.HIRStaticMethod;
 import de.plixo.galactic.high_level.items.HIRTopBlock;
-import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.path.PathElement;
 import de.plixo.galactic.typed.path.Unit;
-import de.plixo.galactic.typed.stellaclass.*;
+import de.plixo.galactic.typed.stellaclass.MethodOwner;
+import de.plixo.galactic.typed.stellaclass.Parameter;
+import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.types.Class;
-import de.plixo.galactic.types.Type;
-import de.plixo.galactic.types.VoidType;
+
+import java.util.ArrayList;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -139,24 +140,17 @@ public class TIRUnitParsing {
     public static void fillMethodShells(Unit unit, Context context) {
         for (var method : unit.hirItems()) {
             if (method instanceof HIRStaticMethod staticMethod) {
-                var flags = ACC_PUBLIC | ACC_STATIC;
                 var hirMethod = staticMethod.hirMethod();
-                var name = hirMethod.methodName();
-                var parameters = hirMethod.hirParameters().stream().map(ref -> {
-                    var parse = TIRTypeParsing.parse(ref.type(), context);
-                    return new Parameter(ref.name(), parse);
-                }).toList();
-                Type returnType;
-                if (hirMethod.returnType() != null) {
-                    returnType = TIRTypeParsing.parse(hirMethod.returnType(), context);
-                } else {
-                    returnType = new VoidType();
-                }
-                var owner = new MethodOwner.UnitOwner(unit);
-                var region = staticMethod.hirMethod().region();
                 var stellaMethod =
-                        new StellaMethod(flags, name, parameters, returnType, hirMethod.expression(), owner,
-                                region);
+                        TIRMethodParsing.parseHIRMethod(hirMethod, ACC_PUBLIC | ACC_STATIC,
+                                new MethodOwner.UnitOwner(unit), context);
+                var thisType = stellaMethod.extension() != null ? stellaMethod.extension() : null;
+                stellaMethod.thisContext(thisType);
+                if (thisType != null) {
+                    var parameters = new ArrayList<>(stellaMethod.parameters());
+                    parameters.addFirst(new Parameter("this", thisType));
+                    stellaMethod.parameters(parameters);
+                }
                 unit.addStaticMethod(stellaMethod);
             }
         }
@@ -164,9 +158,13 @@ public class TIRUnitParsing {
 
     public static void fillMethodExpressions(Unit unit, Context context, Universe language) {
         unit.staticMethods().forEach(ref -> {
+            context.thisContext(ref.thisContext());
             context.pushScope();
             ref.parameters().forEach(var -> {
-                context.scope().addVariable(var.variable());
+                var variable = var.variable();
+                if (variable != null) {
+                    context.scope().addVariable(variable);
+                }
             });
             TIRMethodParsing.parse(ref, context);
             context.popScope();

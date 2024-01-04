@@ -5,13 +5,17 @@ import @java Text java.lang.String
 class Base {
     fn create() -> Base = {
        var hello = new Better { "Bye" }
-       hello.name = "hello"
        hello
     }
     fn print() -> void = {
         println("Hello world")
     }
-    fn contains(name: Text) -> boolean = if this is Better { (this as Better).name.equals(name) } else false
+    fn contains(name: Text) -> boolean =
+        if this is Better {
+            (this as Better).name.equals(name)
+        } else {
+            false
+        }
 }
 class Better extends Base {
     name: Text
@@ -27,9 +31,24 @@ class Implementor {
         var j: Text = "Byte"
         if hello.contains("cast") {
             hello.create()
-            j as java.lang.Object as Better
+            if j is Better {
+                println("Yes")
+            } else {
+                println("No")
+            }
+            hello
         } else {
             hello.create() as Better
         }
     }
+    fn enableCast() = {
+        this.name = "cast"
+    }
+}
+
+fn test() = {
+    var a = new Implementor { "no cast" }
+    a.main().print()
+    a.enableCast()
+    a.main().print()
 }

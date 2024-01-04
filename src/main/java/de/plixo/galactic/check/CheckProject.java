@@ -2,12 +2,14 @@ package de.plixo.galactic.check;
 
 import de.plixo.galactic.Universe;
 import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.lexer.GalacticTokens;
 import de.plixo.galactic.lexer.tokens.WordToken;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.path.Package;
 import de.plixo.galactic.typed.path.Unit;
+import de.plixo.galactic.typed.stellaclass.Parameter;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.VoidType;
@@ -47,7 +49,14 @@ public class CheckProject {
         return matches && !tokens.isKeyword(name) && !tokens.isJavaKeyword(name);
     }
 
-    public static void checkMethodBody(Context context, CheckProject checkProject, StellaMethod method) {
+    public static void checkMethodBody(Context context, CheckProject checkProject,
+                                       StellaMethod method) {
+        for (Parameter parameter : method.parameters()) {
+            if (parameter.type().isVoid()) {
+                throw new FlairCheckException(method.region(), FlairKind.TYPE_MISMATCH,
+                        STR."Parameter \{parameter.name()} cannot be void");
+            }
+        }
         assert method.body() != null;
         checkProject.checkExpressions().parse(method.body(), context, 0);
 

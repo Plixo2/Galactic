@@ -1,13 +1,10 @@
 package test;
 
-import java.util.Objects;
+import stella.Codex;
 
 public class Child {
 
-
-    public void test(Object object) {
-        var s = (String) object;
-        System.out.println(s.length());
+    public static double add(double param0, double param2) {
+        return Codex.add(param0, param2);
     }
-
 }

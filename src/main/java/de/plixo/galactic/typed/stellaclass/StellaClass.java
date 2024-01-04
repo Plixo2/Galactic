@@ -5,10 +5,6 @@ import de.plixo.galactic.high_level.expressions.*;
 import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
-import de.plixo.galactic.typed.Scope;
-import de.plixo.galactic.typed.expressions.AssignExpression;
-import de.plixo.galactic.typed.expressions.DotNotation;
-import de.plixo.galactic.typed.expressions.SymbolExpression;
 import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.method.AbstractMethod;
 import de.plixo.galactic.typed.stellaclass.method.ImplementedMethod;
@@ -21,8 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static de.plixo.galactic.typed.Scope.INPUT;
-import static de.plixo.galactic.typed.Scope.THIS;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
@@ -124,10 +118,9 @@ public class StellaClass extends Class {
 
 
     public void addAllFieldsConstructor(Context context) {
-        var thisVariable = new Scope.Variable("this", INPUT | THIS, this);
         var expressions = new ArrayList<HIRExpression>();
         var params = new ArrayList<Parameter>();
-        var thisSymbol = new HIRIdentifier(region(), "this");
+        var thisSymbol = new HIRThis(region());
         for (var field : this.fields) {
             params.add(new Parameter(field.name(), field.type()));
             var dotNotation = new HIRDotNotation(region(), thisSymbol, field.name());
@@ -136,8 +129,8 @@ public class StellaClass extends Class {
             expressions.add(assign);
         } var owner = new MethodOwner.ClassOwner(this);
         var method = new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(),
-                new HIRBlock(region(), expressions), owner, region());
-        method.thisVariable(thisVariable);
+                new HIRBlock(region(), expressions), owner, null, region());
+        method.thisContext(this);
 
         addMethod(method, context);
     }

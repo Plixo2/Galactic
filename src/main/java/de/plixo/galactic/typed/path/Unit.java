@@ -97,15 +97,16 @@ public final class Unit implements CompileRoot {
         return null;
     }
 
-    public @Nullable StellaMethod getImportedStaticMethod(String name) {
+    public List<StellaMethod> getImportedStaticMethod(String name) {
+        var methods = new ArrayList<StellaMethod>();
         for (var anImport : imports) {
             if (anImport.alias().equals(name)) {
                 if (anImport instanceof Import.StaticMethodImport methodImport) {
-                    return methodImport.method();
+                    methods.add(methodImport.method());
                 }
             }
         }
-        return null;
+        return methods;
     }
 
     public @Nullable Expression getDotNotation(Region region, String name) {
@@ -119,8 +120,7 @@ public final class Unit implements CompileRoot {
         var methodCollection = new MethodCollection(name, methods);
         methodCollection = methodCollection.filter(Method::isStatic);
         if (!methodCollection.isEmpty()) {
-            return new StaticMethodExpression(region, new MethodOwner.UnitOwner(this),
-                    methodCollection);
+            return new StaticMethodExpression(region,methodCollection);
         }
         return null;
     }

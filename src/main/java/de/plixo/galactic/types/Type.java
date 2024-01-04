@@ -61,4 +61,12 @@ public abstract class Type {
     public static boolean isSame(Type a, Type b) {
         return a.equals(b);
     }
+
+    public boolean isVoid() {
+        return this instanceof VoidType;
+    }
+
+    public int JVMSize() {
+        return 1;
+    }
 }
