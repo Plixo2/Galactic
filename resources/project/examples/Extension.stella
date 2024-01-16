@@ -13,8 +13,12 @@ fn test() = {
     list.add(" ")
     list.add("World")
     list.add("!")
-    var names: List = list.map(new UpperCase).filter(new EmptyFilter)
+    var names: List = list.map(new UpperCase).filterEmpty()
     System.out.println(names)
+}
+
+fn filterEmpty() -> List extends List = {
+    this.stream().filter(new EmptyFilter).toList()
 }
 
 class EmptyFilter implements java.util.function.Predicate {

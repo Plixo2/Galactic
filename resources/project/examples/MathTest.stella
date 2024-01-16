@@ -1,10 +1,6 @@
 import * Core
 import * Math
 
-//import @java System java.lang.System
-//import @java String java.lang.String
-//import @java Integer java.lang.Integer
-
 fn test() = {
     println("Enter two numbers: ")
     var one = stdIn().toInt()
