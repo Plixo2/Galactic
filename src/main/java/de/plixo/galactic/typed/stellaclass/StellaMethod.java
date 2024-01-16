@@ -25,7 +25,8 @@ public class StellaMethod {
     private final Type returnType;
     private final HIRExpression hirExpression;
     private final MethodOwner owner;
-    public @Nullable Expression body = null;
+    @Setter
+    private @Nullable Expression body = null;
     @Setter
     private @Nullable Type thisContext;
 

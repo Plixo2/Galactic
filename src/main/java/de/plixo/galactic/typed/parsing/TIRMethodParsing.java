@@ -37,9 +37,9 @@ public class TIRMethodParsing {
     public static void parse(StellaMethod ref, Context context) {
         var language = context.language();
         var expression = ref.hirExpression();
-        ref.body = TIRExpressionParsing.parse(expression, context);
-        ref.body = language.symbolsStage().parse(ref.body, context, 0);
-        ref.body = language.inferStage().parse(ref.body, context, ref.returnType());
+        ref.body(TIRExpressionParsing.parse(expression, context));
+        ref.body(language.symbolsStage().parse(ref.body(), context, 0));
+        ref.body(language.inferStage().parse(ref.body(), context, ref.returnType()));
     }
 
 

@@ -13,18 +13,18 @@ fn test() = {
     list.add(" ")
     list.add("World")
     list.add("!")
-    //var names: List = list.map(new upperCase).filter(new EmptyFilter)
-   // System.out.println(names)
+    var names: List = list.map(new UpperCase).filter(new EmptyFilter)
+    System.out.println(names)
 }
 
 class EmptyFilter implements java.util.function.Predicate {
     fn test(t: java.lang.Object) -> boolean = {
-        (t as String).isBlank()//.not()
+        (t as String).isBlank().not()
     }
 }
 
 
-class upperCase implements Function {
+class UpperCase implements Function {
     fn apply(t: java.lang.Object) -> java.lang.Object = {
         (t as String).toUpperCase()
     }

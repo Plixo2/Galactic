@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -176,5 +177,9 @@ public final class Unit implements CompileRoot {
 
     public Region getRegion() {
        return new Position(this.treeUnit().file(), 0, 0).toRegion();
+    }
+
+    public File file() {
+        return treeUnit.file();
     }
 }

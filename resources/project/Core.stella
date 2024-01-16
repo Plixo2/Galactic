@@ -5,6 +5,7 @@ import @java Function java.util.function.Function
 import @java Predicate java.util.function.Predicate
 import @java List java.util.List
 import @java Codex stella.Codex
+import @java Objects java.util.Objects
 
 fn println(msg: java.lang.String) = {
     System.out.println(msg)
@@ -26,13 +27,13 @@ fn print(msg: java.lang.String) = {
 }
 fn stdIn() -> String = {
     var reader = new java.io.BufferedReader {
-            new java.io.InputStreamReader { System.in }
+        new java.io.InputStreamReader { System.in }
     }
     reader.readLine()
 }
 
 fn toInt() -> int extends String = {
-    Integer.parseInt(this)
+    Integer.parseInt(this.strip())
 }
 
 fn map(function: Function) -> List extends List = {
@@ -44,13 +45,21 @@ fn filter(predicate: Predicate) -> List extends List = {
 }
 
 fn equals(rhs: java.lang.Object) -> boolean extends java.lang.Object = {
-    this.equals(rhs)
+    Objects.equals(this, rhs)
 }
 fn equals(rhs: int) -> boolean extends int = {
     Codex.equals(this, rhs)
 }
 fn equals(rhs: double) -> boolean extends double = {
     Codex.equals(this, rhs)
+}
+
+fn null() -> java.lang.Object = {
+    Codex.getNull()
+}
+
+fn isNull() -> boolean extends java.lang.Object = {
+    Objects.isNull(this)
 }
 
 fn assertValue(condition: boolean) = {

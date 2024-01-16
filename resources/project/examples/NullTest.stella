@@ -1,0 +1,7 @@
+import * Core
+
+fn test() = {
+    var n = null()
+    assertValue(n.isNull())
+    assertValue("hello".isNull().not())
+}

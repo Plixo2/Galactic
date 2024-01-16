@@ -43,6 +43,7 @@ public class Codegen {
             var method = createMethod(methods, context, true);
             classNode.methods.add(method);
         }
+        classNode.sourceFile = unit.file().getAbsolutePath();
         classNode.access = ACC_PUBLIC;
         classNode.name = unit.getJVMDestination();
         classNode.version = version;
@@ -56,6 +57,10 @@ public class Codegen {
         for (var methodImpl : stellaClass.methods()) {
             var method = methodImpl.stellaMethod();
             classNode.methods.add(createMethod(method, context, false));
+        }
+        var file = stellaClass.region().left().file();
+        if (file != null) {
+            classNode.sourceFile = file.getAbsolutePath();
         }
         classNode.access = ACC_PUBLIC | ACC_STATIC;
         classNode.name = stellaClass.getJVMDestination();
@@ -99,11 +104,15 @@ public class Codegen {
             assert thisContext != null;
             startIndex = 1;
         }
-
         var context =
                 new CompileContext(methodNode.instructions, methodNode, normalContext, startIndex);
         LabelNode start;
         context.add(start = new LabelNode());
+        var body = method.body();
+        if (body != null) {
+            var line = body.region().left().line();
+            context.add(new LineNumberNode(line, start));
+        }
         method.parameters().forEach(ref -> context.putVariable(ref.variable()));
 
         if (method.isConstructor()) {
@@ -122,7 +131,7 @@ public class Codegen {
             context.add(superCall);
         }
         parseExpression(
-                Objects.requireNonNull(method.body, STR."require expression \{method.localName()}"),
+                Objects.requireNonNull(body, STR."require expression \{method.localName()}"),
                 context);
 
 
@@ -144,6 +153,10 @@ public class Codegen {
 
         LabelNode end;
         context.add(end = new LabelNode());
+        if (body != null) {
+            // var line = body.region().right().line();
+            //  context.add(new LineNumberNode(line, end));
+        }
 
         methodNode.instructions = context.instructions();
         methodNode.localVariables = new ArrayList<>();

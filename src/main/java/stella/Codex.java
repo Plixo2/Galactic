@@ -1,5 +1,7 @@
 package stella;
 
+import java.util.Objects;
+
 public class Codex {
     public static int add(int a, int b) {
         return a + b;
@@ -17,6 +19,10 @@ public class Codex {
     }
     public static boolean equals(double a, double b) {
         return a == b;
+    }
+
+    public static Object getNull() {
+        return null;
     }
 
     public static void assertValue(boolean condition) {

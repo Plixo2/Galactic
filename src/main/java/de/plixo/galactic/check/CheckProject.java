@@ -61,9 +61,9 @@ public class CheckProject {
         checkProject.checkExpressions().parse(method.body(), context, 0);
 
         var expected = method.returnType();
-        assert method.body != null;
+        assert method.body() != null;
 
-        var found = method.body.getType(context);
+        var found = method.body().getType(context);
         var isVoid = Type.isSame(expected, new VoidType());
         var typeMatch = Type.isAssignableFrom(expected, found, context);
         if (!typeMatch && !isVoid) {

@@ -28,18 +28,16 @@ parameter := id ":"?! type!
 blockExpr := "{"? blockExprList!
 blockExprList := "}"? | expression blockExprList!
 
-expression := variableDefinition | factor
+
 variableDefinition := "var" id! typeHint! "="! expression! |
 typeHint := ":"? type! ||
 branch := "if"? expression! body! branchOpt!
 branchOpt := "else"? expression! ||
 body := blockExpr!
 
-factor := object postfixList! assignOpt!
+
 assignOpt := "="? expression! ||
 
-this := "this"
-object := initialisation | branch | blockExpr | this | string | number | id | "("? expression! ")"?!
 
 initialisation := "new"? type! initialisationList!
 initialisationList := "{"? initialisationFieldList! "}"?! ||
@@ -83,6 +81,8 @@ functionParameterListOpt := "," functionParameterList! ||
 functionParameter := id ":"? type! | id
 
 
+
+
 ConditionalOrExpression := ConditionalAndExpression ConditionalOrExpressionRight!
 ConditionalOrExpressionRight := ConditionalOrExpressionFunction ConditionalOrExpression ||
 ConditionalOrExpressionFunction := "||"
@@ -120,6 +120,10 @@ MultiplicativeExpressionRight := MultiplicativeExpressionFunction Multiplicative
 MultiplicativeExpressionFunction := "*" | "/" | "%"
 
 UnaryExpression := "!" factor | "~" factor | "-" factor | "+" factor | factor
+factor := object postfixList! assignOpt!
+expression := variableDefinition | factor
+this := "this"
+object := initialisation | branch | blockExpr | this | string | number | id | "("? expression! ")"?!
 
 
 //boolArithmetic := comparisonArithmetic boolRight!
