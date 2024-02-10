@@ -20,7 +20,7 @@ This project requires Java 21 (preview) or higher to run.
 Open the project as a Gradle project and run the [Main](src/main/java/de/plixo/galactic/Main.java) 
 class with `--enable-preview` as vm flag.
 
-The Main class of the projects compiles the File in `/resources/standalone/HelloWorld.stella` and builds it to `/resources/build.jar`.
+The Main class compiles the File in `/resources/standalone/HelloWorld.stella` and builds it to `/resources/build.jar`.
 This jar can be executed with `java -jar build.jar` and will print `Hello World!` to the console.
 
 Folders can also be opened. The Module Systems works like in java, so you can import classes from other files and packages. 
