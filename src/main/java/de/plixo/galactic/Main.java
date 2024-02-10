@@ -7,14 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Main {
-    private final static String PATH = "resources/project";
-    private final static @Nullable String MAIN_CLASS = "project/Main";
+    private final static String PATH = "resources/standalone/HelloWorld.stella";
+    private final static @Nullable String MAIN_CLASS = "HelloWorld/HelloWorld";
     private final static String BUILD_PATH = "resources/build.jar";
 
     public static void main(String[] args) throws IOException {
 
-        var PATH = "resources/tests/InlineTests.stella";
-        String MAIN_CLASS = "InlineTests/InlineTests";
+//        var PATH = "resources/tests/InlineTests.stella";
+//        String MAIN_CLASS = "InlineTests/InlineTests";
 
         var startTimeCompile = System.currentTimeMillis();
 

@@ -1,0 +1,5 @@
+import @java String java.lang.String
+
+fn main(args: [String]) = {
+    println("Hello World!")
+}
