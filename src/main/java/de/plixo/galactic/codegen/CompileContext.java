@@ -4,6 +4,7 @@ import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -21,6 +22,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 public class CompileContext {
+    @Setter
+    private int lastLineNumber = 0;
     private final InsnList instructions;
     private final MethodNode node;
     private final Context normalContext;

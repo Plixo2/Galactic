@@ -45,9 +45,9 @@ public class CheckExpressions implements Tree<Context, Integer> {
                     "Cant cast to primitive type or array");
         }
         var parsedType = parsed.getType(context);
-        var castForward = !Type.isAssignableFrom(type, parsedType, context);
-        var castBackward = !Type.isAssignableFrom(parsedType, type, context);
-        if (castForward && castBackward) {
+        var castForward = Type.isAssignableFrom(type, parsedType, context);
+        var castBackward = Type.isAssignableFrom(parsedType, type, context);
+        if (!castForward && !castBackward) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                     "Cant cast across inheritance, this cast will always fail");
         }

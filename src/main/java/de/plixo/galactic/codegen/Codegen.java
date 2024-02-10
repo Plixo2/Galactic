@@ -1,6 +1,7 @@
 package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.boundary.JVMLoadedClass;
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
@@ -45,7 +46,7 @@ public class Codegen {
             classNode.methods.add(method);
         }
         classNode.sourceFile = unit.file().getAbsolutePath();
-        classNode.access = ACC_PUBLIC;
+        classNode.access = ACC_PUBLIC | ACC_STATIC;
         classNode.name = unit.getJVMDestination();
         classNode.version = version;
         classNode.superName = "java/lang/Object";
@@ -106,14 +107,14 @@ public class Codegen {
             startIndex = 1;
         }
         var context =
-                new CompileContext(methodNode.instructions, methodNode, normalContext, startIndex);
+                new CompileContext(-1, methodNode.instructions, methodNode, normalContext, startIndex);
         LabelNode start;
         context.add(start = new LabelNode());
         var body = method.body();
-        if (body != null) {
-            var line = body.region().left().line();
-            context.add(new LineNumberNode(line, start));
-        }
+//        if (body != null) {
+//            var line = body.region().left().line();
+//            context.add(new LineNumberNode(line, start));
+//        }
         method.parameters().forEach(ref -> context.putVariable(ref.variable()));
 
         if (method.isConstructor()) {
@@ -173,7 +174,14 @@ public class Codegen {
 
 
     private static void parseExpression(Expression expression, CompileContext context) {
-
+        var region = expression.region();
+        var currentLine = region.minPosition().line() + 1;
+        if (currentLine != context.lastLineNumber()) {
+            var label = new LabelNode();
+            context.add(label);
+            context.add(new LineNumberNode(currentLine, label));
+            context.lastLineNumber(currentLine);
+        }
         switch (expression) {
             case StringExpression stringExpression -> {
                 context.add(new LdcInsnNode(stringExpression.value()));
