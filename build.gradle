@@ -9,32 +9,39 @@ repositories {
     mavenCentral()
 }
 
+
+
 dependencies {
+    //Annotations for @Nullable, @NotNull
     implementation 'org.jetbrains:annotations:24.0.1'
     implementation 'org.jetbrains:annotations:24.0.1'
+
+    //Lombok Annotation for @Setter, @Getter etc
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
 
-
+    //IO and Utils
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
-
     implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
-
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
     implementation 'org.apache.commons:commons-text:1.10.0'
 
+    //bytebuddy, for testing
     implementation 'net.bytebuddy:byte-buddy:1.14.10'
-//    implementation 'net.bytebuddy:byte-buddy-agent:1.7.1'
     implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.14.10'
 
-
+    //ASM lib
     implementation 'org.ow2.asm:asm:9.5'
     implementation 'org.ow2.asm:asm-commons:9.5'
     implementation 'org.ow2.asm:asm-util:9.5'
     implementation 'org.ow2.asm:asm-tree:9.5'
 
-
+    //testing
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 
@@ -64,4 +71,9 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs(['--enable-preview'])
 }

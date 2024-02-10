@@ -1,4 +1,4 @@
-import * Core
+//import * lib.Core
 
 import @java String java.lang.String
 import @java Consumer java.util.function.Consumer
@@ -24,8 +24,11 @@ fn main(args: [String]) -> void = {
     examples.Extension.test()
     println("Null Test:")
     examples.NullTest.test()
+    println("Loop Test:")
+    examples.LoopTest.test()
 
     println("Math Test:")
     examples.MathTest.test()
+
 }
 

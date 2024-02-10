@@ -1,4 +1,4 @@
-import * Core
+import * stella.Core
 
 import @java Text java.lang.String
 

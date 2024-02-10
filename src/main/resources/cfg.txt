@@ -36,7 +36,8 @@ branchOpt := "else"? expression! ||
 body := blockExpr!
 
 
-assignOpt := "="? expression! ||
+for := "for"? id! "in"?! expression! blockExpr!
+while := "while"? expression! blockExpr!
 
 
 initialisation := "new"? type! initialisationList!
@@ -47,9 +48,11 @@ initialisationField := expression
 
 postfixList := postFix postfixList! ||
 postFix := "."? id! | callAccess | cast | castCheck
-callAccess := "("? expressionList! ")"?! | ":"? expression!
+callAccess := "("? expressionList! ")"?! | ":"? commaWordChain! blockExpr!
 cast := "as"? type!
 castCheck := "is"? type!
+//postFor := "for"? expression! blockExpr!
+
 
 expressionList := expression expressionListOpt! ||
 expressionListOpt := ","? expressionList! ||
@@ -64,6 +67,9 @@ typeListOpt := ","? typeList! ||
 
 dotWordChain := id dotWordChainOpt!
 dotWordChainOpt := "."? dotWordChain ||
+
+commaWordChain := id commaWordChainOpt!
+commaWordChainOpt := ","? commaWordChain ||
 
 superCall := "super"? "<"? type! ">"?! id! "("?! expressionList! ")"?! | "super" "("? expressionList! ")"?!
 
@@ -119,27 +125,13 @@ MultiplicativeExpression := UnaryExpression MultiplicativeExpressionRight!
 MultiplicativeExpressionRight := MultiplicativeExpressionFunction MultiplicativeExpression ||
 MultiplicativeExpressionFunction := "*" | "/" | "%"
 
-UnaryExpression := "!" factor | "~" factor | "-" factor | "+" factor | factor
-factor := object postfixList! assignOpt!
-expression := variableDefinition | factor
+UnaryExpression := UnaryExpressionFunction factor | factor
+UnaryExpressionFunction := "!" | "~" | "-" | "+"
+
+//expression := variableDefinition | factor
+expression := variableDefinition | ConditionalOrExpression
 this := "this"
-object := initialisation | branch | blockExpr | this | string | number | id | "("? expression! ")"?!
+object := initialisation | branch | while | blockExpr | this | string | number | id | "("? expression! ")"?!
+factor := object postfixList! assignOpt!
+assignOpt := "="? expression! ||
 
-
-//boolArithmetic := comparisonArithmetic boolRight!
-//comparisonArithmetic := arithmetic comparisonRight!
-//arithmetic := term arithmeticRight!
-//term := factor termRight!
-//
-//boolRight := boolArithmeticFunc boolArithmetic ||
-//comparisonRight := comparisonArithmeticFunc comparisonArithmetic ||
-//arithmeticRight := arithmeticFunc arithmetic ||
-//termRight := termFunc term ||
-//
-//factor := object memberList! assignOpt!
-
-////operators
-//termFunc := "*" | "/"
-//arithmeticFunc := "+" | "-"
-//comparisonArithmeticFunc := ">" | ">=" | "<" | "<=" | "==" | "!="
-//boolArithmeticFunc := "&&" | "||"

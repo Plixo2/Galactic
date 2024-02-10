@@ -1,0 +1,5 @@
+
+fn main(args: [java.lang.String]) = {
+    println(100 + 10)
+}
+

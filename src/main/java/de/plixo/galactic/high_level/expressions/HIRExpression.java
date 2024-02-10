@@ -1,7 +1,7 @@
 package de.plixo.galactic.high_level.expressions;
 
 public sealed interface HIRExpression
-        permits HIRAssign, HIRBlock, HIRBranch, HIRCallNotation, HIRCast, HIRCastCheck,
+        permits HIRAssign, HIRBinary, HIRBlock, HIRBranch, HIRCallNotation, HIRCast, HIRCastCheck,
         HIRConstruct, HIRDotNotation, HIRIdentifier, HIRNumber, HIRString, HIRSuperCall, HIRThis,
-        HIRVarDefinition {
+        HIRUnary, HIRVarDefinition, HIRWhile {
 }

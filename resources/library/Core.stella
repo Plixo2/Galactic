@@ -1,6 +1,8 @@
 import @java System java.lang.System
 import @java String java.lang.String
 import @java Integer java.lang.Integer
+import @java Double java.lang.Double
+import @java Float java.lang.Float
 import @java Function java.util.function.Function
 import @java Predicate java.util.function.Predicate
 import @java List java.util.List
@@ -25,6 +27,9 @@ fn println(msg: float) = {
 fn print(msg: java.lang.String) = {
     System.out.print(msg)
 }
+fn println(msg: java.lang.Object) = {
+    System.out.println(msg)
+}
 fn stdIn() -> String = {
     var reader = new java.io.BufferedReader {
         new java.io.InputStreamReader { System.in }
@@ -32,9 +37,6 @@ fn stdIn() -> String = {
     reader.readLine()
 }
 
-fn toInt() -> int extends String = {
-    Integer.parseInt(this.strip())
-}
 
 fn map(function: Function) -> List extends List = {
     this.stream().map(function).toList()
@@ -47,15 +49,49 @@ fn filter(predicate: Predicate) -> List extends List = {
 fn equals(rhs: java.lang.Object) -> boolean extends java.lang.Object = {
     Objects.equals(this, rhs)
 }
-fn equals(rhs: int) -> boolean extends int = {
-    Codex.equals(this, rhs)
-}
-fn equals(rhs: double) -> boolean extends double = {
-    Codex.equals(this, rhs)
-}
 
 fn null() -> java.lang.Object = {
     Codex.getNull()
+}
+
+fn toInt() -> int extends String = {
+    Integer.parseInt(this.strip())
+}
+
+fn toDouble() -> double extends String = {
+    Double.parseDouble(this.strip())
+}
+
+fn toInt() -> int extends double = {
+    Codex.toInt(this)
+}
+
+fn toDouble() -> double extends int = {
+    Codex.toDouble(this)
+}
+
+fn box() -> Integer extends int = {
+    Integer.valueOf(this)
+}
+
+fn box() -> Double extends double = {
+    Double.valueOf(this)
+}
+
+fn box() -> Float extends float = {
+    Float.valueOf(this)
+}
+
+fn unbox() -> int extends Integer = {
+    this.intValue()
+}
+
+fn unbox() -> double extends Double = {
+    this.doubleValue()
+}
+
+fn unbox() -> float extends Float = {
+    this.floatValue()
 }
 
 fn isNull() -> boolean extends java.lang.Object = {
@@ -68,10 +104,3 @@ fn assertValue(condition: boolean) = {
 
 
 
-fn not() -> boolean extends boolean = {
-    if this {
-        false
-    } else {
-        true
-    }
-}

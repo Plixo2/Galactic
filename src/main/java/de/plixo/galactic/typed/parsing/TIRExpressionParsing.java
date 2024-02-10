@@ -7,6 +7,8 @@ import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.types.Type;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -31,11 +33,41 @@ public class TIRExpressionParsing {
             case HIRCastCheck hirCastCheck -> parseCastCheck(hirCastCheck, context);
             case HIRSuperCall hirSuperCall -> parseSuperCall(hirSuperCall, context);
             case HIRThis hirThis -> parseThis(hirThis, context);
+            case HIRWhile hirWhile -> parseWhile(hirWhile, context);
+            case HIRBinary hirBinary -> parseBinary(hirBinary, context);
+            case HIRUnary hirUnary -> parseUnary(hirUnary, context);
         }, expression.getClass().getName());
     }
+
+    private static Expression parseUnary(HIRUnary hirUnary, Context context) {
+        var operator = hirUnary.operator();
+        var expression = parse(hirUnary.value(), context);
+        var functionName = operator.toFunctionName();
+        var function = new DotNotation(hirUnary.region(), expression, functionName);
+        var call = new CallNotation(hirUnary.region(), function, new ArrayList<>());
+        return call;
+    }
+
+    private static Expression parseBinary(HIRBinary hirUnary, Context context) {
+        var operator = hirUnary.operator();
+        var left = parse(hirUnary.left(), context);
+        var right = parse(hirUnary.right(), context);
+        var functionName = operator.toFunctionName();
+        var function = new DotNotation(hirUnary.region(), left, functionName);
+        var call = new CallNotation(hirUnary.region(), function, List.of(right));
+        return call;
+    }
+
+    private static Expression parseWhile(HIRWhile hirWhile, Context context) {
+        var condition = parse(hirWhile.condition(), context);
+        var body = parse(hirWhile.body(), context);
+        return new WhileExpression(hirWhile.region(), condition, body);
+    }
+
     private static Expression parseThis(HIRThis hirThis, Context context) {
         if (context.thisContext() == null) {
-            throw new FlairCheckException(hirThis.region(), FlairKind.UNKNOWN_TYPE, "this is not defined in this context");
+            throw new FlairCheckException(hirThis.region(), FlairKind.UNKNOWN_TYPE,
+                    "this is not defined in this context");
         }
         return new ThisExpression(hirThis.region(), context.thisContext());
     }
@@ -43,7 +75,7 @@ public class TIRExpressionParsing {
     private static Expression parseSuperCall(HIRSuperCall superCall, Context context) {
         throw new NullPointerException("SuperCallExpression not implemented");
         //. return new SuperCallExpression(superCall.region(), superCall.superType(), superCall.method(),
-         //       superCall.arguments().stream().map(ref -> parse(ref, context)).toList());
+        //       superCall.arguments().stream().map(ref -> parse(ref, context)).toList());
     }
 
     private static CastCheckExpression parseCastCheck(HIRCastCheck cast, Context context) {

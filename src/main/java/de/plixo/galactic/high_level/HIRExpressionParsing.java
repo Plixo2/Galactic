@@ -1,5 +1,7 @@
 package de.plixo.galactic.high_level;
 
+import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.high_level.expressions.*;
 import de.plixo.galactic.high_level.types.HIRType;
 import de.plixo.galactic.high_level.utils.ExpressionCommaList;
@@ -12,12 +14,15 @@ import java.util.List;
 /**
  * Parses an expression node from the CFG into a HIRExpression
  */
+
+
 public class HIRExpressionParsing {
     public static HIRExpression parse(Node node) {
         node.assertType("expression");
-        if (node.has("factor")) {
-            return parseFactor(node.get("factor"));
-        } else if (node.has("variableDefinition")) {
+        if (node.has("ConditionalOrExpression")) {
+            return HIRMathParsing.parse(node.get("ConditionalOrExpression"));
+        }
+        else if (node.has("variableDefinition")) {
             return parseVarDefinition(node.get("variableDefinition"));
         }
         throw new NullPointerException("unknown expression");
@@ -37,7 +42,7 @@ public class HIRExpressionParsing {
         return new HIRBranch(node.region(), expression, bodyExpression, elsePart);
     }
 
-    private static HIRExpression parseFactor(Node node) {
+    public static HIRExpression parseFactor(Node node) {
         node.assertType("factor");
         var memberNodeList = node.list("postfixList", "postFix");
 
@@ -92,7 +97,11 @@ public class HIRExpressionParsing {
             return parseBlock(node.get("blockExpr"));
         } else if (node.has("number")) {
             var nodeNumber = node.getNumber();
-            return new HIRNumber(node.region(), nodeNumber);
+            try {
+                return new HIRNumber(node.region(), nodeNumber);
+            } catch(NumberFormatException e) {
+                throw new FlairCheckException(node.region(), FlairKind.FORMAT, STR."Wrong number format \{nodeNumber}");
+            }
         } else if (node.has("string")) {
             var nodeNumber = node.getString();
             var literal = nodeNumber.substring(1, nodeNumber.length() - 1);
@@ -110,8 +119,17 @@ public class HIRExpressionParsing {
             return parseSuperCall(node.get("superCall"));
         } else if (node.has("this")) {
             return new HIRThis(node.region());
+        } else if (node.has("while")) {
+            return parseWhile(node.get("while"));
         }
         throw new NullPointerException(STR."Unknown Object \{node}");
+    }
+
+    private static HIRWhile parseWhile(Node node) {
+        node.assertType("while");
+        var expression = HIRExpressionParsing.parse(node.get("expression"));
+        var bodyExpression = HIRExpressionParsing.parseBlock(node.get("blockExpr"));
+        return new HIRWhile(node.region(), expression, bodyExpression);
     }
 
     private static HIRSuperCall parseSuperCall(Node node) {

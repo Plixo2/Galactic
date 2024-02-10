@@ -1,4 +1,3 @@
-import * Core
 
 import @java List java.util.List
 import @java String java.lang.String

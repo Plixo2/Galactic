@@ -4,10 +4,12 @@ import de.plixo.galactic.Universe;
 import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairKind;
+import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.high_level.items.HIRClass;
 import de.plixo.galactic.high_level.items.HIRImport;
 import de.plixo.galactic.high_level.items.HIRStaticMethod;
 import de.plixo.galactic.high_level.items.HIRTopBlock;
+import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.path.PathElement;
@@ -44,19 +46,26 @@ public class TIRUnitParsing {
     }
 
     /**
-     * parses High level imports to imports. This method will get run twice, once for types, once for static methods
+     * parses High level imports to imports. This method will get run twice, once for types,
+     * once for static methods, so clearing imports of the unit is necessary
      *
      * @param unit     the unit to add the imports to
      * @param root     the root of the project, to start the search
      * @param bytecode the loaded bytecode, to locate java imports
      */
-    public static void parseImports(Unit unit, CompileRoot root, LoadedBytecode bytecode,
-                                    boolean throwErrors) {
+    public static void parseImports(Universe universe, Unit unit, CompileRoot root,
+                                    LoadedBytecode bytecode, boolean throwErrors) {
         // clear imports, from previous run
         unit.clearImports();
         unit.classes().forEach(ref -> {
             unit.addImport(unit.getRegion(), ref.localName(), ref, false);
         });
+        for (var anImport : universe.standardLibs().imports()) {
+            var path = new ObjectPath(universe.standardLibs().packageName());
+            path = path.add(anImport.name());
+            addImport(unit, unit.getRegion(), root, "*", path, ImportType.STELLA, bytecode,
+                    throwErrors, false);
+        }
         unit.staticMethods().forEach(ref -> {
             unit.addImport(unit.getRegion(), ref.localName(), ref, false);
         });
@@ -65,73 +74,93 @@ public class TIRUnitParsing {
             if (hirItem instanceof HIRImport hirImport) {
                 var region = hirImport.region();
                 var path = hirImport.path();
-                var importType = hirImport.importType();
+                var importName = hirImport.importType();
                 var alias = hirImport.name();
-                if (importType == null) {
-                    var located = root.toPathElement().get(path);
-                    switch (located) {
-                        case PathElement.StellaClassElement(var stellaClass) -> {
-                            if (alias.equals("*")) {
-                                if (throwErrors) {
-                                    throw new FlairCheckException(region, FlairKind.IMPORT,
-                                            STR."Cant import inner parts of a class \{stellaClass.name()}");
-                                }
-                            }
-                            unit.addImport(region, alias, stellaClass, true);
+                var importType = switch (importName) {
+                    case "java" -> ImportType.JAVA;
+                    case null -> ImportType.STELLA;
+                    case "stella" -> ImportType.STELLA;
+                    default -> {
+                        if (throwErrors) {
+                            throw new FlairCheckException(region, FlairKind.IMPORT,
+                                    STR."unknown import type \{importName}");
                         }
-                        case PathElement.UnitElement(var unitElement) -> {
-                            if (alias.equals("*")) {
-                                unitElement.classes().forEach(ref -> {
-                                    unit.addImport(region, ref.localName(), ref, true);
-                                });
-                                unitElement.staticMethods().forEach(ref -> {
-                                    unit.addImport(region, ref.localName(), ref, true);
-                                });
-                            } else {
-                                if (throwErrors) {
-                                    throw new FlairCheckException(region, FlairKind.IMPORT,
-                                            STR."could not locate matching stella class \{path}");
-                                }
-                            }
-                        }
-                        case PathElement.StellaMethodElement(var method) -> {
-                            if (alias.equals("*")) {
-                                if (throwErrors) {
-                                    throw new FlairCheckException(region, FlairKind.IMPORT,
-                                            STR."Cant import inner parts of a method \{method.localName()}");
-                                }
-                            }
-                            unit.addImport(region, alias, method, true);
-                        }
-                        case null, default -> {
+                        yield null;
+                    }
+                };
+                if (importType != null) {
+                    addImport(unit, region, root, alias, path, importType, bytecode, throwErrors,
+                            true);
+                }
+
+
+            }
+        }
+    }
+
+    private static void addImport(Unit unit, Region region, CompileRoot root, String alias,
+                                  ObjectPath path, ImportType importType, LoadedBytecode bytecode,
+                                  boolean throwErrors, boolean userDefined) {
+        switch (importType) {
+            case STELLA -> {
+                var located = root.toPathElement().get(path);
+                switch (located) {
+                    case PathElement.StellaClassElement(var stellaClass) -> {
+                        if (alias.equals("*")) {
                             if (throwErrors) {
                                 throw new FlairCheckException(region, FlairKind.IMPORT,
-                                        STR."could not locate matching stella class, or method \{path}");
+                                        STR."Cant import inner parts of a class \{stellaClass.name()}");
+                            }
+                        }
+                        unit.addImport(region, alias, stellaClass, userDefined);
+                    }
+                    case PathElement.UnitElement(var unitElement) -> {
+                        if (alias.equals("*")) {
+                            unitElement.classes().forEach(ref -> {
+                                unit.addImport(region, ref.localName(), ref, userDefined);
+                            });
+                            unitElement.staticMethods().forEach(ref -> {
+                                unit.addImport(region, ref.localName(), ref, userDefined);
+                            });
+                        } else {
+                            if (throwErrors) {
+                                throw new FlairCheckException(region, FlairKind.IMPORT,
+                                        STR."could not locate matching stella class \{path}");
                             }
                         }
                     }
-
-                } else if (importType.equals("java")) {
-                    var jvmClass = unit.locateJVMClass(path, bytecode);
-                    if (alias.equals("*")) {
+                    case PathElement.StellaMethodElement(var method) -> {
+                        if (alias.equals("*")) {
+                            if (throwErrors) {
+                                throw new FlairCheckException(region, FlairKind.IMPORT,
+                                        STR."Cant import inner parts of a method \{method.localName()}");
+                            }
+                        }
+                        unit.addImport(region, alias, method, userDefined);
+                    }
+                    case null, default -> {
                         if (throwErrors) {
                             throw new FlairCheckException(region, FlairKind.IMPORT,
-                                    "import * not supported on java");
+                                    STR."could not locate matching stella class, or method \{path}");
                         }
-                    }
-                    if (jvmClass == null) {
-                        if (throwErrors) {
-                            throw new FlairCheckException(region, FlairKind.IMPORT,
-                                    STR."could not locate jvm class \{path}");
-                        }
-                    }
-                    unit.addImport(region, alias, jvmClass, true);
-                } else {
-                    if (throwErrors) {
-                        throw new FlairCheckException(region, FlairKind.IMPORT,
-                                STR."unknown import type \{importType}");
                     }
                 }
+            }
+            case JAVA -> {
+                var jvmClass = unit.locateJVMClass(path, bytecode);
+                if (alias.equals("*")) {
+                    if (throwErrors) {
+                        throw new FlairCheckException(region, FlairKind.IMPORT,
+                                "import * not supported on java");
+                    }
+                }
+                if (jvmClass == null) {
+                    if (throwErrors) {
+                        throw new FlairCheckException(region, FlairKind.IMPORT,
+                                STR."could not locate jvm class \{path}");
+                    }
+                }
+                unit.addImport(region, alias, jvmClass, userDefined);
             }
         }
     }
@@ -169,5 +198,10 @@ public class TIRUnitParsing {
             TIRMethodParsing.parse(ref, context);
             context.popScope();
         });
+    }
+
+    private enum ImportType {
+        JAVA,
+        STELLA
     }
 }

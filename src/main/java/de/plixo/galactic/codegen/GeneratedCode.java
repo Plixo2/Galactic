@@ -30,7 +30,7 @@ public record GeneratedCode(List<JarOutput> output) {
     public void dump(File file) {
         var _ = file.mkdirs();
         if (!file.isDirectory()) {
-            throw new IOException("File is not a directory");
+            throw new IOException("file is not a directory");
         }
         deleteClassFiles(file);
         var absolutePath = file.getAbsolutePath();

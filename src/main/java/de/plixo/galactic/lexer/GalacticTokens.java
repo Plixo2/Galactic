@@ -13,7 +13,7 @@ public class GalacticTokens {
     private String[] keywords =
             new String[]{"class", "interface", "void", "int", "byte", "short", "long", "float",
                     "double", "boolean", "char", "fn", "if", "else", "new", "extends", "implements",
-                    "return", "var", "import", "as", "is", "super", "this"};
+                    "return", "var", "import", "as", "is", "super", "this", "for", "while"};
 
     private String[] javaKeyworkds =
             new String[]{"abstract", "continue", "for", "new", "switch", "assert", "default",

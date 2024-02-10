@@ -1,0 +1,161 @@
+import @java Codex stella.Codex
+import @java Math java.lang.Math
+
+fn add(rhs: int) -> int extends int = {
+    Codex.add(this, rhs)
+}
+fn add(rhs: double) -> double extends double = {
+    Codex.add(this, rhs)
+}
+fn add(rhs: float) -> float extends float = {
+    Codex.add(this, rhs)
+}
+
+fn subtract(rhs: int) -> int extends int = {
+    Codex.subtract(this, rhs)
+}
+fn subtract(rhs: double) -> double extends double = {
+    Codex.subtract(this, rhs)
+}
+fn subtract(rhs: float) -> float extends float = {
+    Codex.subtract(this, rhs)
+}
+
+fn multiply(rhs: int) -> int extends int = {
+    Codex.multiply(this, rhs)
+}
+fn multiply(rhs: double) -> double extends double = {
+    Codex.multiply(this, rhs)
+}
+fn multiply(rhs: float) -> float extends float = {
+    Codex.multiply(this, rhs)
+}
+
+fn divide(rhs: int) -> int extends int = {
+    Codex.divide(this, rhs)
+}
+fn divide(rhs: double) -> double extends double = {
+    Codex.divide(this, rhs)
+}
+fn divide(rhs: float) -> float extends float = {
+    Codex.divide(this, rhs)
+}
+
+fn mod(rhs: int) -> int extends int = {
+    Codex.mod(this, rhs)
+}
+fn mod(rhs: double) -> double extends double = {
+    Codex.mod(this, rhs)
+}
+fn mod(rhs: float) -> float extends float = {
+    Codex.mod(this, rhs)
+}
+
+fn and(rhs: boolean) -> boolean extends boolean = {
+    Codex.and(this, rhs)
+}
+
+fn or(rhs: boolean) -> boolean extends boolean = {
+    Codex.or(this, rhs)
+}
+
+fn less(rhs: int) -> boolean extends int = {
+    Codex.less(this, rhs)
+}
+fn less(rhs: double) -> boolean extends double = {
+    Codex.less(this, rhs)
+}
+fn less(rhs: float) -> boolean extends float = {
+    Codex.less(this, rhs)
+}
+
+fn lessEquals(rhs: int) -> boolean extends int = {
+    Codex.lessEquals(this, rhs)
+}
+fn lessEquals(rhs: double) -> boolean extends double = {
+    Codex.lessEquals(this, rhs)
+}
+fn lessEquals(rhs: float) -> boolean extends float = {
+    Codex.lessEquals(this, rhs)
+}
+
+fn greater(rhs: int) -> boolean extends int = {
+    Codex.greater(this, rhs)
+}
+fn greater(rhs: double) -> boolean extends double = {
+    Codex.greater(this, rhs)
+}
+fn greater(rhs: float) -> boolean extends float = {
+    Codex.greater(this, rhs)
+}
+
+fn greaterEquals(rhs: int) -> boolean extends int = {
+    Codex.greaterEquals(this, rhs)
+}
+fn greaterEquals(rhs: double) -> boolean extends double = {
+    Codex.greaterEquals(this, rhs)
+}
+fn greaterEquals(rhs: float) -> boolean extends float = {
+    Codex.greaterEquals(this, rhs)
+}
+
+fn equals(rhs: int) -> boolean extends int = {
+    Codex.equals(this, rhs)
+}
+fn equals(rhs: double) -> boolean extends double = {
+    Codex.equals(this, rhs)
+}
+fn equals(rhs: float) -> boolean extends float = {
+    Codex.equals(this, rhs)
+}
+fn equals(rhs: boolean) -> boolean extends boolean = {
+    Codex.equals(this, rhs)
+}
+
+fn notEquals(rhs: int) -> boolean extends int = {
+    Codex.notEquals(this, rhs)
+}
+fn notEquals(rhs: double) -> boolean extends double = {
+    Codex.notEquals(this, rhs)
+}
+fn notEquals(rhs: float) -> boolean extends float = {
+    Codex.notEquals(this, rhs)
+}
+fn notEquals(rhs: boolean) -> boolean extends boolean = {
+    Codex.notEquals(this, rhs)
+}
+
+fn negate() -> int extends int = {
+    Codex.negate(this)
+}
+fn negate() -> double extends double = {
+    Codex.negate(this)
+}
+fn negate() -> float extends float = {
+    Codex.negate(this)
+}
+
+
+fn not() -> boolean extends boolean = {
+    if this {
+        false
+    } else {
+        true
+    }
+}
+
+fn not() -> int extends int = {
+    if this <= 1 {
+        1
+    } else {
+        this * !(this - 1)
+    }
+}
+
+fn bitXor(exp: double) -> double extends double = {
+     Math.pow(this, exp)
+}
+
+fn bitXor(exp: int) -> int extends int = {
+     Math.pow(this.toDouble(), exp.toDouble()).toInt()
+}

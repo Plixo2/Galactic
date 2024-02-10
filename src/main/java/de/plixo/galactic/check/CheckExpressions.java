@@ -23,6 +23,19 @@ public class CheckExpressions implements Tree<Context, Integer> {
     }
 
     @Override
+    public Expression parseWhileExpression(WhileExpression whileExpression, Context context,
+                                           Integer unused) {
+        var condition = parse(whileExpression.condition(), context, 0);
+        var conditionType = condition.getType(context);
+        if (!Type.isAssignableFrom(PrimitiveType.BOOLEAN, conditionType, context)) {
+            throw new FlairCheckException(condition.region(), FlairKind.TYPE_MISMATCH,
+                    "condition is not boolean");
+        }
+        var _ = parse(whileExpression.body(), context, 0);
+        return whileExpression;
+    }
+
+    @Override
     public Expression parseCastExpression(CastExpression expression, Context context,
                                           Integer unused) {
         var parsed = parse(expression.object(), context, 0);
@@ -32,8 +45,9 @@ public class CheckExpressions implements Tree<Context, Integer> {
                     "Cant cast to primitive type or array");
         }
         var parsedType = parsed.getType(context);
-        if (!Type.isAssignableFrom(type, parsedType, context) &&
-                !Type.isAssignableFrom(parsedType, type, context)) {
+        var castForward = !Type.isAssignableFrom(type, parsedType, context);
+        var castBackward = !Type.isAssignableFrom(parsedType, type, context);
+        if (castForward && castBackward) {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                     "Cant cast across inheritance, this cast will always fail");
         }

@@ -47,6 +47,14 @@ public class Infer implements Tree<Context, Type> {
     }
 
     @Override
+    public Expression parseWhileExpression(WhileExpression whileExpression, Context context,
+                                           @Nullable Type hint) {
+        var condition = parse(whileExpression.condition(), context, PrimitiveType.BOOLEAN);
+        var body = parse(whileExpression.body(), context, null);
+        return new WhileExpression(whileExpression.region(), condition, body);
+    }
+
+    @Override
     public Expression parsePutStaticExpression(PutStaticFieldExpression expression, Context context,
                                                @Nullable Type hint) {
         return new PutStaticFieldExpression(expression.region(), expression.field(),
@@ -294,10 +302,9 @@ public class Infer implements Tree<Context, Type> {
                 throw new FlairCheckException(region, UNEXPECTED_TYPE,
                         STR."Method \{id} is not an Extension for type \{parsedType}");
             }
-            var collection = new MethodCollection(id, possibleMethods.stream().map(
-                    StellaMethod::asMethod).toList());
-            var methodExpression =
-                    new StaticMethodExpression(region, collection);
+            var collection = new MethodCollection(id,
+                    possibleMethods.stream().map(StellaMethod::asMethod).toList());
+            var methodExpression = new StaticMethodExpression(region, collection);
             return new ExtensionBitExpression(region, methodExpression, parsed);
         }
         throw new FlairCheckException(region, UNEXPECTED_TYPE,

@@ -1,0 +1,98 @@
+import @java Math java.lang.Math
+import @java Predicate java.util.function.Predicate
+import @java Integer java.lang.Integer
+
+fn main(args: [java.lang.String]) = {
+    testObjects()
+}
+
+fn inlineMath() = {
+    assertValue(1d + 3d == 4d)
+    assertValue(!false)
+    assertValue(100 > 50)
+    assertValue(100 >= 100)
+    assertValue(-100 == -100)
+    var a = 100
+    var b = 10 * 10
+    assertValue(a == b)
+    assertValue(100 < 1000)
+    assertValue(a <= 1000)
+    assertValue(-a == -100)
+    assertValue(false || true)
+    assertValue(true && true)
+    assertValue(100 % 3 == 1)
+    assertValue(true != false)
+    assertValue(false == false)
+    assertValue(!10 == 3628800)
+    assertValue(2 + 10 * 20 + 2 == 204)
+    assertValue((10d^3d) == 1000d)
+    assertValue((2^8) == 256)
+}
+
+fn distance(inA: double, inB: double) -> double = {
+    Math.sqrt(inA * inA + inB * inB)
+}
+
+fn sum(amount: int) -> int = {
+    var sum = 0
+    var i = 0
+    while i <= amount {
+        sum = sum + i
+        i = i + 1
+    }
+    sum
+}
+
+fn testObjects() = {
+    var boxedInt: Integer = (10).box()
+    assertValue(boxedInt is java.lang.Object)
+    assertValue(boxedInt is Integer)
+    assertValue(boxedInt.unbox() == 10)
+    var boxedDouble: java.lang.Double = (10d).box()
+    assertValue(boxedDouble.unbox().toInt() == 10)
+
+    var list: java.util.List = new java.util.ArrayList {}
+
+    list.add((10).box())
+    list.add((20).box())
+    list.add((-20).box())
+    var i = 0
+    while i < list.size() {
+        assertValue(list.get(i) is Integer)
+        var value = (list.get(i) as Integer).unbox()
+        i = i + 1
+    }
+    var bSuper = new Super {}
+    var aImpl = new Impl {}
+    assertValue(bSuper.test() == "super")
+    assertValue(aImpl.test() == "Implementation")
+    
+    var minValue = 0
+    var filtered = list.stream().filter(new IntFilterGreater { minValue }).toList()
+    i = 0
+    while i < filtered.size() {
+        var value: int = (filtered.get(i) as Integer).unbox()
+        assertValue(value > minValue)
+        i = i + 1
+    }
+    
+}
+
+class Super {
+    fn test() -> java.lang.String = {
+        "super"
+    }
+}
+
+class Impl extends Super {
+    fn test() -> java.lang.String = {
+        "Implementation"
+    }
+}
+
+class IntFilterGreater implements Predicate {
+    value: int
+    fn test(inValue: java.lang.Object) -> boolean = {
+        (inValue as Integer).unbox() > this.value
+    }
+}

@@ -1,18 +1,30 @@
-import * Core
-import * Math
 
 fn test() = {
     println("Enter two numbers: ")
     var one = stdIn().toInt()
     var two = stdIn().toInt()
-    if (one.equals(two)) {
+    if (one == two) {
         println("equals")
     } else {
         println("not equals")
     }
     print("Addition: ")
-    println(one.add(two))
-    assertValue(1d.add(3d).equals(4d))
+    println(one + two)
+    assertValue(1d + 3d == 4d)
+    assertValue(!false)
+    assertValue(100 > 50)
+    assertValue(100 >= 100)
+    assertValue(-100 == -100)
+    var a = 100
+    var b = 10 * 10
+    println(a)
+    println(b)
+    assertValue(a == b)
+    assertValue(100 < 1000)
+    assertValue(a <= 1000)
+    assertValue(-a == -100)
+    println(-100)
+    println(-a)
 }
 
 

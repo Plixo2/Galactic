@@ -27,6 +27,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 /**
  * Code generator for the JVM.
+ * Warning: this is a mess lol
  */
 @RequiredArgsConstructor
 public class Codegen {
@@ -212,13 +213,29 @@ public class Codegen {
                     context.add(new InsnNode(ICONST_0));
                 }
             }
+            case WhileExpression whileExpression -> {
+                var start = new LabelNode();
+                var end = new LabelNode();
+                context.add(start);
+                parseExpression(whileExpression.condition(), context);
+                context.add(new JumpInsnNode(IFEQ, end));
+                var body = whileExpression.body();
+                parseExpression(body, context);
+                var bodyType = body.getType(context.normalContext());
+                if (!bodyType.equals(new VoidType())) {
+                    context.add(new InsnNode(POP));
+                }
+                context.add(new JumpInsnNode(GOTO, start));
+                context.add(end);
+            }
             case FieldExpression getFieldExpression -> {
                 parseExpression(getFieldExpression.object(), context);
                 var field = getFieldExpression.field();
                 if (getFieldExpression.owner() instanceof Class aClass) {
-                    context.add(
+                    var fieldInsnNode =
                             new FieldInsnNode(GETFIELD, aClass.getJVMDestination(), field.name(),
-                                    field.getDescriptor()));
+                                    field.getDescriptor());
+                    context.add(fieldInsnNode);
                 } else {
                     throw new NullPointerException(getFieldExpression.owner().getDescriptor());
                 }
@@ -278,6 +295,12 @@ public class Codegen {
                 parseExpression(branchExpression.condition(), context);
                 context.add(new JumpInsnNode(IFEQ, elseTarget));
                 parseExpression(branchExpression.then(), context);
+                var normalContext = context.normalContext();
+                //TODO
+                if (!branchExpression.then().getType(normalContext).equals(new VoidType()) &&
+                        branchExpression.getType(normalContext).equals(new VoidType())) {
+                    context.add(new InsnNode(POP));
+                }
                 context.add(new JumpInsnNode(GOTO, endTarget));
                 context.add(elseTarget);
                 if (branchExpression.elseExpression() != null) {

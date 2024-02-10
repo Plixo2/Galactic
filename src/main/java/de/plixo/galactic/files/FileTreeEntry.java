@@ -30,7 +30,7 @@ public sealed abstract class FileTreeEntry {
     private final String name;
 
     /**
-     * Reads the File, turns it into tokens, then stores the tokens in the unit
+     * Reads the file, turns it into tokens, then stores the tokens in the unit
      *
      * @param tokenizer the tokenizer to use
      */

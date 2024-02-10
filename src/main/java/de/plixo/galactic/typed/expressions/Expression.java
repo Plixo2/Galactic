@@ -16,7 +16,7 @@ public sealed interface Expression
         PutStaticFieldExpression, StaticClassExpression, StaticFieldExpression,
         StaticMethodExpression, StellaClassConstructExpression, StellaPackageExpression,
         StringExpression, SuperCallExpression, SymbolExpression, ThisExpression, UnitExpression,
-        VarDefExpression, VarExpression {
+        VarDefExpression, VarExpression, WhileExpression {
 
 
     Type getType(Context context);

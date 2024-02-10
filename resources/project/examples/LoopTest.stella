@@ -1,0 +1,27 @@
+import @java ArrayList java.util.ArrayList
+
+
+fn test() = {
+    var list = new ArrayList {}
+
+ //   while list.isEmpty().not() {
+   //     list.add("Hello")
+   // }
+    //while(fn() = {
+
+    //})
+
+    //while list.isEmpty().not() {
+    //    list.add("Hello")
+    //}
+
+    //list.forEach: fn(f) {
+    //    println(f)
+    //}
+    //list.map: f {
+//        (f as java.lang.String).toUpperCase()
+//    }
+//    list.forEach: f {
+//        println(f)
+//    }
+}

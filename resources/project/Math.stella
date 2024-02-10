@@ -1,9 +1,0 @@
-import @java Codex stella.Codex
-
-fn add(rhs: int) -> int extends int = {
-    Codex.add(this, rhs)
-}
-fn add(rhs: double) -> double extends double = {
-    Codex.add(this, rhs)
-}
-

@@ -6,22 +6,26 @@ import de.plixo.galactic.boundary.LoadedBytecode;
 import de.plixo.galactic.check.CheckProject;
 import de.plixo.galactic.codegen.Codegen;
 import de.plixo.galactic.codegen.GeneratedCode;
+import de.plixo.galactic.codegen.JarOutput;
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.exception.SyntaxFlairHandler;
 import de.plixo.galactic.exception.TokenFlairHandler;
 import de.plixo.galactic.files.FileTree;
+import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.GalacticTokens;
 import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.parsing.Grammar;
 import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.StandardLibs;
 import de.plixo.galactic.typed.TreeBuilding;
 import de.plixo.galactic.typed.lowering.Infer;
 import de.plixo.galactic.typed.lowering.Symbols;
 import de.plixo.galactic.typed.parsing.TIRClassParsing;
 import de.plixo.galactic.typed.parsing.TIRUnitParsing;
 import de.plixo.galactic.typed.path.CompileRoot;
+import de.plixo.galactic.typed.path.Unit;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -48,6 +53,10 @@ public class Universe {
     private final ObjectPath defaultSuperClass = new ObjectPath("java", "lang", "Object");
     //java 8
     private final int codeGenVersion = 52;
+
+    private final StandardLibs standardLibs = new StandardLibs("stella",
+            List.of(new StandardLibs.Lib("resources/library/Core.stella", "Core"),
+                    new StandardLibs.Lib("resources/library/Math.stella", "Math")));
 
     /**
      * Bytecode memoization
@@ -67,8 +76,6 @@ public class Universe {
      * @return result of the compilation
      */
     public CompileResult parse(File file) throws FlairException {
-        var startTime = System.currentTimeMillis();
-
         var grammar = generateGrammar();
         var rule = Objects.requireNonNull(grammar.get(entryRule), "missing entry rule");
         var tokens = new GalacticTokens().tokens();
@@ -78,27 +85,25 @@ public class Universe {
         if (rootEntry == null) {
             throw new NullPointerException("Cant open project file");
         }
+        rootEntry = addLibs(rootEntry, standardLibs);
 
         var tokenFlairHandler = new TokenFlairHandler();
         rootEntry.readAndLex(tokenizer, tokenFlairHandler);
         rootEntry.parse(rule);
         tokenFlairHandler.handle();
 
-        var syntaxFlairHandler = new SyntaxFlairHandler();
-        var root = TreeBuilding.convertRoot(rootEntry, syntaxFlairHandler);
-        syntaxFlairHandler.handle();
         try {
+            var syntaxFlairHandler = new SyntaxFlairHandler();
+            var root = TreeBuilding.convertRoot(rootEntry, syntaxFlairHandler);
+            syntaxFlairHandler.handle();
+
             read(root);
             var checkProject = new CheckProject();
             checkProject.check(root, this);
+            return new Success(root);
         } catch (FlairCheckException e) {
             return new Error(e);
-        } finally {
-            var endTime = System.currentTimeMillis();
-            System.out.println(STR."Reading Took \{endTime - startTime} ms");
         }
-
-        return new Success(root);
     }
 
     /**
@@ -106,11 +111,17 @@ public class Universe {
      *
      * @param stream    the output stream
      * @param root      the root of the compile tree
-     * @param mainClass the main class, e.g. "de/plixo/Main"
+     * @param mainClass the main class, e.g. "de/plixo/Main". If it's null, and the root is a unit,
+     *                  the main class will be the unit path
      */
     public void write(FileOutputStream stream, CompileRoot root, @Nullable String mainClass)
             throws IOException {
-        var startTime = System.currentTimeMillis();
+
+        var mainClassPath = mainClass;
+        if (root instanceof Unit unit && mainClassPath == null) {
+            mainClassPath = unit.getJVMDestination();
+        }
+
         var units = root.getUnits();
         var compiler = new Codegen(codeGenVersion);
         for (var unit : units) {
@@ -122,12 +133,20 @@ public class Universe {
             }
         }
         var output = compiler.getOutput();
-        var manifest = new GeneratedCode.Manifest(mainClass, manifestVersion);
+        var manifest = new GeneratedCode.Manifest(mainClassPath, manifestVersion);
         output.write(stream, manifest, loadedBytecode);
         output.dump(new File(debugOutput));
+    }
 
-        var endTime = System.currentTimeMillis();
-        System.out.println(STR."Writing Took \{endTime - startTime} ms");
+    public List<JarOutput> compileUnit(Unit unit, CompileRoot root) {
+        var compiler = new Codegen(codeGenVersion);
+        var context = new Context(this, unit, null, null, loadedBytecode);
+        compiler.addUnit(unit, context);
+        for (var aClass : unit.classes()) {
+            context = new Context(this, unit, aClass, root, loadedBytecode);
+            compiler.addClass(aClass, context);
+        }
+        return compiler.getOutput().output();
     }
 
     /**
@@ -145,7 +164,7 @@ public class Universe {
             TIRUnitParsing.parse(unit, defaultSuperClass);
         }
         for (var unit : units) {
-            TIRUnitParsing.parseImports(unit, root, loadedBytecode, false);
+            TIRUnitParsing.parseImports(this, unit, root, loadedBytecode, false);
         }
 
         var classes = new ArrayList<StellaClass>();
@@ -165,7 +184,7 @@ public class Universe {
         });
         //rerun import for static method imports
         for (var unit : units) {
-            TIRUnitParsing.parseImports(unit, root, loadedBytecode, true);
+            TIRUnitParsing.parseImports(this, unit, root, loadedBytecode, true);
         }
         classes.forEach(aClass -> {
             var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
@@ -210,6 +229,33 @@ public class Universe {
         return grammar.generate(grammarStr.lines().iterator());
     }
 
+    private FileTreeEntry addLibs(FileTreeEntry rootEntry, StandardLibs standardClasses) {
+        var root = switch (rootEntry) {
+            case FileTreeEntry.FileTreePackage fileTreePackage -> fileTreePackage;
+            case FileTreeEntry.FileTreeUnit fileTreeUnit -> {
+                var name = fileTreeUnit.localName();
+                var children = new ArrayList<FileTreeEntry>();
+                children.add(fileTreeUnit);
+                yield new FileTreeEntry.FileTreePackage(name, name, children);
+            }
+        };
+        var fileTreeEntries = new ArrayList<FileTreeEntry>();
+        var packageName = standardClasses.packageName();
+        for (var standardClass : standardClasses.imports()) {
+            var stdSource = new File(standardClass.file());
+            if (!stdSource.exists()) {
+                throw new FlairException(STR."Cant find lib \{standardClass.file()}");
+            }
+            var localName = standardClass.name();
+            var entry = new FileTreeEntry.FileTreeUnit(localName, STR."\{packageName}.\{localName}",
+                    stdSource);
+            fileTreeEntries.add(entry);
+        }
+        root.children()
+                .add(new FileTreeEntry.FileTreePackage(packageName, packageName, fileTreeEntries));
+        return root;
+    }
+
     /**
      * The result of the compilation, can be either an Error or a Success
      */
@@ -224,4 +270,5 @@ public class Universe {
     public record Error(FlairCheckException exception) implements CompileResult {
 
     }
+
 }

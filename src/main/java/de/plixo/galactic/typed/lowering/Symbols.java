@@ -6,15 +6,8 @@ import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.types.Class;
-import de.plixo.galactic.types.Field;
-import de.plixo.galactic.types.Type;
-
-import java.util.*;
 
 import static de.plixo.galactic.exception.FlairKind.NAME;
-import static de.plixo.galactic.typed.Scope.FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
 /**
  * The Symbols stage is responsible for resolving symbols and names. It's the first stage of the Expression parser.
@@ -26,6 +19,14 @@ public class Symbols implements Tree<Context, Integer> {
     public Expression defaultBehavior(Expression expression) {
         throw new FlairException(STR."Expression of type \{expression.getClass()
                 .getSimpleName()} not implemented for Symbol stage");
+    }
+
+    @Override
+    public Expression parseWhileExpression(WhileExpression whileExpression, Context context,
+                                           Integer hint) {
+        var condition = parse(whileExpression.condition(), context, hint);
+        var body = parse(whileExpression.body(), context, hint);
+        return new WhileExpression(whileExpression.region(), condition, body);
     }
 
     @Override
@@ -50,7 +51,8 @@ public class Symbols implements Tree<Context, Integer> {
     }
 
     @Override
-    public Expression parseConstructExpression(ConstructExpression expression, Context context, Integer unused) {
+    public Expression parseConstructExpression(ConstructExpression expression, Context context,
+                                               Integer unused) {
 
         var parsed = expression.arguments().stream().map(ref -> {
             context.pushScope();
@@ -68,29 +70,34 @@ public class Symbols implements Tree<Context, Integer> {
     }
 
     @Override
-    public Expression parseStringExpression(StringExpression expression, Context context, Integer unused) {
+    public Expression parseStringExpression(StringExpression expression, Context context,
+                                            Integer unused) {
         return expression;
     }
 
     @Override
-    public Expression parseNumberExpression(NumberExpression expression, Context context, Integer unused) {
+    public Expression parseNumberExpression(NumberExpression expression, Context context,
+                                            Integer unused) {
         return expression;
     }
 
 
     @Override
-    public Expression parseBooleanExpression(BooleanExpression expression, Context context, Integer unused) {
+    public Expression parseBooleanExpression(BooleanExpression expression, Context context,
+                                             Integer unused) {
         return expression;
     }
 
     @Override
-    public Expression parseCastExpression(CastExpression expression, Context context, Integer unused) {
+    public Expression parseCastExpression(CastExpression expression, Context context,
+                                          Integer unused) {
         var parsed = parse(expression.object(), context, 0);
         return new CastExpression(expression.region(), parsed, expression.type());
     }
 
     @Override
-    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context, Integer unused) {
+    public Expression parseCastCheckExpression(CastCheckExpression expression, Context context,
+                                               Integer unused) {
         var parsed = parse(expression.object(), context, 0);
         return new CastCheckExpression(expression.region(), parsed, expression.type());
     }
@@ -147,7 +154,8 @@ public class Symbols implements Tree<Context, Integer> {
     }
 
     @Override
-    public Expression parseBranchExpression(BranchExpression expression, Context context, Integer unused) {
+    public Expression parseBranchExpression(BranchExpression expression, Context context,
+                                            Integer unused) {
         context.pushScope();
         var parsedCondition = parse(expression.condition(), context, 0);
         context.popScope();
@@ -167,7 +175,8 @@ public class Symbols implements Tree<Context, Integer> {
 
 
     @Override
-    public Expression parseBlockExpression(BlockExpression blockExpression, Context context, Integer unused) {
+    public Expression parseBlockExpression(BlockExpression blockExpression, Context context,
+                                           Integer unused) {
         context.pushScope();
         var parsed =
                 blockExpression.expressions().stream().map(ref -> parse(ref, context, 0)).toList();
@@ -176,7 +185,8 @@ public class Symbols implements Tree<Context, Integer> {
     }
 
     @Override
-    public Expression parseVarDefExpression(VarDefExpression varDefExpression, Context context, Integer unused) {
+    public Expression parseVarDefExpression(VarDefExpression varDefExpression, Context context,
+                                            Integer unused) {
         var region = varDefExpression.region();
         var scope = context.scope();
         var name = varDefExpression.name();
@@ -198,7 +208,8 @@ public class Symbols implements Tree<Context, Integer> {
     }
 
     @Override
-    public Expression parseSymbolExpression(SymbolExpression expression, Context context, Integer unused) {
+    public Expression parseSymbolExpression(SymbolExpression expression, Context context,
+                                            Integer unused) {
         var id = expression.id();
         var region = expression.region();
         if (id.equals("true") || id.equals("false")) {

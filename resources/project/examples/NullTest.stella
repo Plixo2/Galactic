@@ -1,4 +1,3 @@
-import * Core
 
 fn test() = {
     var n = null()

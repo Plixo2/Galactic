@@ -7,12 +7,12 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
- * Generates a FileTreeEntry from a given File
+ * Generates a FileTreeEntry from a given file
  */
 public class FileTree {
 
     /**
-     * Generates a FileTreeEntry from a given File recursively
+     * Generates a FileTreeEntry from a given file recursively
      *
      * @param file        root file of the tree
      * @param filePattern regex pattern for files to include
@@ -22,6 +22,14 @@ public class FileTree {
         return get(null, file, filePattern);
     }
 
+    /**
+     * Recursive helper function for generateFileTree
+     * @param path absolute path, seperated by dots, null means it's the root
+     * @param file current file to convert
+     * @param filePattern regex pattern for files to include
+     * @return FileTreeEntry for the file, null if the file is not matching the pattern, or the 'file' is not a file or directory
+     */
+
     private static @Nullable FileTreeEntry get(@Nullable String path, File file,
                                                String filePattern) {
         var absolutePath = file.getAbsolutePath();
@@ -30,11 +38,10 @@ public class FileTree {
         if (path == null) {
             name = localName;
         } else {
-            name = path + "." + localName;
+            name = STR."\{path}.\{localName}";
         }
         if (file.isDirectory()) {
             var children = new ArrayList<FileTreeEntry>();
-            var treePackage = new FileTreeEntry.FileTreePackage(localName, name, children);
             var childFiles = file.listFiles();
             if (childFiles != null) {
                 for (var child : childFiles) {
@@ -44,14 +51,17 @@ public class FileTree {
                     }
                 }
             }
-            return treePackage;
+            return new FileTreeEntry.FileTreePackage(localName, name, children);
         } else if (file.isFile()) {
             var stellaFile = FilenameUtils.getExtension(absolutePath).matches(filePattern);
             if (stellaFile) {
                 return new FileTreeEntry.FileTreeUnit(localName, name, file);
+            } else {
+                return null;
             }
+        } else {
+            return null;
         }
-        return null;
     }
 
 }

@@ -1,4 +1,3 @@
-import * Core
 
 import @java ElementList java.util.ArrayList
 import @java Function java.util.function.Function
@@ -32,11 +31,11 @@ class Test implements Function, Setter, Getter {
 
 fn test() = {
     var list = new ElementList
-    list.add: "Hello"
-    list.add: " "
-    list.add: "World"
-    list.add: "!"
+    list.add ("Hello")
+    list.add (" "    )
+    list.add ("World")
+    list.add ("!"    )
     var mapped = list.stream().map(new Test).toList()
-    mapped.forEach: new Test
-    new ElementList { mapped }.forEach: new Test
+    mapped.forEach(new Test)
+    new ElementList { mapped }.forEach(new Test)
 }
