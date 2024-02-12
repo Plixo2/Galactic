@@ -2,6 +2,7 @@ package de.plixo.galactic.standalone;
 
 import de.plixo.galactic.Universe;
 import de.plixo.galactic.codegen.JarOutput;
+import de.plixo.galactic.typed.StandardLibs;
 import de.plixo.galactic.typed.path.Package;
 import lombok.SneakyThrows;
 import net.bytebuddy.dynamic.loading.ByteArrayClassLoader;
@@ -12,19 +13,23 @@ import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 
 public class Container {
     //    private static final String TEST_BUILD = "resources/tests/build.jar";
     private final Universe universe;
+    private final StandardLibs standardLibs = new StandardLibs("stella",
+            List.of(new StandardLibs.Lib("resources/library/Core.stella", "Core"),
+                    new StandardLibs.Lib("resources/library/Math.stella", "Math")));
 
     public Container() {
         universe = new Universe();
     }
 
     public Universe.CompileResult load(String path) {
-        return universe.parse(new File(path));
+        return universe.parse(new File(path), standardLibs);
     }
 
     public @Nullable Universe.Success assertSuccess(Universe.CompileResult result) {

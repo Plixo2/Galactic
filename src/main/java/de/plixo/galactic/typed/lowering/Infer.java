@@ -150,14 +150,6 @@ public class Infer implements Tree<Context, Type> {
         if (parsed instanceof ExtensionBitExpression(
                 var region, var staticMethodExpression, var object
         )) {
-//            parsed = new StaticMethodExpression(region, staticMethodExpression.owner(),
-//                    staticMethodExpression.methods().map(ref -> {
-//                        var types = new ArrayList<Type>();
-//                        types.add(object.getType(context));
-//                        types.addAll(ref.arguments());
-//                        return new Method(ref.modifier(), ref.name(), ref.returnType(), types,
-//                                ref.owner());
-//                    }));
             parsed = staticMethodExpression;
             var argsPlus = new ArrayList<Expression>();
             argsPlus.add(object);

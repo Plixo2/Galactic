@@ -11,6 +11,7 @@ import de.plixo.galactic.high_level.items.HIRStaticMethod;
 import de.plixo.galactic.high_level.items.HIRTopBlock;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
+import de.plixo.galactic.typed.StandardLibs;
 import de.plixo.galactic.typed.path.CompileRoot;
 import de.plixo.galactic.typed.path.PathElement;
 import de.plixo.galactic.typed.path.Unit;
@@ -53,15 +54,15 @@ public class TIRUnitParsing {
      * @param root     the root of the project, to start the search
      * @param bytecode the loaded bytecode, to locate java imports
      */
-    public static void parseImports(Universe universe, Unit unit, CompileRoot root,
+    public static void parseImports(StandardLibs standardLibs, Unit unit, CompileRoot root,
                                     LoadedBytecode bytecode, boolean throwErrors) {
         // clear imports, from previous run
         unit.clearImports();
         unit.classes().forEach(ref -> {
             unit.addImport(unit.getRegion(), ref.localName(), ref, false);
         });
-        for (var anImport : universe.standardLibs().imports()) {
-            var path = new ObjectPath(universe.standardLibs().packageName());
+        for (var anImport : standardLibs.imports()) {
+            var path = new ObjectPath(standardLibs.packageName());
             path = path.add(anImport.name());
             addImport(unit, unit.getRegion(), root, "*", path, ImportType.STELLA, bytecode,
                     throwErrors, false);

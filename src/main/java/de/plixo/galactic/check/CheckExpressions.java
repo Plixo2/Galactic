@@ -141,7 +141,7 @@ public class CheckExpressions implements Tree<Context, Integer> {
     @Override
     public Expression parseObjectFieldExpression(FieldExpression expression, Context context,
                                                  Integer unused) {
-        parse(expression.object(), context, 0);
+        var _ = parse(expression.object(), context, 0);
         if (!expression.field().isPublic()) {
             throw new FlairCheckException(expression.region(), FlairKind.SECURITY,
                     "cant access non public field");

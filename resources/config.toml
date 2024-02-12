@@ -1,0 +1,10 @@
+
+
+source = "resources/standalone/HelloWorld.stella"
+main = "HelloWorld/HelloWorld"
+
+build = "resources/build.jar"
+
+[core]
+Core = "resources/library/Core.stella"
+Math = "resources/library/Math.stella"

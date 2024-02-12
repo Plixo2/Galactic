@@ -75,7 +75,6 @@ fn testObjects() = {
         assertValue(value > minValue)
         i = i + 1
     }
-    
 }
 
 class Super {

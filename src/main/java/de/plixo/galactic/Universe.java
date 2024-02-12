@@ -54,9 +54,6 @@ public class Universe {
     //java 8
     private final int codeGenVersion = 52;
 
-    private final StandardLibs standardLibs = new StandardLibs("stella",
-            List.of(new StandardLibs.Lib("resources/library/Core.stella", "Core"),
-                    new StandardLibs.Lib("resources/library/Math.stella", "Math")));
 
     /**
      * Bytecode memoization
@@ -75,7 +72,7 @@ public class Universe {
      * @param file the project Path (file or directory)
      * @return result of the compilation
      */
-    public CompileResult parse(File file) throws FlairException {
+    public CompileResult parse(File file, StandardLibs standardLibs) throws FlairException {
         var grammar = generateGrammar();
         var rule = Objects.requireNonNull(grammar.get(entryRule), "missing entry rule");
         var tokens = new GalacticTokens().tokens();
@@ -97,7 +94,7 @@ public class Universe {
             var root = TreeBuilding.convertRoot(rootEntry, syntaxFlairHandler);
             syntaxFlairHandler.handle();
 
-            read(root);
+            read(root, standardLibs);
             var checkProject = new CheckProject();
             checkProject.check(root, this);
             return new Success(root);
@@ -114,8 +111,8 @@ public class Universe {
      * @param mainClass the main class, e.g. "de/plixo/Main". If it's null, and the root is a unit,
      *                  the main class will be the unit path
      */
-    public void write(FileOutputStream stream, CompileRoot root, @Nullable String mainClass)
-            throws IOException {
+    public void write(FileOutputStream stream, CompileRoot root, @Nullable String mainClass,
+                      boolean debug) throws IOException {
 
         var mainClassPath = mainClass;
         if (root instanceof Unit unit && mainClassPath == null) {
@@ -135,7 +132,9 @@ public class Universe {
         var output = compiler.getOutput();
         var manifest = new GeneratedCode.Manifest(mainClassPath, manifestVersion);
         output.write(stream, manifest, loadedBytecode);
-        output.dump(new File(debugOutput));
+        if (debug) {
+            output.dump(new File(debugOutput));
+        }
     }
 
     public List<JarOutput> compileUnit(Unit unit, CompileRoot root) {
@@ -154,7 +153,7 @@ public class Universe {
      *
      * @param root the root of the compile tree
      */
-    private void read(CompileRoot root) {
+    private void read(CompileRoot root, StandardLibs standardLibs) {
         var units = root.getUnits();
         var defaultSuperClass = JVMLoader.asJVMClass(this.defaultSuperClass, loadedBytecode);
         if (defaultSuperClass == null) {
@@ -164,7 +163,7 @@ public class Universe {
             TIRUnitParsing.parse(unit, defaultSuperClass);
         }
         for (var unit : units) {
-            TIRUnitParsing.parseImports(this, unit, root, loadedBytecode, false);
+            TIRUnitParsing.parseImports(standardLibs, unit, root, loadedBytecode, false);
         }
 
         var classes = new ArrayList<StellaClass>();
@@ -184,7 +183,7 @@ public class Universe {
         });
         //rerun import for static method imports
         for (var unit : units) {
-            TIRUnitParsing.parseImports(this, unit, root, loadedBytecode, true);
+            TIRUnitParsing.parseImports(standardLibs, unit, root, loadedBytecode, true);
         }
         classes.forEach(aClass -> {
             var context = new Context(this, aClass.unit(), aClass, root, loadedBytecode);
