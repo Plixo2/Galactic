@@ -4,7 +4,7 @@ import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.types.Type;
 
-public record ThisExpression(Region region, Type type) implements Expression{
+public record ThisExpression(Region region, Type type) implements Expression {
     @Override
     public Type getType(Context context) {
         return type;

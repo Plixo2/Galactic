@@ -15,7 +15,9 @@ import de.plixo.galactic.types.*;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 
@@ -127,7 +129,8 @@ public class StellaClass extends Class {
             var valueSymbol = new HIRIdentifier(region(), field.name());
             var assign = new HIRAssign(region(), dotNotation, valueSymbol);
             expressions.add(assign);
-        } var owner = new MethodOwner.ClassOwner(this);
+        }
+        var owner = new MethodOwner.ClassOwner(this);
         var method = new StellaMethod(ACC_PUBLIC, "<init>", params, new VoidType(),
                 new HIRBlock(region(), expressions), owner, null, region());
         method.thisContext(this);

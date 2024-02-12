@@ -14,7 +14,7 @@ public final class HIRNumber implements HIRExpression {
     private final BigDecimal value;
     private final PrimitiveType.StellaPrimitiveType type;
 
-    public HIRNumber(Region region, String number) throws NumberFormatException{
+    public HIRNumber(Region region, String number) throws NumberFormatException {
         this.region = region;
         if (number.isEmpty()) {
             value = new BigDecimal(number);

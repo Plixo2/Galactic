@@ -22,7 +22,8 @@ public class CheckPackage {
         }
         for (var subPackage : thePackage.packages()) {
             if (!names.add(subPackage.localName())) {
-                throw new FlairException(STR."Duplicate name for package \{subPackage.localName()}");
+                throw new FlairException(
+                        STR."Duplicate name for package \{subPackage.localName()}");
             }
             check(subPackage, root, language, checkProject);
         }

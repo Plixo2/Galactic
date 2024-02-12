@@ -25,6 +25,7 @@ public record Region(Position left, Position right) {
             return left.character() < right.character() ? left : right;
         }
     }
+
     public Position maxPosition() {
         if (left.line() < right.line()) {
             return right;

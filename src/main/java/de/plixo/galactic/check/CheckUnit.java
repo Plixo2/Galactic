@@ -54,8 +54,8 @@ public class CheckUnit {
             var name = method.localName();
             names.add(name);
 //            if (!) {
-               // throw new FlairCheckException(method.region(), NAME,
-                 //       STR."Duplicate name for method \{name}");
+            // throw new FlairCheckException(method.region(), NAME,
+            //       STR."Duplicate name for method \{name}");
 //            }
             if (!CheckProject.isAllowedTopLevelName(name)) {
                 throw new FlairCheckException(method.region(), NAME,

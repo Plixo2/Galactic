@@ -1,6 +1,8 @@
 package de.plixo.galactic.high_level;
 
-import de.plixo.galactic.high_level.items.*;
+import de.plixo.galactic.high_level.items.HIRClass;
+import de.plixo.galactic.high_level.items.HIRField;
+import de.plixo.galactic.high_level.items.HIRMethod;
 import de.plixo.galactic.high_level.types.HIRType;
 import de.plixo.galactic.parsing.Node;
 

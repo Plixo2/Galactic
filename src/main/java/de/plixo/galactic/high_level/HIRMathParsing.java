@@ -53,16 +53,32 @@ public class HIRMathParsing {
 
     static {
         var lookup = new HashMap<String, BinNodeFormat>();
-        lookup.put("conditionalorexpression", new BinNodeFormat("ConditionalAndExpression", "ConditionalOrExpressionRight",
-                "ConditionalOrExpressionFunction"));
-        lookup.put("ConditionalAndExpression", new BinNodeFormat("InclusiveOrExpression", "ConditionalAndExpressionRight", "ConditionalAndExpressionFunction"));
-        lookup.put("InclusiveOrExpression", new BinNodeFormat("ExclusiveOrExpression", "InclusiveOrExpressionRight", "InclusiveOrExpressionFunction"));
-        lookup.put("ExclusiveOrExpression", new BinNodeFormat("AndExpression", "ExclusiveOrExpressionRight", "ExclusiveOrExpressionFunction"));
-        lookup.put("AndExpression", new BinNodeFormat("EqualityExpression", "AndExpressionRight", "AndExpressionFunction"));
-        lookup.put("EqualityExpression", new BinNodeFormat("RelationalExpression", "EqualityExpressionRight", "EqualityExpressionFunction"));
-        lookup.put("RelationalExpression", new BinNodeFormat("AdditiveExpression", "RelationalExpressionRight", "RelationalExpressionFunction"));
-        lookup.put("AdditiveExpression", new BinNodeFormat("MultiplicativeExpression", "AdditiveExpressionRight", "AdditiveExpressionFunction"));
-        lookup.put("MultiplicativeExpression", new BinNodeFormat("UnaryExpression", "MultiplicativeExpressionRight", "MultiplicativeExpressionFunction"));
+        lookup.put("conditionalorexpression",
+                new BinNodeFormat("ConditionalAndExpression", "ConditionalOrExpressionRight",
+                        "ConditionalOrExpressionFunction"));
+        lookup.put("ConditionalAndExpression",
+                new BinNodeFormat("InclusiveOrExpression", "ConditionalAndExpressionRight",
+                        "ConditionalAndExpressionFunction"));
+        lookup.put("InclusiveOrExpression",
+                new BinNodeFormat("ExclusiveOrExpression", "InclusiveOrExpressionRight",
+                        "InclusiveOrExpressionFunction"));
+        lookup.put("ExclusiveOrExpression",
+                new BinNodeFormat("AndExpression", "ExclusiveOrExpressionRight",
+                        "ExclusiveOrExpressionFunction"));
+        lookup.put("AndExpression", new BinNodeFormat("EqualityExpression", "AndExpressionRight",
+                "AndExpressionFunction"));
+        lookup.put("EqualityExpression",
+                new BinNodeFormat("RelationalExpression", "EqualityExpressionRight",
+                        "EqualityExpressionFunction"));
+        lookup.put("RelationalExpression",
+                new BinNodeFormat("AdditiveExpression", "RelationalExpressionRight",
+                        "RelationalExpressionFunction"));
+        lookup.put("AdditiveExpression",
+                new BinNodeFormat("MultiplicativeExpression", "AdditiveExpressionRight",
+                        "AdditiveExpressionFunction"));
+        lookup.put("MultiplicativeExpression",
+                new BinNodeFormat("UnaryExpression", "MultiplicativeExpressionRight",
+                        "MultiplicativeExpressionFunction"));
 
         HIRMathParsing.lookup = new HashMap<>();
 
@@ -87,7 +103,8 @@ public class HIRMathParsing {
 
     private static HIRExpression genericBinary(Node node) {
         var name = node.name();
-        var entry = Objects.requireNonNull(lookup.get(name.toLowerCase()), STR."No entry for \{name}");
+        var entry =
+                Objects.requireNonNull(lookup.get(name.toLowerCase()), STR."No entry for \{name}");
         HIRExpression left;
         if (entry.next.equals("UnaryExpression")) {
             left = parseUnaryExpression(node.get("UnaryExpression"));
@@ -125,6 +142,7 @@ public class HIRMathParsing {
         }
         return factor;
     }
+
     private static BinaryOperator getBinOperator(Node node) {
         var literal = node.child().record().literal();
         return switch (literal) {

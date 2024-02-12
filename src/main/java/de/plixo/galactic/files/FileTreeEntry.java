@@ -2,7 +2,6 @@ package de.plixo.galactic.files;
 
 import de.plixo.galactic.exception.TokenFlairHandler;
 import de.plixo.galactic.lexer.Position;
-import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.lexer.TokenRecord;
 import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.lexer.tokens.CommentToken;
@@ -60,8 +59,7 @@ public sealed abstract class FileTreeEntry {
                     line = tokens.getLast().position().right().line();
                 }
                 var eofRegion = new Position(unit.file, line + 1, 0).toRegion();
-                tokens.add(
-                        new TokenRecord(new EOFToken(), "", eofRegion));
+                tokens.add(new TokenRecord(new EOFToken(), "", eofRegion));
                 unit.tokens = tokens;
             }
             case FileTreePackage treePackage -> {

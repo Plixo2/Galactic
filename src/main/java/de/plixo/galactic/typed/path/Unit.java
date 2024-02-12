@@ -12,8 +12,6 @@ import de.plixo.galactic.typed.MethodCollection;
 import de.plixo.galactic.typed.expressions.Expression;
 import de.plixo.galactic.typed.expressions.StaticClassExpression;
 import de.plixo.galactic.typed.expressions.StaticMethodExpression;
-import de.plixo.galactic.typed.stellaclass.MethodOwner;
-import de.plixo.galactic.typed.stellaclass.StellaBlock;
 import de.plixo.galactic.typed.stellaclass.StellaClass;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Class;
@@ -121,7 +119,7 @@ public final class Unit implements CompileRoot {
         var methodCollection = new MethodCollection(name, methods);
         methodCollection = methodCollection.filter(Method::isStatic);
         if (!methodCollection.isEmpty()) {
-            return new StaticMethodExpression(region,methodCollection);
+            return new StaticMethodExpression(region, methodCollection);
         }
         return null;
     }
@@ -176,7 +174,7 @@ public final class Unit implements CompileRoot {
     }
 
     public Region getRegion() {
-       return new Position(this.treeUnit().file(), 0, 0).toRegion();
+        return new Position(this.treeUnit().file(), 0, 0).toRegion();
     }
 
     public File file() {

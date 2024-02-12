@@ -1,7 +1,8 @@
 package de.plixo.galactic.high_level;
 
 public enum UnaryOperator {
-       NOT, NEGATE,
+    NOT,
+    NEGATE,
     BIT_COMPLEMENT;
 
     public String toFunctionName() {

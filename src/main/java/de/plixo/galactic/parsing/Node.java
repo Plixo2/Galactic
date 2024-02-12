@@ -83,6 +83,7 @@ public class Node {
         final Node id = get("id");
         return Objects.requireNonNull(id.child().record).literal();
     }
+
     public Region getIDRegion() {
         if (Objects.equals("id", name)) {
             return this.region;
@@ -90,6 +91,7 @@ public class Node {
         final Node id = get("id");
         return Objects.requireNonNull(id).region();
     }
+
     public String getNumber() {
         if (Objects.equals("number", name)) {
             return Objects.requireNonNull(child().record).literal();

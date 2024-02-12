@@ -6,7 +6,6 @@ import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.MethodCollection;
 import de.plixo.galactic.typed.expressions.*;
-import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import static de.plixo.galactic.exception.FlairKind.NAME;
-import static de.plixo.galactic.exception.FlairKind.UNEXPECTED_TYPE;
 
 
 /**
@@ -36,12 +34,15 @@ public abstract class Class extends Type {
     }
 
     public abstract int modifiers();
+
     public boolean isInterface() {
         return Modifier.isInterface(modifiers());
     }
+
     public boolean isPublic() {
         return Modifier.isPublic(modifiers());
     }
+
     public boolean isFinal() {
         return Modifier.isFinal(modifiers());
     }
@@ -105,7 +106,7 @@ public abstract class Class extends Type {
     }
 
     public @Nullable Expression getDotNotation(Region region, Expression expression, String id,
-                                     Context context) {
+                                               Context context) {
         var possibleField = this.getField(id, context);
         if (possibleField != null) {
             return new FieldExpression(region, expression, this, possibleField);
@@ -146,6 +147,7 @@ public abstract class Class extends Type {
     /**
      * Returns the method that is the functional interface method of this class.
      * If the class cannot be used as an interface, null is returned.
+     *
      * @return method to implement as a function
      */
     public @Nullable Method functionalInterfaceMethod(Context context) {

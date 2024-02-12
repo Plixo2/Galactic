@@ -21,8 +21,6 @@ public class Scope {
     public float b = 0;
 
 
-
-
     @Getter
     @Setter
     private @Nullable Scope parent;

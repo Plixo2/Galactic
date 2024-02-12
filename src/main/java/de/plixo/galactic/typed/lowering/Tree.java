@@ -67,10 +67,13 @@ public interface Tree<C extends Context, A> {
                     parseCastExpression(castExpression, context, hint);
             case CastCheckExpression castCheckExpression ->
                     parseCastCheckExpression(castCheckExpression, context, hint);
-            case ThisExpression thisExpression -> parseThisExpression(thisExpression, context, hint);
-            case ExtensionBitExpression extensionBitExpression -> parseExtensionBit(extensionBitExpression, context, hint);
+            case ThisExpression thisExpression ->
+                    parseThisExpression(thisExpression, context, hint);
+            case ExtensionBitExpression extensionBitExpression ->
+                    parseExtensionBit(extensionBitExpression, context, hint);
             case SuperCallExpression superCallExpression -> throw new NullPointerException("");
-            case WhileExpression whileExpression -> parseWhileExpression(whileExpression, context, hint);
+            case WhileExpression whileExpression ->
+                    parseWhileExpression(whileExpression, context, hint);
         }, expression.getClass().getSimpleName());
     }
 
@@ -78,7 +81,8 @@ public interface Tree<C extends Context, A> {
         return defaultBehavior(whileExpression);
     }
 
-    default Expression parseExtensionBit(ExtensionBitExpression superCallExpression, C context, A hint) {
+    default Expression parseExtensionBit(ExtensionBitExpression superCallExpression, C context,
+                                         A hint) {
         return defaultBehavior(superCallExpression);
     }
 

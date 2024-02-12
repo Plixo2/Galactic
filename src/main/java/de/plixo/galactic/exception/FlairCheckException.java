@@ -53,10 +53,13 @@ public class FlairCheckException extends FlairException {
                     boolean sameLine = minPosition.line() == maxPosition.line();
                     if (sameLine) {
                         var min = Math.min(minPosition.character(), maxPosition.character());
-                        var delta = Math.max(Math.abs(maxPosition.character() - minPosition.character()), 1);
-                        lines.add(STR."\{" ".repeat(min + startLength.length())}\{"v".repeat(delta)} here");
+                        var delta = Math.max(
+                                Math.abs(maxPosition.character() - minPosition.character()), 1);
+                        lines.add(STR."\{" ".repeat(min + startLength.length())}\{"v".repeat(
+                                delta)} here");
                     } else {
-                        lines.add(STR."\{" ".repeat(minPosition.character() + startLength.length())}v here");
+                        lines.add(STR."\{" ".repeat(
+                                minPosition.character() + startLength.length())}v here");
                     }
                     do {
                         String line = STR."\{index + 1}: \{src.get(index)}";
@@ -65,7 +68,8 @@ public class FlairCheckException extends FlairException {
                     } while (index <= maxLine);
                     if (!sameLine) {
                         var endLength = STR."\{index + 1}: ";
-                        lines.add(STR."\{" ".repeat(maxPosition.character() + endLength.length())}^ until here");
+                        lines.add(STR."\{" ".repeat(
+                                maxPosition.character() + endLength.length())}^ until here");
                     }
                     lines.add("");
                 }

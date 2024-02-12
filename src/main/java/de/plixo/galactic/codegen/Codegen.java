@@ -1,7 +1,6 @@
 package de.plixo.galactic.codegen;
 
 import de.plixo.galactic.boundary.JVMLoadedClass;
-import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
@@ -106,8 +105,8 @@ public class Codegen {
             assert thisContext != null;
             startIndex = 1;
         }
-        var context =
-                new CompileContext(-1, methodNode.instructions, methodNode, normalContext, startIndex);
+        var context = new CompileContext(-1, methodNode.instructions, methodNode, normalContext,
+                startIndex);
         LabelNode start;
         context.add(start = new LabelNode());
         var body = method.body();

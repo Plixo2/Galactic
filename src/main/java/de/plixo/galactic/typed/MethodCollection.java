@@ -48,6 +48,7 @@ public class MethodCollection {
     public MethodCollection filter(Predicate<Method> predicate) {
         return new MethodCollection(this.name, this.methods.stream().filter(predicate).toList());
     }
+
     public MethodCollection map(Function<Method, Method> function) {
         return new MethodCollection(this.name, this.methods.stream().map(function).toList());
     }

@@ -2,9 +2,7 @@ package de.plixo.galactic.boundary;
 
 import com.google.common.io.ByteStreams;
 import de.plixo.galactic.exception.FlairException;
-import de.plixo.galactic.exception.FlairException;
 import de.plixo.galactic.files.ObjectPath;
-import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.*;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +12,6 @@ import org.objectweb.asm.tree.ClassNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Helper class to load classes from the JVM, uses {@link LoadedBytecode} for mapping classes to

@@ -19,6 +19,7 @@ public record MethodCallExpression(Region region, MethodSource source, Method me
 
     public sealed interface MethodSource permits StaticMethodExpression, GetMethodExpression {
         MethodCollection methods();
+
         Type getCallType(Context context);
     }
 }

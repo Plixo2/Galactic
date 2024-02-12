@@ -21,8 +21,7 @@ public class HIRExpressionParsing {
         node.assertType("expression");
         if (node.has("ConditionalOrExpression")) {
             return HIRMathParsing.parse(node.get("ConditionalOrExpression"));
-        }
-        else if (node.has("variableDefinition")) {
+        } else if (node.has("variableDefinition")) {
             return parseVarDefinition(node.get("variableDefinition"));
         }
         throw new NullPointerException("unknown expression");
@@ -99,8 +98,9 @@ public class HIRExpressionParsing {
             var nodeNumber = node.getNumber();
             try {
                 return new HIRNumber(node.region(), nodeNumber);
-            } catch(NumberFormatException e) {
-                throw new FlairCheckException(node.region(), FlairKind.FORMAT, STR."Wrong number format \{nodeNumber}");
+            } catch (NumberFormatException e) {
+                throw new FlairCheckException(node.region(), FlairKind.FORMAT,
+                        STR."Wrong number format \{nodeNumber}");
             }
         } else if (node.has("string")) {
             var nodeNumber = node.getString();

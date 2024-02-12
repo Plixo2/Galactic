@@ -28,6 +28,7 @@ public class HIRMethodParsing {
             extendsType = HIRTypeParsing.parse(anExtends.get("type"));
         }
 
-        return new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr, extendsType);
+        return new HIRMethod(node.getIDRegion(), name, parameterList, returnType, blockExpr,
+                extendsType);
     }
 }

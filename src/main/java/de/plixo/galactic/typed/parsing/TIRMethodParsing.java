@@ -7,7 +7,6 @@ import de.plixo.galactic.typed.stellaclass.Parameter;
 import de.plixo.galactic.typed.stellaclass.StellaMethod;
 import de.plixo.galactic.types.Type;
 import de.plixo.galactic.types.VoidType;
-import org.jetbrains.annotations.Nullable;
 
 public class TIRMethodParsing {
 

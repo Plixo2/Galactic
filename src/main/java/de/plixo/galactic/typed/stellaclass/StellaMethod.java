@@ -6,7 +6,6 @@ import de.plixo.galactic.typed.expressions.Expression;
 import de.plixo.galactic.types.Method;
 import de.plixo.galactic.types.Type;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,8 +1,8 @@
 package de.plixo.galactic.boundary;
 
 import de.plixo.galactic.exception.FlairException;
-import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.files.ObjectPath;
+import de.plixo.galactic.typed.stellaclass.MethodOwner;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.ClassSource;
 import de.plixo.galactic.types.Field;

@@ -1,6 +1,5 @@
 package de.plixo.galactic.parsing;
 
-import de.plixo.galactic.lexer.Position;
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.lexer.TokenRecord;
 import lombok.AllArgsConstructor;

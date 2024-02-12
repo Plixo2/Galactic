@@ -24,8 +24,9 @@ public class FileTree {
 
     /**
      * Recursive helper function for generateFileTree
-     * @param path absolute path, seperated by dots, null means it's the root
-     * @param file current file to convert
+     *
+     * @param path        absolute path, seperated by dots, null means it's the root
+     * @param file        current file to convert
      * @param filePattern regex pattern for files to include
      * @return FileTreeEntry for the file, null if the file is not matching the pattern, or the 'file' is not a file or directory
      */
