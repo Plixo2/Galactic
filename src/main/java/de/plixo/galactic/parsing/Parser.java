@@ -2,6 +2,8 @@ package de.plixo.galactic.parsing;
 
 import de.plixo.galactic.lexer.Region;
 import de.plixo.galactic.lexer.TokenRecord;
+import de.plixo.galactic.lexer.tokens.MacroToken;
+import de.plixo.galactic.macros.Macro;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Parser {
     private final TokenStream<TokenRecord> stream;
+    private final List<Macro> macros;
 
     /**
      * try to apply a rule.
@@ -32,6 +35,15 @@ public class Parser {
             if (node == null && !stream.hasEntriesLeft()) {
                 stream.setIndex(startIndex);
             }
+            return new FailedRule(stream.left(), rule, null);
+        }
+        return node;
+    }
+
+
+    public SyntaxResult buildPartial(Grammar.Rule rule) {
+        val node = testRule(rule);
+        if (node == null) {
             return new FailedRule(stream.left(), rule, null);
         }
         return node;
@@ -79,30 +91,46 @@ public class Parser {
             rightPos = stream.current().position().maxPosition();
             switch (entry) {
                 case Grammar.LiteralEntry literalEntry -> {
-                    var token = stream.current();
-                    var test = token.token().alias().equals(literalEntry.name());
+                    var tokenRecord = stream.current();
+                    System.out.println(tokenRecord.literal());
+                    var token = tokenRecord.token();
+                    var test = token.alias().equals(literalEntry.name());
                     if (!test) {
                         if (literalEntry.throwError()) {
                             return new FailedLiteral(stream.left(), rule, literalEntry.name(),
-                                    token);
+                                    tokenRecord);
                         } else {
                             return null;
                         }
                     }
+                    if (token instanceof MacroToken) {
+                        var macro = getMacro(tokenRecord.literal());
+                        if (macro == null) {
+                            return new FailedLiteral(stream.left(), rule,
+                                    STR."Macro not found \{tokenRecord.literal()}", tokenRecord);
+                        }
+                        var result = macro.execute(stream).result();
+                        if (result instanceof SyntaxMatch syntaxMatch) {
+                            var node = syntaxMatch.node();
+                            nodes.add(node);
+                            rightPos = node.region().right();
+                            continue;
+                        } else {
+                            return result;
+                        }
+                    }
+
                     if (literalEntry.capture()) {
-                        var region = token.position();
-                        nodes.add(new Node(token, rule.name(), new ArrayList<>(), region));
+                        var region = tokenRecord.position();
+                        nodes.add(new Node(tokenRecord, rule.name(), new ArrayList<>(), region));
                     }
                     stream.consume();
                 }
                 case Grammar.RuleEntry ruleEntry -> {
                     var child = testRule(ruleEntry.rule());
                     switch (child) {
-                        case FailedLiteral syntaxError -> {
-                            return syntaxError;
-                        }
-                        case FailedRule syntaxError -> {
-                            return syntaxError;
+                        case FailedLiteral _, FailedRule _, FailedMacro _ -> {
+                            return child;
                         }
                         case SyntaxMatch syntaxMatch -> {
                             var node = syntaxMatch.node();
@@ -111,6 +139,8 @@ public class Parser {
                         }
                         case null -> {
                             if (ruleEntry.throwError()) {
+//                                throw new NullPointerException(
+//                                        STR."\{stream.left()} of \n\{ruleEntry} \n\{ruleEntry.rule()} in \n\{rule}");
                                 return new FailedRule(stream.left(), ruleEntry.rule(), rule);
                             }
                             return null;
@@ -119,12 +149,16 @@ public class Parser {
                 }
             }
         }
-//        if (stream.hasEntriesLeft()) {
-//            rightPos = stream.current().position();
-//        }
         var region = new Region(leftToken.position().minPosition(), rightPos);
         return new SyntaxMatch(new Node(leftToken, rule.name(), nodes, region));
     }
+
+    private @Nullable Macro getMacro(String literal) {
+        assert !literal.isEmpty();
+        var literalName = literal.substring(1);
+        return macros.stream().filter(m -> m.name().equals(literalName)).findFirst().orElse(null);
+    }
+
 
     public static abstract sealed class SyntaxResult {
 
@@ -147,9 +181,19 @@ public class Parser {
         TokenRecord consumedLiteral;
     }
 
+    @AllArgsConstructor
+    @Getter
+    public static final class FailedMacro extends SyntaxResult {
+        List<TokenRecord> records;
+        Macro macro;
+        String message;
+    }
+
     @Getter
     @AllArgsConstructor
     public static final class SyntaxMatch extends SyntaxResult {
         private final Node node;
     }
+
+
 }

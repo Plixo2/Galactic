@@ -3,6 +3,7 @@ package de.plixo.galactic.parsing;
 import de.plixo.galactic.lexer.TokenRecord;
 import de.plixo.galactic.lexer.Tokenizer;
 import de.plixo.galactic.lexer.tokens.*;
+import de.plixo.galactic.macros.Macro;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +21,7 @@ public class Grammar {
 
     private final List<Consumer<RuleSet>> solveLater = new ArrayList<>();
 
+
     /**
      * Main function for generating and linking all rules
      *
@@ -27,7 +29,10 @@ public class Grammar {
      * @return a RuleSet
      */
     public RuleSet generate(Iterator<String> rules) {
-        var ruleSet = new RuleSet();
+        return generate(rules, new RuleSet());
+    }
+
+    public RuleSet generate(Iterator<String> rules, RuleSet base) {
         var tokenizer = new Tokenizer(notationTokens());
         var lineIndex = 0;
         while (rules.hasNext()) {
@@ -51,15 +56,16 @@ public class Grammar {
             if (stream.hasEntriesLeft()) {
                 throw stream.current().createException();
             }
-            if (ruleSet.has(rule.name)) {
-                throw stream.current().createException("name collision " + rule.name);
+            if (base.has(rule.name)) {
+                stream.setIndex(0);
+                throw stream.current().createException(STR."name collision \{rule.name}");
             }
-            ruleSet.rules.put(rule.name, rule);
+            base.rules.put(rule.name, rule);
             lineIndex += 1;
         }
-        solveLater.forEach(ref -> ref.accept(ruleSet));
+        solveLater.forEach(ref -> ref.accept(base));
         solveLater.clear();
-        return ruleSet;
+        return base;
     }
 
     /**

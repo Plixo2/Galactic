@@ -23,8 +23,35 @@ public class HIRExpressionParsing {
             return HIRMathParsing.parse(node.get("ConditionalOrExpression"));
         } else if (node.has("variableDefinition")) {
             return parseVarDefinition(node.get("variableDefinition"));
+        } else if(node.has("blockExpr")) {
+            return parseBlock(node.get("blockExpr"));
+        } else if(node.has("expression")) {
+            return parse(node.get("expression"));
+        } else if (node.has("macro")) {
+            return parseMacro(node.get("macro"));
         }
-        throw new NullPointerException("unknown expression");
+
+        throw new NullPointerException(
+                STR."unknown expression \{node.children().stream().map(Node::name)
+                        .toList()} of \n \{node}");
+    }
+
+    private static HIRExpression parseMacro(Node node) {
+        node.assertType("macro");
+        if (node.has("ConditionalOrExpression")) {
+            return HIRMathParsing.parse(node.get("ConditionalOrExpression"));
+        } else if (node.has("variableDefinition")) {
+            return parseVarDefinition(node.get("variableDefinition"));
+        } else if(node.has("blockExpr")) {
+            return parseBlock(node.get("blockExpr"));
+        } else if(node.has("expression")) {
+            return parse(node.get("expression"));
+        } else if (node.has("macro")) {
+            return parseMacro(node.get("macro"));
+        }
+        throw new NullPointerException(
+                STR."unknown expression \{node.children().stream().map(Node::name)
+                        .toList()} of \n \{node}");
     }
 
     private static HIRBranch parseBranch(Node node) {
@@ -175,7 +202,9 @@ public class HIRExpressionParsing {
     }
 
     private static HIRExpression parseBlock(Node node) {
+//        System.out.println("parsing block of " + node.region().left().file());
         node.assertType("blockExpr");
+
         var list =
                 node.list("blockExprList", "expression").stream().map(HIRExpressionParsing::parse)
                         .toList();

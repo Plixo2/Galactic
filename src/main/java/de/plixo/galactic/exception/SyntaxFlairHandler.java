@@ -1,7 +1,9 @@
 package de.plixo.galactic.exception;
 
 import de.plixo.galactic.lexer.TokenRecord;
+import de.plixo.galactic.macros.Macro;
 import de.plixo.galactic.parsing.Grammar;
+import de.plixo.galactic.parsing.Parser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -32,12 +34,14 @@ public class SyntaxFlairHandler {
                     yield STR."Failed to parse \{failedRule.failedRule.name()}";
                 } else {
                     var failedRecord = failedRule.records.getFirst();
+                    failedRule.records.forEach(System.out::println);
                     yield STR."Failed \{failedRule.failedRule.name()}: \{failedRecord.errorMessage()}";
                 }
             }
             case FailedLiteral failedLiteral ->
                     STR."Failed \{failedLiteral.parentRule.name()}: Expected literal '\{failedLiteral.expectedLiteral}' but got '\{failedLiteral.consumedLiteral.literal()}' at \{failedLiteral.consumedLiteral.position()
                             .toString()}";
+            case FailedMacro failedMacro -> STR."Failed Macro \{failedMacro.macro.name()}: \{failedMacro.message}";
         }).toList();
         var msg = String.join("\n", strings);
         throw new FlairException(STR."\n\{msg}");
@@ -63,5 +67,12 @@ public class SyntaxFlairHandler {
         TokenRecord consumedLiteral;
     }
 
+    @AllArgsConstructor
+    @Getter
+    public static final class FailedMacro extends SyntaxFlair {
+        List<TokenRecord> records;
+        Macro macro;
+        String message;
+    }
 
 }

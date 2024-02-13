@@ -63,6 +63,10 @@ public class TreeBuilding {
             case Parser.SyntaxMatch syntaxMatch -> {
                 HIRUnitParsing.parse(createdUnit, syntaxMatch.node());
             }
+            case Parser.FailedMacro failedMacro -> {
+                errorHandler.add(new SyntaxFlairHandler.FailedMacro(failedMacro.records(),
+                        failedMacro.macro(), failedMacro.message()));
+            }
             case null -> {
                 throw new NullPointerException("syntaxResult should be known");
             }

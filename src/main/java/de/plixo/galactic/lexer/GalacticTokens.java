@@ -61,11 +61,12 @@ public class GalacticTokens {
         tokens.add(new CharToken('<'));
         tokens.add(new CharToken('>'));
         tokens.add(new CharToken('@'));
-        tokens.add(new CharToken('#'));
         tokens.add(new CharToken('?'));
         for (String keyword : keywords) {
             tokens.add(new LiteralToken(keyword));
         }
+
+        tokens.add(new MacroToken());
         tokens.add(new WordToken());
         tokens.add(new NumberToken());
         tokens.add(new StringToken());

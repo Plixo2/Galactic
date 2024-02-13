@@ -8,6 +8,7 @@ import de.plixo.galactic.lexer.tokens.CommentToken;
 import de.plixo.galactic.lexer.tokens.EOFToken;
 import de.plixo.galactic.lexer.tokens.UnknownToken;
 import de.plixo.galactic.lexer.tokens.WhiteSpaceToken;
+import de.plixo.galactic.macros.Macro;
 import de.plixo.galactic.parsing.Grammar;
 import de.plixo.galactic.parsing.Parser;
 import de.plixo.galactic.parsing.TokenStream;
@@ -52,7 +53,6 @@ public sealed abstract class FileTreeEntry {
                     case CommentToken ignored -> false;
                     default -> true;
                 }).toList();
-
                 var tokens = new ArrayList<>(filteredTokens);
                 int line = 0;
                 if (!tokens.isEmpty()) {
@@ -76,15 +76,15 @@ public sealed abstract class FileTreeEntry {
      *
      * @param rule the grammar rule to apply
      */
-    public void parse(Grammar.Rule rule) {
+    public void parse(Grammar.Rule rule, List<Macro> macros) {
         switch (this) {
             case FileTreeUnit unit -> {
-                unit.syntaxResult = new Parser(new TokenStream<>(unit.tokens)).build(rule);
+                unit.syntaxResult = new Parser(new TokenStream<>(unit.tokens), macros).build(rule);
                 unit.tokens = new ArrayList<>();
             }
             case FileTreePackage treePackage -> {
                 treePackage.children().forEach(ref -> {
-                    ref.parse(rule);
+                    ref.parse(rule, macros);
                 });
             }
         }

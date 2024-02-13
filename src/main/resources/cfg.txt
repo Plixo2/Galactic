@@ -36,7 +36,7 @@ branchOpt := "else"? expression! ||
 body := blockExpr!
 
 
-for := "for"? id! "in"?! expression! blockExpr!
+//for := "for"? id! "in"?! expression! blockExpr!
 while := "while"? expression! blockExpr!
 
 
@@ -128,10 +128,10 @@ MultiplicativeExpressionFunction := "*" | "/" | "%"
 UnaryExpression := UnaryExpressionFunction factor | factor
 UnaryExpressionFunction := "!" | "~" | "-" | "+"
 
-//expression := variableDefinition | factor
-expression := variableDefinition | ConditionalOrExpression
+expression := variableDefinition | ConditionalOrExpression | macro
 this := "this"
 object := initialisation | branch | while | blockExpr | this | string | number | id | "("? expression! ")"?!
 factor := object postfixList! assignOpt!
 assignOpt := "="? expression! ||
 
+macro := "macro"

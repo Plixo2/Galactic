@@ -1,0 +1,5 @@
+for := forInit! ","?! forCondition! ","?! forUpdate! expression!
+
+forInit := expression!
+forCondition := expression!
+forUpdate := expression!

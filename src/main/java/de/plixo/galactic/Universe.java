@@ -16,6 +16,8 @@ import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.GalacticTokens;
 import de.plixo.galactic.lexer.Tokenizer;
+import de.plixo.galactic.macros.ForMacro;
+import de.plixo.galactic.macros.Macro;
 import de.plixo.galactic.parsing.Grammar;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.StandardLibs;
@@ -30,6 +32,7 @@ import de.plixo.galactic.typed.stellaclass.StellaClass;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
+import javax.crypto.Mac;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -73,10 +76,12 @@ public class Universe {
      * @return result of the compilation
      */
     public CompileResult parse(File file, StandardLibs standardLibs) throws FlairException {
-        var grammar = generateGrammar();
+        var grammar = generateGrammar(configFile, new Grammar.RuleSet());
         var rule = Objects.requireNonNull(grammar.get(entryRule), "missing entry rule");
         var tokens = new GalacticTokens().tokens();
         var tokenizer = new Tokenizer(tokens);
+
+        List<Macro> macros = List.of(new ForMacro(grammar));
 
         var rootEntry = FileTree.generateFileTree(file, filePattern);
         if (rootEntry == null) {
@@ -86,7 +91,7 @@ public class Universe {
 
         var tokenFlairHandler = new TokenFlairHandler();
         rootEntry.readAndLex(tokenizer, tokenFlairHandler);
-        rootEntry.parse(rule);
+        rootEntry.parse(rule, macros);
         tokenFlairHandler.handle();
 
         try {
@@ -216,7 +221,7 @@ public class Universe {
      *
      * @return the grammar rule set
      */
-    private Grammar.RuleSet generateGrammar() {
+    public static Grammar.RuleSet generateGrammar(String configFile, Grammar.RuleSet base) {
         var resource = Objects.requireNonNull(Main.class.getResource(configFile));
         String grammarStr;
         try {
@@ -225,7 +230,7 @@ public class Universe {
             throw new FlairException("Cant load grammar resource", e);
         }
         var grammar = new Grammar();
-        return grammar.generate(grammarStr.lines().iterator());
+        return grammar.generate(grammarStr.lines().iterator(), base);
     }
 
     private FileTreeEntry addLibs(FileTreeEntry rootEntry, StandardLibs standardClasses) {
