@@ -74,8 +74,16 @@ public interface Tree<C extends Context, A> {
             case SuperCallExpression superCallExpression -> throw new NullPointerException("");
             case WhileExpression whileExpression ->
                     parseWhileExpression(whileExpression, context, hint);
+            case ArrayLengthExpression arrayLengthExpression ->
+                    parseArrayLengthExpression(arrayLengthExpression, context, hint);
         }, expression.getClass().getSimpleName());
     }
+
+    default Expression parseArrayLengthExpression(ArrayLengthExpression arrayLengthExpression,
+                                                  C context, A hint) {
+        return defaultBehavior(arrayLengthExpression);
+    }
+
 
     default Expression parseWhileExpression(WhileExpression whileExpression, C context, A hint) {
         return defaultBehavior(whileExpression);

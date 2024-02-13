@@ -335,6 +335,10 @@ public class Codegen {
                     }
                 }
             }
+            case ArrayLengthExpression arrayLengthExpression -> {
+                parseExpression(arrayLengthExpression.expression(), context);
+                context.add(new InsnNode(ARRAYLENGTH));
+            }
             case VarDefExpression varDefExpression -> {
                 context.putVariable(varDefExpression.variable());
                 parseExpression(varDefExpression.expression(), context);
@@ -352,12 +356,6 @@ public class Codegen {
                 context.add(new VarInsnNode(opcode, target));
             }
             case VarExpression varExpression -> {
-//                if (varExpression.variable() instanceof Scope.ClosureVariable closureVariable) {
-//                    var field = Objects.requireNonNull(closureVariable.field());
-//                    var owner = Objects.requireNonNull(closureVariable.owningExpression());
-//                    var fieldExpression = new FieldExpression(varExpression.region(), owner, field.owner(), field);
-//                    parseExpression(fieldExpression, context);
-//                } else {
                 var target = context.getVariablesIndex(varExpression.variable());
                 var type = varExpression.variable().getType();
                 var opcode = ALOAD;
@@ -370,7 +368,6 @@ public class Codegen {
                     };
                 }
                 context.add(new VarInsnNode(opcode, target));
-//                }
             }
             case StaticFieldExpression staticFieldExpression -> {
                 var field = staticFieldExpression.field();

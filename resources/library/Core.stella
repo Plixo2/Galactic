@@ -102,5 +102,7 @@ fn assertValue(condition: boolean) = {
     Codex.assertValue(condition)
 }
 
-
+fn at(index: int) -> java.lang.Object extends [java.lang.Object] = {
+    Codex.at(this, index)
+}
 

@@ -6,6 +6,7 @@ import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.expressions.*;
 import de.plixo.galactic.typed.lowering.Tree;
+import de.plixo.galactic.types.ArrayType;
 import de.plixo.galactic.types.Class;
 import de.plixo.galactic.types.PrimitiveType;
 import de.plixo.galactic.types.Type;
@@ -36,6 +37,17 @@ public class CheckExpressions implements Tree<Context, Integer> {
     }
 
     @Override
+    public Expression parseArrayLengthExpression(ArrayLengthExpression arrayLengthExpression,
+                                                 Context context, Integer hint) {
+        var parsed = parse(arrayLengthExpression.expression(), context, 0);
+        if (!(parsed.getType(context) instanceof ArrayType)) {
+            throw new FlairCheckException(arrayLengthExpression.region(), FlairKind.TYPE_MISMATCH,
+                    "expression is not an array");
+        }
+        return arrayLengthExpression;
+    }
+
+    @Override
     public Expression parseCastExpression(CastExpression expression, Context context,
                                           Integer unused) {
         var parsed = parse(expression.object(), context, 0);
@@ -44,7 +56,7 @@ public class CheckExpressions implements Tree<Context, Integer> {
             throw new FlairCheckException(expression.region(), FlairKind.TYPE_MISMATCH,
                     "Cant cast to primitive type or array");
         }
-        var parsedType = parsed.getType(context);
+//        var parsedType = parsed.getType(context);
 //        var castForward = Type.isAssignableFrom(type, parsedType, context);
 //        var castBackward = Type.isAssignableFrom(parsedType, type, context);
 //        if (!castForward && !castBackward) {

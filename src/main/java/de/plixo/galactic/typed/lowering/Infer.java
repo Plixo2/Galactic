@@ -273,12 +273,22 @@ public class Infer implements Tree<Context, Type> {
         var region = expression.region();
         var id = expression.id();
         var parsedType = parsed.getType(context);
-        if (parsedType instanceof Class aClass) {
-            var dotNotation = aClass.getDotNotation(region, parsed, id, context);
-            if (dotNotation != null) {
-                return dotNotation;
+        switch (parsedType) {
+            case Class aClass -> {
+                var dotNotation = aClass.getDotNotation(region, parsed, id, context);
+                if (dotNotation != null) {
+                    return dotNotation;
+                }
             }
+            case ArrayType array -> {
+                if (id.equals("length")) {
+                    return new ArrayLengthExpression(region, parsed);
+                }
+            }
+            default -> {}
         }
+
+        // Extensions
         var symbolExpression = context.unit().getImportedStaticMethod(id);
         if (!symbolExpression.isEmpty()) {
             var possibleMethods = symbolExpression.stream().filter(ref -> {

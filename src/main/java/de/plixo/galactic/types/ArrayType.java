@@ -15,7 +15,7 @@ public class ArrayType extends Type {
 
     @Override
     public String toString() {
-        return "Array[" + elementType + ']';
+        return STR."Array[\{elementType}\{']'}";
     }
 
     @Override
