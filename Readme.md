@@ -21,6 +21,9 @@ Open the project as a Gradle project and run the [Main](src/main/java/de/plixo/g
 class with `--enable-preview` as vm flag.
 
 The Main class compiles the File in `/resources/standalone/HelloWorld.stella` and builds it to `/resources/build.jar`.
+See the [Config](resources/config.toml) file, to configure the build process.
+
+
 This jar can be executed with `java -jar build.jar` and will print `Hello World!` to the console.
 
 Folders can also be opened. The Module Systems works like in java, so you can import classes from other files and packages. 
@@ -39,12 +42,37 @@ For more examples see the [tests](resources/tests) folder, or view the standard 
 import @java String java.lang.String
 
 fn main(args: [String]) = {
-    println("Hello World!")
+    ~"Hello World!"
+
+    print("args: ")
+    #for var i = 0, i < args.length, i = i + 1 {
+        print(args.get(i) & " ")
+    }
+    println()
 }
 ```
 Output:
 ```cmd
 Hello World!
+args: ...
 ```
 
+### How this works:
 
+#### Extensions
+The `~"Hello World!"` is syntactic sugar for `("Hello World!").bitComplement()`.
+The `bitComplement` function is an extension method defined in the [Core](resources/library/Core.stella) library, which is automatically 
+imported:
+
+```
+fn bitComplement() -> void extends Object = {
+    println(this)
+}
+```
+
+Extensions are also the reason you can call `println()` on every object, or test for null with `isNull()`.
+
+#### Macros
+The `#for` loop is a macro, which is expanded to a while loop at compile time.
+The Macros can use their own grammar, building on the existing Language, to parse Expressions and convert them back into tokens.
+As a User you cant define your own macros yet, but the standard library uses them to provide a more convenient syntax.

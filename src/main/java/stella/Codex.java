@@ -185,6 +185,9 @@ public class Codex {
         }
     }
 
+    public static String concat(String a, String b) {
+        return a + b;
+    }
 
     public static Object get(Object[] array, int index) {
         return array[index];

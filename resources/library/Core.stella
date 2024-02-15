@@ -8,6 +8,7 @@ import @java Predicate java.util.function.Predicate
 import @java List java.util.List
 import @java Codex stella.Codex
 import @java Objects java.util.Objects
+import @java Object java.lang.Object
 
 fn println(msg: java.lang.String) = {
     System.out.println(msg)
@@ -29,9 +30,6 @@ fn print(msg: java.lang.String) = {
 }
 fn print(msg: java.lang.Object) = {
     System.out.print(msg)
-}
-fn println(msg: java.lang.Object) = {
-    System.out.println(msg)
 }
 fn println() = {
     System.out.println()
@@ -108,7 +106,26 @@ fn assertValue(condition: boolean) = {
     Codex.assertValue(condition)
 }
 
-fn get(index: int) -> java.lang.Object extends [java.lang.Object] = {
+fn get(index: int) -> Object extends [Object] = {
     Codex.get(this, index)
 }
 
+fn bitAnd(rhs: String) -> String extends String = {
+    Codex.concat(this, rhs)
+}
+
+fn bitAnd(rhs: String) -> String extends Object = {
+    if (this.isNull()) {
+        "null" & rhs
+    } else {
+        Codex.concat(this.toString(), rhs)
+    }
+}
+
+fn bitComplement() -> void extends Object = {
+    println(this)
+}
+
+fn println() -> void extends Object = {
+    System.out.println(this)
+}

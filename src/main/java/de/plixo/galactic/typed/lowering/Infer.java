@@ -28,7 +28,12 @@ public class Infer implements Tree<Context, Type> {
                         .getSimpleName()} not implemented for Infer stage");
     }
 
-
+    @Override
+    public Expression parseArrayLengthExpression(ArrayLengthExpression expression, Context context,
+                                  @Nullable Type hint) {
+        var parsed = parse(expression.expression(), context, null);
+        return new ArrayLengthExpression(expression.region(), parsed);
+    }
     @Override
     public Expression parseAssign(AssignExpression expression, Context context,
                                   @Nullable Type hint) {
@@ -187,7 +192,7 @@ public class Infer implements Tree<Context, Type> {
                     source.getCallType(context), parsedArguments);
         } else {
             throw new FlairCheckException(parsed.region(), UNEXPECTED_TYPE,
-                    "Can only call methods");
+                    STR."Can only call methods, not \{parsed.getClass().getSimpleName()}");
         }
     }
 
