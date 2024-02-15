@@ -20,6 +20,11 @@ public class Node {
      * First token upstream, or the final token
      */
     private final TokenRecord record;
+
+    /**
+     * First token upstream, or the final token
+     */
+    private final boolean isLiteral;
     /**
      * Name of the node
      */
@@ -109,8 +114,29 @@ public class Node {
     }
 
     public Node child() {
-        return children.get(0);
+        return children.getFirst();
     }
+
+    /**
+     * Tokenizes the node and its children into tokens again.
+     *
+     * @return list of tokens, where every token is only contained once
+     */
+    public List<TokenRecord> tokenize() {
+        var tokens = new ArrayList<TokenRecord>();
+        tokenize(tokens);
+        return tokens;
+    }
+
+    private void tokenize(List<TokenRecord> tokens) {
+        if (isLiteral) {
+            tokens.add(record);
+        }
+        for (var child : children) {
+            child.tokenize(tokens);
+        }
+    }
+
 
     public List<Node> list(String list, String list2, String leaf) {
         final List<Node> collection = new ArrayList<>();
@@ -156,20 +182,18 @@ public class Node {
 
         var bob = new StringBuilder();
         bob.append(prefix);
-        if (children.isEmpty()) {
+        bob.append(STR."\{name} ");
+        if (isLiteral) {
             bob.append("\"").append(record.literal()).append("\"");
-        } else {
-            bob.append(name);
         }
         buffer.append(bob);
-        var offsetLength = 80;
+        var offsetLength = 100;
         var bobLength = new String(bob.toString().getBytes(),
                 StandardCharsets.UTF_8).length(); //used for formatting
         var diff = Math.max(offsetLength - bobLength, 10);
 
         buffer.append(" ".repeat(diff));
-        buffer.append(this.region().minLine());
-        buffer.append(" - ").append(this.region().maxLine());
+        buffer.append(this.region().dotFormat());
         buffer.append('\n');
 
         for (var it = children.iterator(); it.hasNext(); ) {
@@ -181,4 +205,6 @@ public class Node {
             }
         }
     }
+
+
 }

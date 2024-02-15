@@ -1,4 +1,4 @@
-for := forInit! ","?! forCondition! ","?! forUpdate! expression!
+forMacro := forInit! ","?! forCondition! ","?! forUpdate! expression!
 
 forInit := expression!
 forCondition := expression!

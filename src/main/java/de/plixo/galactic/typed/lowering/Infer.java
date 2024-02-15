@@ -2,6 +2,7 @@ package de.plixo.galactic.typed.lowering;
 
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.MethodCollection;
 import de.plixo.galactic.typed.Scope;
@@ -22,8 +23,9 @@ import static de.plixo.galactic.exception.FlairKind.*;
 public class Infer implements Tree<Context, Type> {
     @Override
     public Expression defaultBehavior(Expression expression) {
-        throw new FlairException(STR."Expression of type \{expression.getClass()
-                .getSimpleName()} not implemented for Infer stage");
+        throw new FlairCheckException(expression.region(), FlairKind.UNKNOWN_TYPE,
+                STR."Expression of type \{expression.getClass()
+                        .getSimpleName()} not implemented for Infer stage");
     }
 
 

@@ -34,7 +34,6 @@ public class SyntaxFlairHandler {
                     yield STR."Failed to parse \{failedRule.failedRule.name()}";
                 } else {
                     var failedRecord = failedRule.records.getFirst();
-                    failedRule.records.forEach(System.out::println);
                     yield STR."Failed \{failedRule.failedRule.name()}: \{failedRecord.errorMessage()}";
                 }
             }

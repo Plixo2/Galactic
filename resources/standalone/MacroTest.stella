@@ -3,6 +3,7 @@ import @java String java.lang.String
 fn main(args: [String]) = {
     println("Hello World!")
 
-    #for a, b, c println("a")
-
+    #for var a = 0, a <= 100, a = a + 1 {
+        println(a)
+    }
 }

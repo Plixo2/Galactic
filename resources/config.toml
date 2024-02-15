@@ -1,9 +1,7 @@
 
 
-#source = "resources/standalone/HelloWorld.stella"
-#main = "HelloWorld/HelloWorld"
-source = "resources/standalone/MacroTest.stella"
-main = "MacroTest/MacroTest"
+source = "resources/standalone/HelloWorld.stella"
+main = "HelloWorld/HelloWorld"
 
 build = "resources/build.jar"
 

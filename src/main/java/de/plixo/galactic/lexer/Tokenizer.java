@@ -1,6 +1,9 @@
 package de.plixo.galactic.lexer;
 
+import de.plixo.galactic.lexer.tokens.CommentToken;
 import de.plixo.galactic.lexer.tokens.Token;
+import de.plixo.galactic.lexer.tokens.UnknownToken;
+import de.plixo.galactic.lexer.tokens.WhiteSpaceToken;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,5 +85,21 @@ public class Tokenizer {
         }
 
         return records;
+    }
+
+    /**
+     * Dummy token for Macro execution
+     * @param creater macro token
+     * @param str string to tokenize
+     * @return list of tokens, without whitespace and comments
+     */
+    public List<TokenRecord> dummy(TokenRecord creater, String str) {
+        var recordList = fromFile(creater.position().left().file(), str);
+        return recordList.stream().filter(ref -> switch (ref.token()) {
+            case UnknownToken ignored -> false;
+            case WhiteSpaceToken ignored -> false;
+            case CommentToken ignored -> false;
+            default -> true;
+        }).toList();
     }
 }

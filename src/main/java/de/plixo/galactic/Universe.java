@@ -91,10 +91,13 @@ public class Universe {
 
         var tokenFlairHandler = new TokenFlairHandler();
         rootEntry.readAndLex(tokenizer, tokenFlairHandler);
-        rootEntry.parse(rule, macros);
         tokenFlairHandler.handle();
 
+
         try {
+            rootEntry.applyMacros(macros, tokenizer);
+            rootEntry.parse(rule);
+
             var syntaxFlairHandler = new SyntaxFlairHandler();
             var root = TreeBuilding.convertRoot(rootEntry, syntaxFlairHandler);
             syntaxFlairHandler.handle();

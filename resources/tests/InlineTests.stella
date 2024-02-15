@@ -95,3 +95,28 @@ class IntFilterGreater implements Predicate {
         (inValue as Integer).unbox() > this.value
     }
 }
+
+fn loop() = {
+    #for var a = 0, a <= 100, a = a + 1 {
+        println(a)
+    }
+}
+
+fn fib(n: int) -> int = {
+    if n <= 1 {
+        n
+    } else {
+        fib(n - 1) + fib(n - 2)
+    }
+}
+
+
+fn boxing() {
+    var boxedInt: Integer = (10).box()
+    assertValue(boxedInt is java.lang.Object)
+    assertValue(boxedInt is Integer)
+    assertValue(boxedInt.unbox() == 10)
+    var boxedDouble: java.lang.Double = (10d).box()
+    assertValue(boxedDouble.unbox().toInt() == 10)
+}
+

@@ -2,6 +2,7 @@ package de.plixo.galactic.typed.lowering;
 
 import de.plixo.galactic.exception.FlairCheckException;
 import de.plixo.galactic.exception.FlairException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.typed.Context;
 import de.plixo.galactic.typed.Scope;
 import de.plixo.galactic.typed.expressions.*;
@@ -17,8 +18,9 @@ public class Symbols implements Tree<Context, Integer> {
 
     @Override
     public Expression defaultBehavior(Expression expression) {
-        throw new FlairException(STR."Expression of type \{expression.getClass()
-                .getSimpleName()} not implemented for Symbol stage");
+        throw new FlairCheckException(expression.region(), FlairKind.UNKNOWN_TYPE,
+                STR."Expression of type \{expression.getClass()
+                        .getSimpleName()} not implemented for Symbols stage");
     }
 
     @Override

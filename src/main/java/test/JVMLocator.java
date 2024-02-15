@@ -27,7 +27,6 @@ public class JVMLocator {
             for (Class loadedClass : loadedClasses) {
                 hashSet.add(loadedClass.getName());
             }
-            System.out.println(loadedClasses.length);
 
             classPath = ClassPath.from(ClassLoader.getSystemClassLoader());
             Set<ClassPath.ClassInfo> classes = classPath.getAllClasses();

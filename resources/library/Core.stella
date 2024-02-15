@@ -27,16 +27,22 @@ fn println(msg: float) = {
 fn print(msg: java.lang.String) = {
     System.out.print(msg)
 }
+fn print(msg: java.lang.Object) = {
+    System.out.print(msg)
+}
 fn println(msg: java.lang.Object) = {
     System.out.println(msg)
 }
+fn println() = {
+    System.out.println()
+}
+
 fn stdIn() -> String = {
     var reader = new java.io.BufferedReader {
         new java.io.InputStreamReader { System.in }
     }
     reader.readLine()
 }
-
 
 fn map(function: Function) -> List extends List = {
     this.stream().map(function).toList()
@@ -102,7 +108,7 @@ fn assertValue(condition: boolean) = {
     Codex.assertValue(condition)
 }
 
-fn at(index: int) -> java.lang.Object extends [java.lang.Object] = {
-    Codex.at(this, index)
+fn get(index: int) -> java.lang.Object extends [java.lang.Object] = {
+    Codex.get(this, index)
 }
 

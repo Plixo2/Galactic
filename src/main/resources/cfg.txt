@@ -128,10 +128,8 @@ MultiplicativeExpressionFunction := "*" | "/" | "%"
 UnaryExpression := UnaryExpressionFunction factor | factor
 UnaryExpressionFunction := "!" | "~" | "-" | "+"
 
-expression := variableDefinition | ConditionalOrExpression | macro
+expression := variableDefinition | ConditionalOrExpression
 this := "this"
 object := initialisation | branch | while | blockExpr | this | string | number | id | "("? expression! ")"?!
 factor := object postfixList! assignOpt!
 assignOpt := "="? expression! ||
-
-macro := "macro"

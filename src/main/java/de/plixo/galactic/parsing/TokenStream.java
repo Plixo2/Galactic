@@ -48,7 +48,7 @@ public class TokenStream<T> {
      *
      * @return list of tokens left in the stream
      */
-    public List<T> left() {
+    public List<T> tokenLeft() {
         var left = new ArrayList<T>();
         while (this.hasEntriesLeft()) {
             left.add(this.current());

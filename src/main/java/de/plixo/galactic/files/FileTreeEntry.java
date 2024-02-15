@@ -1,5 +1,7 @@
 package de.plixo.galactic.files;
 
+import de.plixo.galactic.exception.FlairCheckException;
+import de.plixo.galactic.exception.FlairKind;
 import de.plixo.galactic.exception.TokenFlairHandler;
 import de.plixo.galactic.lexer.Position;
 import de.plixo.galactic.lexer.TokenRecord;
@@ -76,15 +78,37 @@ public sealed abstract class FileTreeEntry {
      *
      * @param rule the grammar rule to apply
      */
-    public void parse(Grammar.Rule rule, List<Macro> macros) {
+    public void parse(Grammar.Rule rule) {
         switch (this) {
             case FileTreeUnit unit -> {
-                unit.syntaxResult = new Parser(new TokenStream<>(unit.tokens), macros).build(rule);
+                unit.syntaxResult = new Parser(new TokenStream<>(unit.tokens)).build(rule);
                 unit.tokens = new ArrayList<>();
             }
             case FileTreePackage treePackage -> {
                 treePackage.children().forEach(ref -> {
-                    ref.parse(rule, macros);
+                    ref.parse(rule);
+                });
+            }
+        }
+    }
+
+    public void applyMacros(List<Macro> macros, Tokenizer tokenizer) {
+        switch (this) {
+            case FileTreeUnit unit -> {
+                assert unit.tokens != null;
+                var macroConversion = Macro.convert(macros, unit.tokens, tokenizer);
+                switch (macroConversion) {
+                    case Macro.MacroResult.FailedMacro failedMacro -> {
+                        throw new FlairCheckException(failedMacro.region(), FlairKind.TOKEN, failedMacro.message());
+                    }
+                    case Macro.MacroResult.RecordStream recordStream -> {
+                        unit.tokens = recordStream.records();
+                    }
+                }
+            }
+            case FileTreePackage treePackage -> {
+                treePackage.children().forEach(ref -> {
+                    ref.applyMacros(macros, tokenizer);
                 });
             }
         }

@@ -35,4 +35,8 @@ public record Region(Position left, Position right) {
             return left.character() < right.character() ? right : left;
         }
     }
+
+    public String dotFormat() {
+        return STR."\{left.line()}:\{left.character()} -> \{right.line()}:\{right.character()}";
+    }
 }

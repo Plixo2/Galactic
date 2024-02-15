@@ -1,5 +1,15 @@
+import @java Object java.lang.Object
+
 import @java String java.lang.String
 
 fn main(args: [String]) = {
-    println("Hello World!")
+    println("hello world!")
+
+    print("args: ")
+
+    //for is a macro, that's expanding to a while loop
+    #for var i = 0, i < args.length, i = i + 1 {
+        print(args.get(i))
+    }
+    println()
 }

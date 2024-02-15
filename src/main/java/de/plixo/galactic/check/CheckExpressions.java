@@ -19,8 +19,9 @@ import java.lang.reflect.Modifier;
 public class CheckExpressions implements Tree<Context, Integer> {
     @Override
     public Expression defaultBehavior(Expression expression) {
-        throw new FlairException(STR."Expression of type \{expression.getClass()
-                .getSimpleName()} not implemented for Check stage");
+        throw new FlairCheckException(expression.region(), FlairKind.UNKNOWN_TYPE,
+                STR."Expression of type \{expression.getClass()
+                        .getSimpleName()} not implemented for Check stage");
     }
 
     @Override

@@ -185,7 +185,8 @@ public class Codex {
         }
     }
 
-    public static Object at(Object[] array, int index) {
+
+    public static Object get(Object[] array, int index) {
         return array[index];
     }
 
