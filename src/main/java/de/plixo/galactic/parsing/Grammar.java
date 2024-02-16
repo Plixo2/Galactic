@@ -32,7 +32,10 @@ public class Grammar {
         return generate(rules, new RuleSet());
     }
 
-    public RuleSet generate(Iterator<String> rules, RuleSet base) {
+    public RuleSet generate(Iterator<String> rules, RuleSet baseSet) {
+        var base = new RuleSet();
+        base.rules.putAll(baseSet.rules);
+
         var tokenizer = new Tokenizer(notationTokens());
         var lineIndex = 0;
         while (rules.hasNext()) {

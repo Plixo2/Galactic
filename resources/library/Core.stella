@@ -53,6 +53,10 @@ fn filter(predicate: Predicate) -> List extends List = {
 fn equals(rhs: java.lang.Object) -> boolean extends java.lang.Object = {
     Objects.equals(this, rhs)
 }
+fn notEquals(rhs: java.lang.Object) -> boolean extends java.lang.Object = {
+    !Objects.equals(this, rhs)
+}
+
 
 fn null() -> java.lang.Object = {
     Codex.getNull()

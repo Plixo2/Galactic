@@ -4,6 +4,7 @@ main = "project/HelloWorld"
 
 build = "build.jar"
 
+
 [core]
 Core = "../resources/library/Core.stella"
 Math = "../resources/library/Math.stella"

@@ -16,6 +16,7 @@ import de.plixo.galactic.files.FileTreeEntry;
 import de.plixo.galactic.files.ObjectPath;
 import de.plixo.galactic.lexer.GalacticTokens;
 import de.plixo.galactic.lexer.Tokenizer;
+import de.plixo.galactic.macros.ForEachMacro;
 import de.plixo.galactic.macros.ForMacro;
 import de.plixo.galactic.macros.Macro;
 import de.plixo.galactic.parsing.Grammar;
@@ -81,7 +82,7 @@ public class Universe {
         var tokens = new GalacticTokens().tokens();
         var tokenizer = new Tokenizer(tokens);
 
-        List<Macro> macros = List.of(new ForMacro(grammar));
+        var macros = List.of(new ForMacro(grammar), new ForEachMacro(grammar));
 
         var rootEntry = FileTree.generateFileTree(file, filePattern);
         if (rootEntry == null) {

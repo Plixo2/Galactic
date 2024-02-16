@@ -11,15 +11,15 @@ import de.plixo.galactic.parsing.TokenStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ForMacro extends Macro {
+public class ForEachMacro extends Macro {
 
     Grammar.Rule rule;
 
-    public ForMacro(Grammar.RuleSet standardGrammar) {
-        super("for");
+    public ForEachMacro(Grammar.RuleSet standardGrammar) {
+        super("forEach");
         var grammar = Universe.generateGrammar("/macros.txt", standardGrammar);
-        rule = grammar.get("forMacro");
-        assert rule != null : "Rule for 'for' not found";
+        rule = grammar.get("forEachMacro");
+        assert rule != null : "Rule for 'forEach' not found";
     }
 
 
@@ -41,34 +41,28 @@ public class ForMacro extends Macro {
     }
 
     private List<TokenRecord> convert(TokenRecord creator, Node node, Tokenizer tokenizer) {
-        node.assertType("forMacro");
-        var forInit = node.get("forInit").get("expression");
-        var forCondition = node.get("forCondition").get("expression");
-        var forUpdate = node.get("forUpdate").get("expression");
+        node.assertType("forEachMacro");
+        var varName = node.getID();
+        var forEachIter = node.get("forEachIter").get("expression");
         var expression = node.get("expression");
+        var varIterName = STR."iter_\{varName}";
 
         var tokens = new ArrayList<TokenRecord>();
-        //create outer block, so the for loop variables can be encapsulated
         tokens.addAll(tokenizer.dummy(creator, "{"));
-        tokens.addAll(forInit.tokenize());
-        tokens.addAll(tokenizer.dummy(creator, "while"));
-        tokens.addAll(forCondition.tokenize());
-        tokens.addAll(tokenizer.dummy(creator, "{"));
+        tokens.addAll(tokenizer.dummy(creator, STR."var \{varIterName} = "));
+        tokens.addAll(forEachIter.tokenize());
+        tokens.addAll(tokenizer.dummy(creator, ".iterator()"));
 
-        //encapsulate the expression in a block, so it cannot be used for updating the for loop
+        tokens.addAll(tokenizer.dummy(creator, "while"));
+        tokens.addAll(tokenizer.dummy(creator, varIterName));
+        tokens.addAll(tokenizer.dummy(creator, ".hasNext()"));
         tokens.addAll(tokenizer.dummy(creator, "{"));
+        tokens.addAll(tokenizer.dummy(creator, STR."var \{varName} = \{varIterName}.next()"));
         tokens.addAll(expression.tokenize());
         tokens.addAll(tokenizer.dummy(creator, "}"));
 
-        //update loop
-        tokens.addAll(forUpdate.tokenize());
         tokens.addAll(tokenizer.dummy(creator, "}"));
 
-        tokens.addAll(tokenizer.dummy(creator, "}"));
-
-//        for (TokenRecord token : tokens) {
-//            System.out.println(token.literal());
-//        }
 
         return tokens;
     }

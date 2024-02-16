@@ -3,8 +3,6 @@ import @java String java.lang.String
 fn main(args: [String]) = {
     ~"Hello World!"
 
-
-
     print("args: ")
     #for var i = 0, i < args.length, i = i + 1 {
         print(args.get(i) & " ")

@@ -1,8 +1,9 @@
 import @java Math java.lang.Math
 import @java Predicate java.util.function.Predicate
 import @java Integer java.lang.Integer
+import @java String java.lang.String
 
-fn main(args: [java.lang.String]) = {
+fn main(args: [String]) = {
     testObjects()
 }
 
@@ -69,11 +70,10 @@ fn testObjects() = {
     
     var minValue = 0
     var filtered = list.stream().filter(new IntFilterGreater { minValue }).toList()
-    i = 0
-    while i < filtered.size() {
-        var value: int = (filtered.get(i) as Integer).unbox()
+
+    #forEach bInt : filtered {
+        var value: int = (bInt as Integer).unbox()
         assertValue(value > minValue)
-        i = i + 1
     }
 }
 
@@ -111,7 +111,7 @@ fn fib(n: int) -> int = {
 }
 
 
-fn boxing() {
+fn boxing() = {
     var boxedInt: Integer = (10).box()
     assertValue(boxedInt is java.lang.Object)
     assertValue(boxedInt is Integer)
@@ -120,3 +120,16 @@ fn boxing() {
     assertValue(boxedDouble.unbox().toInt() == 10)
 }
 
+fn identity(obj: java.lang.Object) -> java.lang.Object = {
+    obj
+}
+
+fn filterNotEquals(list: java.util.List, obj: java.lang.Object) -> java.util.List = {
+    var result = new java.util.ArrayList{}
+    #forEach head : list {
+        if obj != head {
+            result.add(head)
+        }
+    }
+    result
+}

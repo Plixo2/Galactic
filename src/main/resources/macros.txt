@@ -3,3 +3,7 @@ forMacro := forInit! ","?! forCondition! ","?! forUpdate! expression!
 forInit := expression!
 forCondition := expression!
 forUpdate := expression!
+
+
+forEachMacro := id! ":"?! forEachIter! expression!
+forEachIter := expression!
